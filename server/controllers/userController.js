@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const {sequelize, user, blacklist} = require("../config/dbConnection");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
 //@desc Login User
 //@route Post /api/user/login
 //@access Public
@@ -31,7 +32,10 @@ const loginUser = asyncHandler(async (req, res) => {
       sameSite: "Strict",
     };
     res.cookie("SessionID", accessToken, options);
-    res.status(200).json({ msg: "Welcome" });
+    res.status(200).json({
+      "user": loggedUser, 
+      "redirect": `/dashboard/${loggedUser.role}` 
+    });
   }else{
     res.status(401);
     throw new Error("Email or password incorrect");
@@ -48,4 +52,12 @@ const logoutUser = asyncHandler(async (req, res) => {
   res.status(200).json(`Antio ${req.user.role}`);
 });
 
-module.exports = { loginUser, logoutUser };
+//@desc Get User
+//@route Get /api/user/current
+//@access Private
+const getUser = asyncHandler(async (req, res) => {
+  res.status(200).json(req.user);
+});
+
+
+module.exports = { loginUser, logoutUser, getUser };
