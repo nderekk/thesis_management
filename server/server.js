@@ -7,6 +7,7 @@ const app = express();
 // middleware
 app.use(express.json());
 app.use("/api/user", require("./routes/userRoutes"));
+app.use("/api/student", require("./routes/studentRoutes"));
 // app.use("/api/<thing>", require("./routes/<analogo_route>"));
 app.use(errorHandler);
 
