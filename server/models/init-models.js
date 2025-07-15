@@ -13,6 +13,7 @@ var _thesis_presentation = require("./thesis_presentation");
 var _thesis_topics = require("./thesis_topics");
 var _trimelis_requests = require("./trimelis_requests");
 var _user = require("./user");
+var _blacklist = require("./blacklist");
 
 function initModels(sequelize) {
   var announcements = _announcements(sequelize, DataTypes);
@@ -29,6 +30,7 @@ function initModels(sequelize) {
   var thesis_topics = _thesis_topics(sequelize, DataTypes);
   var trimelis_requests = _trimelis_requests(sequelize, DataTypes);
   var user = _user(sequelize, DataTypes);
+  var blacklist = _blacklist(sequelize, DataTypes);
 
   thesis.belongsTo(professor, { as: "prof2_am_professor", foreignKey: "prof2_am"});
   professor.hasMany(thesis, { as: "theses", foreignKey: "prof2_am"});
@@ -78,6 +80,7 @@ function initModels(sequelize) {
     thesis_topics,
     trimelis_requests,
     user,
+    blacklist,
   };
 }
 module.exports = initModels;
