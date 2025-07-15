@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const {sequelize, user} = require("../config/dbConnection");
+const {sequelize, user, blacklist} = require("../config/dbConnection");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 //@desc Login User
@@ -24,11 +24,28 @@ const loginUser = asyncHandler(async (req, res) => {
     process.env.ACCESS_TOKEN_SECRET,
     { expiresIn: "59m"}
     );
-    res.status(200).json({ accessToken });
+    let options = {
+      maxAge: 20 * 60 * 1000, // would expire in 20minutes
+      httpOnly: true, // The cookie is only accessible by the web server
+      secure: true,
+      sameSite: "Strict",
+    };
+    res.cookie("SessionID", accessToken, options);
+    res.status(200).json({ msg: "Welcome" });
   }else{
     res.status(401);
     throw new Error("Email or password incorrect");
   }
 });
 
-module.exports = { loginUser };
+//@desc Logout User
+//@route Post /api/user/logout
+//@access Private
+const logoutUser = asyncHandler(async (req, res) => {
+  blacklist.create({
+    token: req.token
+  });
+  res.status(200).json(`Antio ${req.user.role}`);
+});
+
+module.exports = { loginUser, logoutUser };
