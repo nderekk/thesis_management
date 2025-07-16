@@ -1,9 +1,8 @@
-const { Sequelize, DataTypes } = require('sequelize');
 const dotenv = require("dotenv").config();
+const { Sequelize, DataTypes } = require('sequelize');
 const {sequelize} = require("../config/dbConnection");
 
-// Import your model definition (adjust path if needed)
-const User = require('../models/user')(sequelize, DataTypes);
+const User = require("../models/user")(sequelize, DataTypes);
 
 async function addUsers() {
   try {
@@ -16,9 +15,9 @@ async function addUsers() {
     // await User.sync({ force: false });
 
     const users = [
-      { email: 'professor@example.com', password: 'securepass1', role: 'professor' },
-      { email: 'student@example.com', password: 'securepass2', role: 'student' },
-      { email: 'secretary@example.com', password: 'securepass3', role: 'secretary' },
+      { email: 'skegias@kathigitas.com', password: '123', role: 'professor' },
+      { email: 'skegias@mathitas.com', password: '123', role: 'student' },
+      { email: 'skegias@gramateias.com', password: '123', role: 'secretary' },
     ];
 
     for (const userData of users) {
