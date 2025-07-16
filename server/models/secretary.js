@@ -16,7 +16,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     },
     phone_number: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING(50),
       allowNull: false
     },
     address: {
@@ -26,7 +26,11 @@ module.exports = function(sequelize, DataTypes) {
     email: {
       type: DataTypes.STRING(50),
       allowNull: false
-    }
+    },
+    secretary_userid: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
   }, {
     sequelize,
     tableName: 'secretary',

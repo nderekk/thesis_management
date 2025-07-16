@@ -20,13 +20,17 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     },
     phone_number: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING(50),
       allowNull: false
     },
     field_of_expertise: {
       type: DataTypes.STRING(150),
       allowNull: false
-    }
+    },
+    prof_userid: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
   }, {
     sequelize,
     tableName: 'professor',

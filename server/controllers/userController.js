@@ -33,7 +33,7 @@ const loginUser = asyncHandler(async (req, res) => {
     };
     res.cookie("SessionID", accessToken, options);
     res.status(200).json({
-      "user": loggedUser, 
+      "userRole": loggedUser.role, 
       "redirect": `/dashboard/${loggedUser.role}` 
     });
   }else{

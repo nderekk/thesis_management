@@ -64,6 +64,9 @@ function initModels(sequelize) {
   thesis.hasMany(trimelis_requests, { as: "trimelis_requests", foreignKey: "thesis_id"});
   thesis.belongsTo(thesis_topics, { as: "topic", foreignKey: "topic_id"});
   thesis_topics.hasMany(thesis, { as: "theses", foreignKey: "topic_id"});
+  professor.belongsTo(user, {as: "user", foreignKey: "prof_userid"});
+  student.belongsTo(user, {as: "user", foreignKey: "student_userid"});
+  secretary.belongsTo(user, {as: "user", foreignKey: "secretary_userid"});
 
   return {
     announcements,

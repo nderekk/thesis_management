@@ -28,11 +28,11 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     },
     phone_number: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING(50),
       allowNull: false
     },
     mobile_number: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING(50),
       allowNull: false
     },
     address: {
@@ -46,7 +46,11 @@ module.exports = function(sequelize, DataTypes) {
     post_code: {
       type: DataTypes.SMALLINT,
       allowNull: false
-    }
+    },
+    student_userid: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
   }, {
     sequelize,
     tableName: 'student',
