@@ -20,7 +20,7 @@ const getThesisInfo = asyncHandler(async (req, res) => {
 
 });
 
-//@desc Get current studnet
+//@desc Get current student
 //@route Get /api/student
 //@access Private
 const getStudentInfo = asyncHandler(async (req, res) => {
