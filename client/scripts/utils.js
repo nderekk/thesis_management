@@ -43,12 +43,22 @@ function handleLogin(e) {
     e.preventDefault();
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
-    const userType = document.getElementById('userType').value;
-    const user = authenticateUser(username, password, userType);
-
+    const user = fetch("http://localhost:5001/api/user/login", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      },
+      body:  JSON.stringify({
+        email: username,
+        password: password
+      }),
+    })
+    .then(res => res.json())
+    .catch(error => console.error('Error:', error));
+    console.log(user);
     if (user) {
         currentUser = user;
-        currentUserType = userType;
+        currentUserType = user.userRole;
         localStorage.setItem('currentUser', JSON.stringify(user));
         showMainApp();
     } else {

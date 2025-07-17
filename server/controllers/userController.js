@@ -38,6 +38,7 @@ const loginUser = asyncHandler(async (req, res) => {
       "email": loggedUser.email,
       "redirect": `/dashboard/${loggedUser.role}` 
     });
+    console.log("mphkes bro");
   }else{
     res.status(401);
     throw new Error("Email or password incorrect");
