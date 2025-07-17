@@ -29,7 +29,6 @@ const loginUser = asyncHandler(async (req, res) => {
       maxAge: 20 * 60 * 1000, // would expire in 20minutes
       httpOnly: true, // The cookie is only accessible by the web server
       secure: true,
-      sameSite: "Strict",
     };
     res.cookie("SessionID", accessToken, options);
     res.status(200).json({
