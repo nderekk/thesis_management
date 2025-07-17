@@ -1,0 +1,35 @@
+{
+  "name": "thesis-management-system",
+  "version": "1.0.0",
+  "description": "Σύστημα Διαχείρισης Διπλωματικών Εργασιών για το Πανεπιστήμιο Πατρών",
+  "main": "index.html",
+  "scripts": {
+    "start": "http-server -p 8000 -c-1",
+    "dev": "http-server -p 8000 -c-1 -o",
+    "build": "echo 'No build process needed for static files'",
+    "test": "echo 'No tests specified'"
+  },
+  "keywords": [
+    "thesis",
+    "management",
+    "university",
+    "greece",
+    "upatras",
+    "html",
+    "css",
+    "javascript"
+  ],
+  "author": "Development Team",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/thesis-management-system.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/thesis-management-system/issues"
+  },
+  "homepage": "https://github.com/your-username/thesis-management-system#readme"
+} 

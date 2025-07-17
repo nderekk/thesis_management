@@ -1,1 +1,94 @@
 <!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Σύστημα Διαχείρισης Διπλωματικών Εργασιών</title>
+    <link rel="stylesheet" href="styles/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="screen active">
+        <div class="login-container">
+            <div class="login-header">
+                <i class="fas fa-graduation-cap"></i>
+                <h1>Σύστημα Διαχείρισης Διπλωματικών Εργασιών</h1>
+                <p>Πανεπιστήμιο Πατρών</p>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">Όνομα Χρήστη:</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Κωδικός:</label>
+                    <input type="password" id="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="userType">Τύπος Χρήστη:</label>
+                    <select id="userType" required>
+                        <option value="">Επιλέξτε τύπο χρήστη</option>
+                        <option value="student">Φοιτητής/τρια</option>
+                        <option value="professor">Διδάσκων</option>
+                        <option value="secretary">Γραμματεία</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Σύνδεση</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="screen">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h2 id="appTitle">Σύστημα Διαχείρισης Διπλωματικών</h2>
+                </div>
+                <div class="header-right">
+                    <span id="userInfo"></span>
+                    <button id="logoutBtn" class="btn btn-secondary">
+                        <i class="fas fa-sign-out-alt"></i> Αποσύνδεση
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-content">
+                <div id="navMenu"></div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div id="contentArea">
+                <!-- Content will be dynamically loaded here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="modalOverlay" class="modal-overlay">
+        <div id="modalContent" class="modal-content">
+            <!-- Modal content will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Φόρτωση...</p>
+    </div>
+
+    <!--<script src="scripts/app.js"></script> -->
+    <script src="scripts/utils.js"></script>
+    <script src="scripts/student.js"></script>
+    <script src="scripts/professor.js"></script>
+    <script src="scripts/secretary.js"></script>
+</body>
+</html> 

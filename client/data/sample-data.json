@@ -1,0 +1,205 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "student1",
+      "name": "Γιώργος Παπαδόπουλος",
+      "am": "123456",
+      "type": "student",
+      "email": "student1@upatras.gr",
+      "mobile": "6971234567",
+      "phone": "2610991234"
+    },
+    {
+      "id": 2,
+      "username": "student2",
+      "name": "Μαρία Κωνσταντίνου",
+      "am": "123457",
+      "type": "student",
+      "email": "student2@upatras.gr",
+      "mobile": "6971234568",
+      "phone": "2610991235"
+    },
+    {
+      "id": 3,
+      "username": "prof1",
+      "name": "Δρ. Αλέξανδρος Σμιθ",
+      "type": "professor",
+      "email": "smith@upatras.gr",
+      "department": "Τμήμα Μηχανικών Η/Υ και Πληροφορικής"
+    },
+    {
+      "id": 4,
+      "username": "prof2",
+      "name": "Δρ. Ελένη Παπαδοπούλου",
+      "type": "professor",
+      "email": "papadopoulou@upatras.gr",
+      "department": "Τμήμα Μηχανικών Η/Υ και Πληροφορικής"
+    },
+    {
+      "id": 5,
+      "username": "secretary1",
+      "name": "Κατερίνα Δημητρίου",
+      "type": "secretary",
+      "email": "secretary@upatras.gr",
+      "department": "Γραμματεία ΤΜΗΥΠ"
+    }
+  ],
+  "topics": [
+    {
+      "id": 1,
+      "title": "Ανάπτυξη Web Εφαρμογής για Διαχείριση Διπλωματικών Εργασιών",
+      "description": "Ανάπτυξη σύγχρονης web εφαρμογής με χρήση HTML, CSS και JavaScript για τη διαχείριση διπλωματικών εργασιών. Η εφαρμογή θα υποστηρίζει τη διαδικασία από την αρχική ανάθεση μέχρι την ολοκλήρωση της διπλωματικής.",
+      "creatorId": 3,
+      "status": "assigned",
+      "createdDate": "2024-01-15",
+      "pdfFile": "thesis_topic_1.pdf"
+    },
+    {
+      "id": 2,
+      "title": "Μηχανική Μάθηση για Ανάλυση Δεδομένων",
+      "description": "Εφαρμογή αλγορίθμων μηχανικής μάθησης για ανάλυση μεγάλων όγκων δεδομένων. Η έρευνα θα επικεντρωθεί σε τεχνικές clustering και classification.",
+      "creatorId": 4,
+      "status": "assigned",
+      "createdDate": "2024-02-01",
+      "pdfFile": "thesis_topic_2.pdf"
+    },
+    {
+      "id": 3,
+      "title": "Ασφάλεια Δικτύων και Κρυπτογραφία",
+      "description": "Μελέτη σύγχρονων τεχνικών ασφάλειας δικτύων και εφαρμογή κρυπτογραφικών αλγορίθμων για την προστασία δεδομένων.",
+      "creatorId": 3,
+      "status": "available",
+      "createdDate": "2024-03-10",
+      "pdfFile": "thesis_topic_3.pdf"
+    },
+    {
+      "id": 4,
+      "title": "Ανάπτυξη Mobile Εφαρμογής για IoT",
+      "description": "Σχεδίαση και ανάπτυξη mobile εφαρμογής για τη διαχείριση συσκευών IoT. Η εφαρμογή θα υποστηρίζει Android και iOS.",
+      "creatorId": 4,
+      "status": "available",
+      "createdDate": "2024-03-15",
+      "pdfFile": "thesis_topic_4.pdf"
+    }
+  ],
+  "theses": [
+    {
+      "id": 1,
+      "title": "Ανάπτυξη Web Εφαρμογής για Διαχείριση Διπλωματικών",
+      "description": "Ανάπτυξη σύγχρονης web εφαρμογής με χρήση HTML, CSS και JavaScript για τη διαχείριση διπλωματικών εργασιών.",
+      "studentId": 1,
+      "supervisorId": 3,
+      "committeeMembers": [],
+      "status": "pending",
+      "assignedDate": "2024-01-20",
+      "grade": null,
+      "notes": [],
+      "invitedProfessors": []
+    },
+    {
+      "id": 2,
+      "title": "Μηχανική Μάθηση για Ανάλυση Δεδομένων",
+      "description": "Εφαρμογή αλγορίθμων μηχανικής μάθησης για ανάλυση μεγάλων όγκων δεδομένων.",
+      "studentId": 2,
+      "supervisorId": 4,
+      "committeeMembers": [3],
+      "status": "review",
+      "assignedDate": "2024-02-05",
+      "grade": 8.5,
+      "notes": [],
+      "examDate": "2024-03-15",
+      "examTime": "14:00",
+      "examType": "online",
+      "examLink": "https://meet.google.com/abc-defg-hij",
+      "committeeComments": [
+        {
+          "professorId": 4,
+          "comment": "Πολύ καλή εργασία με εξαιρετική ανάλυση των δεδομένων."
+        },
+        {
+          "professorId": 3,
+          "comment": "Η παρουσίαση ήταν ξεκάθαρη και επαγγελματική."
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Ανάλυση Αλγορίθμων και Δομές Δεδομένων",
+      "description": "Συγκριτική ανάλυση διαφόρων αλγορίθμων ταξινόμησης και αναζήτησης.",
+      "studentId": 1,
+      "supervisorId": 3,
+      "committeeMembers": [4],
+      "status": "completed",
+      "assignedDate": "2023-09-15",
+      "completedDate": "2024-01-20",
+      "grade": 9.0,
+      "notes": [],
+      "examDate": "2024-01-15",
+      "examTime": "10:00",
+      "examType": "in-person",
+      "examRoom": "Αίθουσα 101",
+      "libraryLink": "https://nemertes.lis.upatras.gr/thesis/12345",
+      "committeeComments": [
+        {
+          "professorId": 3,
+          "comment": "Εξαιρετική εργασία με βαθιά κατανόηση των αλγορίθμων."
+        },
+        {
+          "professorId": 4,
+          "comment": "Πολύ καλή παρουσίαση και ανάλυση των αποτελεσμάτων."
+        }
+      ]
+    }
+  ],
+  "invitations": [
+    {
+      "id": 1,
+      "thesisId": 1,
+      "invitedProfessorId": 4,
+      "invitingStudentId": 1,
+      "status": "accepted",
+      "invitationDate": "2024-01-25",
+      "responseDate": "2024-01-28"
+    },
+    {
+      "id": 2,
+      "thesisId": 2,
+      "invitedProfessorId": 3,
+      "invitingStudentId": 2,
+      "status": "accepted",
+      "invitationDate": "2024-02-10",
+      "responseDate": "2024-02-12"
+    }
+  ],
+  "grades": [
+    {
+      "id": 1,
+      "thesisId": 2,
+      "professorId": 4,
+      "grade": 9.5,
+      "criteria": {
+        "content": 9.5,
+        "methodology": 9.0,
+        "presentation": 9.5,
+        "originality": 9.0
+      },
+      "comments": "Εξαιρετική εργασία με πολύ καλή μεθοδολογία και παρουσίαση.",
+      "date": "2024-04-15"
+    },
+    {
+      "id": 2,
+      "thesisId": 2,
+      "professorId": 3,
+      "grade": 9.0,
+      "criteria": {
+        "content": 9.0,
+        "methodology": 9.0,
+        "presentation": 9.0,
+        "originality": 9.0
+      },
+      "comments": "Πολύ καλή εργασία με σωστή εφαρμογή των μεθόδων μηχανικής μάθησης.",
+      "date": "2024-04-15"
+    }
+  ]
+} 
