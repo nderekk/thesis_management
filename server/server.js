@@ -7,12 +7,10 @@ const cors = require('cors');
 const app = express();
 // middleware
 app.use(express.json());
-app.use(cors());
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');  // ή το συγκεκριμένο origin σου αντί για '*'
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  next();
-});
+app.use(cors({
+  origin: 'http://127.0.0.1:5501', // το origin του frontend σου
+  credentials: true
+}));
 app.use("/api/user", require("./routes/userRoutes"));
 app.use("/api/student", require("./routes/studentRoutes"));
 // app.use("/api/<thing>", require("./routes/<analogo_route>"));
