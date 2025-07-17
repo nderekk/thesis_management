@@ -39,12 +39,13 @@ function initializeApp() {
     });
 }
 
-function handleLogin(e) {
+async function handleLogin(e) {
     e.preventDefault();
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
-    const user = fetch("http://localhost:5001/api/user/login", {
+    const response = await fetch("http://localhost:5001/api/user/login", {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json'  // important for JSON data
       },
@@ -52,9 +53,11 @@ function handleLogin(e) {
         email: username,
         password: password
       }),
-    })
-    .then(res => res.json())
-    .catch(error => console.error('Error:', error));
+    });
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status}`);
+    }
+    const user = await response.json();
     console.log(user);
     if (user) {
         currentUser = user;
@@ -84,7 +87,15 @@ function authenticateUser(username, password, userType) {
     return userList.find(user => user.username === username);
 }
 
-function handleLogout() {
+async function handleLogout() {
+    const response = await fetch("http://localhost:5001/api/user/logout", {
+      method: 'POST',
+      credentials: "include"
+    });
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status}`);
+    }
+    console.log(response.data);
     currentUser = null;
     currentUserType = null;
     localStorage.removeItem('currentUser');
