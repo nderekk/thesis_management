@@ -170,7 +170,7 @@ function loadDefaultContent() {
     loadContent(defaultPages[currentUserType]);
 }
 
-function loadContent(pageId, event) {
+async function loadContent(pageId, event) {
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     if (event) event.target.closest('.nav-item').classList.add('active');
 
@@ -190,7 +190,7 @@ function loadContent(pageId, event) {
         manageTheses: typeof getSecretaryThesesManagement === 'function' ? getSecretaryThesesManagement : () => ''
     };
 
-    contentArea.innerHTML = contentMap[pageId]();
+    contentArea.innerHTML = await contentMap[pageId]();
 }
 
 function showModal(content) {

@@ -1,5 +1,17 @@
-function getStudentThesisView() {
-    const studentThesis = theses.find(t => t.studentId === currentUser.id);
+async function getStudentThesisView() {
+    const response = await fetch("http://localhost:5001/api/student/thesis", {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      }
+    });
+    if (!response.ok) {
+        alert(response.message);
+        throw new Error(`Error: ${response.status}`);
+    }
+    const studentThesis = await response.json();
+    console.log(studentThesis);
     if (!studentThesis) {
         return `<div class="content-header">
                     <h1>Προβολή Θέματος</h1>
@@ -21,7 +33,7 @@ function getStudentThesisView() {
             <div class="form-row">
                 <div class="form-group">
                     <label>Επιβλέπων:</label>
-                    <p>${getUserName(studentThesis.supervisorId)}</p>
+                    <p>${studentThesis.supervisor}</p>
                 </div>
                 <div class="form-group">
                     <label>Ημερομηνία Ανάθεσης:</label>
