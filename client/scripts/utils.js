@@ -7,7 +7,6 @@ let topics = [];
 
 document.addEventListener('DOMContentLoaded', function () {
     initializeApp();
-    loadSampleData();
 });
 
 function initializeApp() {
@@ -64,28 +63,11 @@ async function handleLogin(e) {
         currentUser = user;
         currentUserType = user.userRole;
         localStorage.setItem('currentUser', JSON.stringify(user));
+        localStorage.setItem('currentUserType', currentUserType);
         showMainApp();
     } else {
         alert('Λάθος όνομα χρήστη, κωδικός ή τύπος χρήστη!');
     }
-}
-
-function authenticateUser(username, password, userType) {
-    const sampleUsers = {
-        student: [
-            { id: 1, username: 'student1', name: 'Γιώργος Παπαδόπουλος', am: '123456', type: 'student' },
-            { id: 2, username: 'student2', name: 'Μαρία Κωνσταντίνου', am: '123457', type: 'student' }
-        ],
-        professor: [
-            { id: 3, username: 'prof1', name: 'Δρ. Αλέξανδρος Σμιθ', type: 'professor' },
-            { id: 4, username: 'prof2', name: 'Δρ. Ελένη Παπαδοπούλου', type: 'professor' }
-        ],
-        secretary: [
-            { id: 5, username: 'secretary1', name: 'Κατερίνα Δημητρίου', type: 'secretary' }
-        ]
-    };
-    const userList = sampleUsers[userType] || [];
-    return userList.find(user => user.username === username);
 }
 
 async function handleLogout() {
@@ -96,10 +78,10 @@ async function handleLogout() {
     if (!response.ok) {
       throw new Error(`Error: ${response.status}`);
     }
-    console.log(response.data);
     currentUser = null;
     currentUserType = null;
     localStorage.removeItem('currentUser');
+    localStorage.removeItem('currentUserType');
     showLoginScreen();
 }
 
@@ -117,9 +99,22 @@ function showMainApp() {
     loadDefaultContent();
 }
 
-function updateUserInfo() {
+async function updateUserInfo() {
+    const response = await fetch(`http://localhost:5001/api/${currentUser.userRole}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      },
+    });
+    if (!response.ok) {
+        alert(response.message);
+        throw new Error(`Error: ${response.status}`);
+    }
+    currentUser = await response.json();
+    console.log(currentUser);
     const userInfo = document.getElementById('userInfo');
-    userInfo.textContent = `${currentUser.name} (${getUserTypeName(currentUserType)})`;
+    userInfo.textContent = `${currentUser.first_name} ${currentUser.last_name} (${getUserTypeName(currentUserType)})`;
 }
 
 function getUserTypeName(type) {
