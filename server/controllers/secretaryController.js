@@ -7,6 +7,10 @@ const jwt = require("jsonwebtoken");
 //@route Get /api/secretary
 //@access Private
 const getSecretaryInfo = asyncHandler(async (req, res) => {
+  if ( req.user.role !== "secretary") {
+    return res.status(403).json({ error: "Error - Not Authorized" });
+  }
+
   const loggedSecretary = await secretary.findOne({ where: {secretary_userid: req.user.id} });
   res.status(200).json(loggedSecretary);
 });
