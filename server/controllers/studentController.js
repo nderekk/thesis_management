@@ -25,6 +25,9 @@ const getThesisInfo = asyncHandler(async (req, res) => {
 //@route Get /api/student
 //@access Private
 const getStudentInfo = asyncHandler(async (req, res) => {
+  if ( req.user.role !== "student") {
+    return res.status(403).json({ error: "Error - Not Authorized" });
+  }
   const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
   res.status(200).json(loggedStudent);
 });
