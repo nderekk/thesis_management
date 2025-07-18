@@ -18,9 +18,10 @@ function initializeApp() {
     });
 
     const savedUser = localStorage.getItem('currentUser');
+    const savedRole = localStorage.getItem('currentUserType');
     if (savedUser) {
         currentUser = JSON.parse(savedUser);
-        currentUserType = currentUser.type;
+        currentUserType = savedRole;
         showMainApp();
     }
 
