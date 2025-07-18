@@ -8,7 +8,7 @@ const {
 // public
 // private
 router.use(validateToken);
-router.post("/", getSecretaryInfo);
+router.get("/", getSecretaryInfo);
 
 
 module.exports = router;
