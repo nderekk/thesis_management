@@ -8,7 +8,7 @@ const jwt = require("jsonwebtoken");
 //@access Private
 const getProfessorInfo = asyncHandler(async (req, res) => {
   if ( req.user.role !== "professor") {
-    return res.status(403).json({ error: "Error - Not Authorized" });
+    return res.status(401).json({ error: "Error - Not Authorized" });
   }
   const loggedProfessor = await professor.findOne({ where: {prof_userid: req.user.id} });
   res.status(200).json(loggedProfessor);

@@ -8,7 +8,7 @@ const jwt = require("jsonwebtoken");
 //@access Private
 const getSecretaryInfo = asyncHandler(async (req, res) => {
   if ( req.user.role !== "secretary") {
-    return res.status(403).json({ error: "Error - Not Authorized" });
+    return res.status(401).json({ error: "Error - Not Authorized" });
   }
 
   const loggedSecretary = await secretary.findOne({ where: {secretary_userid: req.user.id} });
