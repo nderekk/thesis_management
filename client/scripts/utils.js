@@ -55,11 +55,12 @@ async function handleLogin(e) {
       }),
     });
     if (!response.ok) {
-      throw new Error(`Error: ${response.status}`);
+        alert('Λάθος όνομα χρήστη, κωδικός ή τύπος χρήστη!');
+        throw new Error(`Error: ${response.status}`);
     }
     const user = await response.json();
     console.log(user);
-    if (user) {
+    if ('userRole' in user) {
         currentUser = user;
         currentUserType = user.userRole;
         localStorage.setItem('currentUser', JSON.stringify(user));
