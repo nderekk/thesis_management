@@ -23,10 +23,10 @@ const loginUser = asyncHandler(async (req, res) => {
       }
     }, 
     process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: "59m"}
+    { expiresIn: "10h"}
     );
     let options = {
-      maxAge: 20 * 60 * 1000, // would expire in 20minutes
+      maxAge: (20 * 60 * 1000)*100, // would expire in 20minutes
       httpOnly: true, // The cookie is only accessible by the web server
       secure: true,
     };

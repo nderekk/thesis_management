@@ -4,6 +4,7 @@ const router = express.Router();
 const {
     getThesisInfo,
     getStudentInfo,
+    modifyStudentInfo,
 } = require("../controllers/studentController");
 
 // public
@@ -11,6 +12,7 @@ const {
 router.use(validateToken);
 router.get("/thesis", getThesisInfo);
 router.get("/", getStudentInfo);
+router.put("/", modifyStudentInfo);
 
 
 module.exports = router;

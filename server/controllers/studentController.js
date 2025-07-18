@@ -34,10 +34,54 @@ const getThesisInfo = asyncHandler(async (req, res) => {
 //@access Private
 const getStudentInfo = asyncHandler(async (req, res) => {
   if ( req.user.role !== "student") {
-    return res.status(401).json({ error: "Error - Not Authorized" });
+    res.status(401)
+    throw new Error("Not Authorized Endpoint");
   }
   const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
   res.status(200).json(loggedStudent);
 });
 
-module.exports = {getThesisInfo, getStudentInfo};
+//@desc modify student info
+//@route Put /api/student
+//@access Private
+const modifyStudentInfo = asyncHandler(async (req, res) => {
+  if ( req.user.role !== "student") {
+    res.status(401)
+    throw new Error("Not Authorized Endpoint");
+  }
+  const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
+
+  const {
+    newAddress,
+    newCity,
+    newPostCode,
+    newEmail,
+    newMobile,
+    newPhone
+  } = req.body;
+
+  const updateData = {};
+  if (newAddress !== undefined) updateData.newAddress = newAddress;
+  if (newCity !== undefined) updateData.newCity = newCity;
+  if (newPostCode !== undefined) updateData.newPostCode = newPostCode;
+  if (newEmail !== undefined) updateData.newEmail = newEmail;
+  if (newMobile !== undefined) updateData.newMobile = newMobile;
+  if (newPhone !== undefined) updateData.newPhone = newPhone;
+
+  if (Object.keys(updateData).length === 0) {
+      res.status(400);
+      throw new Error('No fields provided for update');
+  }  
+
+  await loggedStudent.update({
+    address: newAddress, 
+    email: newEmail,
+    phone_number: newPhone,
+    mobile_number: newMobile,
+    city: newCity,
+    post_code: newPostCode
+  });
+  res.status(200).json(loggedStudent);
+});
+
+module.exports = {getThesisInfo, getStudentInfo, modifyStudentInfo};

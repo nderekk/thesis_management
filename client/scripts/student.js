@@ -75,23 +75,26 @@ function getProfileEditForm() {
         <div class="form-container">
             <form id="profileForm">
                 <div class="form-group">
-                    <label for="fullEmail">Πλήρης Ταχυδρομική Διεύθυνση:</label>
-                    <input type="text" id="fullEmail" value="${currentUser.fullEmail || ''}" required>
+                    <label for="address">Πλήρης Ταχυδρομική Διεύθυνση:</label>
+                    <input type="text" id="address" value="${currentUser.address + 
+                      ", " + currentUser.city + 
+                      ", " + currentUser.post_code 
+                      || ''}" required>
                 </div>
                 
                 <div class="form-group">
-                    <label for="contactEmail">Email Επικοινωνίας:</label>
-                    <input type="email" id="contactEmail" value="${currentUser.contactEmail || ''}" required>
+                    <label for="email">Email Επικοινωνίας:</label>
+                    <input type="email" id="email" value="${currentUser.email || ''}" required>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="mobile">Κινητό Τηλέφωνο:</label>
-                        <input type="tel" id="mobile" value="${currentUser.mobile || ''}" required>
+                        <input type="tel" id="mobile" value="${currentUser.mobile_number || ''}" required>
                     </div>
                     <div class="form-group">
                         <label for="phone">Σταθερό Τηλέφωνο:</label>
-                        <input type="tel" id="phone" value="${currentUser.phone || ''}">
+                        <input type="tel" id="phone" value="${currentUser.phone_number || ''}">
                     </div>
                 </div>
                 
@@ -101,12 +104,35 @@ function getProfileEditForm() {
     `;
 }
 
-document.addEventListener('submit', function (e) {
+document.addEventListener('submit', async function (e) {
     if (e.target.id === 'profileForm') {
         e.preventDefault();
         currentUser.email = document.getElementById('email').value;
-        currentUser.phone = document.getElementById('phone').value;
-        currentUser.address = document.getElementById('address').value;
+        currentUser.phone_number = document.getElementById('phone').value;
+        currentUser.mobile_number = document.getElementById('mobile').value;
+        const fullAddress = document.getElementById('address').value;
+        currentUser.address = fullAddress.split(', ')[0];
+        currentUser.city = fullAddress.split(', ')[1];
+        currentUser.post_code = fullAddress.split(', ')[2];
+        const response = await fetch("http://localhost:5001/api/student", {
+            method: 'PUT',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'  // important for JSON data
+            },
+            body: JSON.stringify({
+                "newAddress": currentUser.address,
+                "newCity": currentUser.city,
+                "newPostCode": currentUser.post_code,
+                "newEmail": currentUser.email,
+                "newMobile": currentUser.mobile_number, 
+                "newPhone": currentUser.phone_number
+            })
+        });
+        if (!response.ok) {
+            alert(response.message);
+            throw new Error(`Error: ${response.status}`);
+        }
         alert('Τα στοιχεία αποθηκεύτηκαν.');
     }
 });

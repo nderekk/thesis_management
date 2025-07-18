@@ -19,6 +19,7 @@ function initializeApp() {
 
     const savedUser = localStorage.getItem('currentUser');
     const savedRole = localStorage.getItem('currentUserType');
+    
     if (savedUser) {
         currentUser = JSON.parse(savedUser);
         currentUserType = savedRole;
@@ -192,6 +193,7 @@ async function loadContent(pageId, event) {
 
     contentArea.innerHTML = await contentMap[pageId]();
 }
+
 
 function showModal(content) {
     document.getElementById('modalContent').innerHTML = content;
