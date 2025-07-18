@@ -50,7 +50,7 @@ async function getStudentThesisView() {
                 <div class="form-group">
                     <label>Μέλη Τριμελούς:</label>
                     <ul>
-                        ${studentThesis.committeeMembers.map(memberId => `<li>${getUserName(memberId)}</li>`).join('')}
+                        ${studentThesis.committeeMembers.map(member => `<li>${member}</li>`).join('')}
                     </ul>
                 </div>
             ` : ''}
