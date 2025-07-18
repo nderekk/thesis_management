@@ -12,9 +12,10 @@ const getThesisInfo = asyncHandler(async (req, res) => {
   const thesisTopic = await thesis_topics.findOne({ where: {id: studentThesis.topic_id}});
   const prof = await professor.findOne({ where: {am: studentThesis.supervisor_am}})
   res.status(200).json({
-    thesisTitle: thesisTopic.title, 
-    thesisDescription: thesisTopic.description,
-    assignmentDate: studentThesis.assignment_date,
+    title: thesisTopic.title, 
+    description: thesisTopic.description,
+    assignedDate: studentThesis.assignment_date,
+    status: studentThesis.thesis_status,
     supervisor: `Dr. ${prof.first_name} ${prof.last_name}`,
   });
 
