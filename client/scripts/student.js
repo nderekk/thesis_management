@@ -6,11 +6,11 @@ async function getStudentThesisView() {
         'Content-Type': 'application/json'  // important for JSON data
       }
     });
-    if (!response.ok) {
-        alert(response.message);
-        throw new Error(`Error: ${response.status}`);
-    }
     const studentThesis = await response.json();
+    if (!response.ok) {
+        alert(studentThesis.message);
+        throw new Error(`Error: ${studentThesis.message}`);
+    }
     console.log(studentThesis);
     if (!studentThesis) {
         return `<div class="content-header">
@@ -129,22 +129,34 @@ document.addEventListener('submit', async function (e) {
                 "newPhone": currentUser.phone_number
             })
         });
+        const r = await response.json();
         if (!response.ok) {
-            alert(response.message);
-            throw new Error(`Error: ${response.status}`);
+            alert(r.message);
+            throw new Error(`Error: ${r.message}`);
         }
         alert('Τα στοιχεία αποθηκεύτηκαν.');
     }
 });
 
 // Additional functions for other pages will be implemented as needed
-function getThesisManagement() {
+async function getThesisManagement() {
     console.log("getThesisManagement called");
     console.log("currentUser:", currentUser);
     console.log("theses:", theses);
-    console.log("currentUser.id:", currentUser.id);
+    console.log("currentUser.am:", currentUser.am);
     
-    const studentThesis = theses.find(t => t.studentId === currentUser.id);
+    const response = await fetch("http://localhost:5001/api/student/thesis", {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'  // important for JSON data
+        },
+    });
+    const studentThesis = await response.json();
+    if (!response.ok) {
+        alert(studentThesis.message);
+        throw new Error(`Error: ${studentThesis.message}`);
+    }
     console.log("studentThesis found:", studentThesis);
     
     if (!studentThesis) {
@@ -169,7 +181,7 @@ function getThesisManagement() {
             <div class="form-row">
                 <div class="form-group">
                     <label>Επιβλέπων:</label>
-                    <p>${getUserName(studentThesis.supervisorId)}</p>
+                    <p>${studentThesis.supervisor}</p>
                 </div>
                 <div class="form-group">
                     <label>Ημερομηνία Ανάθεσης:</label>
@@ -182,7 +194,7 @@ function getThesisManagement() {
             </div>
         </div>
     `;
-    switch(studentThesis.status) {
+    switch(studentThesis.status.toLowerCase()) {
         case 'pending':
             content += getPendingThesisContent(studentThesis);
             break;
@@ -259,8 +271,9 @@ function getActiveThesisContent(thesis) {
             <div class="form-group">
                 <label>Μέλη Τριμελούς:</label>
                 <ul>
-                    <li><strong>Επιβλέπων:</strong> ${getUserName(thesis.supervisorId)}</li>
-                    ${thesis.committeeMembers.map(memberId => `<li><strong>Μέλος:</strong> ${getUserName(memberId)}</li>`).join('')}
+                    <li><strong>Επιβλέπων:</strong> ${thesis.supervisor}</li>
+                    ${thesis.committeeMembers
+                        .slice(1).map(member => `<li><strong>Μέλος:</strong> ${member}</li>`).join('')}
                 </ul>
             </div>
             <div class="form-group">
