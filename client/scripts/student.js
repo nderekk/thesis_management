@@ -225,14 +225,14 @@ function getPendingThesisContent(thesis) {
             </div>
             <div class="form-group">
                 <label>Επιβλέπων (αυτόματος):</label>
-                <p><strong>${getUserName(thesis.supervisorId)}</strong></p>
+                <p><strong>${thesis.supervisor}</strong></p>
             </div>
             <div class="form-group">
                 <label>Προσκληθέντες Διδάσκοντες:</label>
                 <div class="invited-members">
                     ${invitedProfessors.length === 0 ? '<p>Δεν έχουν σταλεί προσκλήσεις.</p>' : invitedProfessors.map(inv => `
                         <div class="invited-member">
-                            <span>${getUserName(inv.professorId)}</span>
+                            <span>${inv.professorId}</span>
                             <span class="status-badge status-${inv.status}">${getInvitationStatusText(inv.status)}</span>
                         </div>
                     `).join('')}
