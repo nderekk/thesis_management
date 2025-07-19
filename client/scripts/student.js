@@ -196,10 +196,10 @@ async function getThesisManagement() {
     `;
     switch(studentThesis.status.toLowerCase()) {
         case 'pending':
-            content += getPendingThesisContent(studentThesis);
+            content += await getPendingThesisContent(studentThesis);
             break;
         case 'active':
-            content += getActiveThesisContent(studentThesis);
+            content +=  getActiveThesisContent(studentThesis);
             break;
         case 'review':
             content += getReviewThesisContent(studentThesis);
@@ -213,8 +213,21 @@ async function getThesisManagement() {
     return content;
 }
 
-function getPendingThesisContent(thesis) {
-    const professors = users.filter(u => u.type === 'professor' && u.id !== thesis.supervisorId);
+async function  getPendingThesisContent(thesis) {
+    const response = await fetch("http://localhost:5001/api/student/professorList", {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      }
+    });
+    var professors = await response.json();
+    if (!response.ok) {
+        alert(studentThesis.message);
+        throw new Error(`Error: ${studentThesis.message}`);
+    }
+    professors = professors.p.filter(p => p.name !== thesis.supervisor);
+    console.log(thesis.supervisor);
     const invitedProfessors = thesis.invitedProfessors || [];
     const acceptedInvitations = invitedProfessors.filter(inv => inv.status === 'accepted').length;
     return `
