@@ -158,7 +158,7 @@ body {
 }
 
 /* Main Application Layout */
-#mainApp {
+#mainApp.screen.active {
     display: flex;
     flex-direction: column;
     height: 100vh;
@@ -314,27 +314,27 @@ body {
     text-transform: uppercase;
 }
 
-.status-pending {
+.status-Pending {
     background: #fff3cd;
     color: #856404;
 }
 
-.status-active {
+.status-Active {
     background: #d1ecf1;
     color: #0c5460;
 }
 
-.status-review {
+.status-Review {
     background: #d4edda;
     color: #155724;
 }
 
-.status-completed {
+.status-Completed {
     background: #cce5ff;
     color: #004085;
 }
 
-.status-cancelled {
+.status-Cancelled {
     background: #f8d7da;
     color: #721c24;
 }

@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function initializeApp() {
+    console.log('loginScreen classes:', document.getElementById('loginScreen').className);
+    console.log('mainApp classes:', document.getElementById('mainApp').className);
+
     document.getElementById('loginForm').addEventListener('submit', handleLogin);
     document.getElementById('logoutBtn').addEventListener('click', handleLogout);
     document.getElementById('modalOverlay').addEventListener('click', function (e) {

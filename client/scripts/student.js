@@ -27,7 +27,7 @@ async function getStudentThesisView() {
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">${studentThesis.title}</h3>
-                <span class="status-badge status-${studentThesis.status}">${getStatusText(studentThesis.status)}</span>
+                <span class="status-badge status-${studentThesis.status}">${getStatusText(studentThesis.status)}</span>    
             </div>
             
             <div class="form-row">
