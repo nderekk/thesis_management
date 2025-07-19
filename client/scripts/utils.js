@@ -109,11 +109,15 @@ async function updateUserInfo() {
         'Content-Type': 'application/json'  // important for JSON data
       },
     });
-    if (!response.ok) {
-        alert(response.message);
-        throw new Error(`Error: ${response.status}`);
-    }
     currentUser = await response.json();
+    if (!response.ok) {
+      currentUser = null;
+      currentUserType = null;
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('currentUserType');
+      showLoginScreen();
+      throw new Error(`Error: ${currentUser.message}`);
+    }
     console.log(currentUser);
     const userInfo = document.getElementById('userInfo');
     userInfo.textContent = `${currentUser.first_name} ${currentUser.last_name} (${getUserTypeName(currentUserType)})`;
