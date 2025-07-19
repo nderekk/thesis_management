@@ -5,6 +5,7 @@ const {
     getThesisInfo,
     getStudentInfo,
     modifyStudentInfo,
+    professorList,
 } = require("../controllers/studentController");
 
 // public
@@ -13,6 +14,7 @@ router.use(validateToken);
 router.get("/thesis", getThesisInfo);
 router.get("/", getStudentInfo);
 router.put("/", modifyStudentInfo);
+router.get("/professorList", professorList);
 
 
 module.exports = router;

@@ -19,11 +19,11 @@ const getThesisInfo = asyncHandler(async (req, res) => {
     description: thesisTopic.description,
     assignedDate: studentThesis.assignment_date,
     status: studentThesis.thesis_status,
-    supervisor: `Dr. ${supervisor.first_name} ${supervisor.last_name}`,
+    supervisor: `${supervisor.first_name} ${supervisor.last_name}`,
     committeeMembers: [
-      `Dr. ${supervisor.first_name} ${supervisor.last_name}`,
-      `Dr. ${prof2.first_name} ${prof2.last_name}`,
-      `Dr. ${prof3.first_name} ${prof3.last_name}`, 
+      `${supervisor.first_name} ${supervisor.last_name}`,
+      `${prof2.first_name} ${prof2.last_name}`,
+      `${prof3.first_name} ${prof3.last_name}`, 
     ]
   });
 
@@ -84,4 +84,21 @@ const modifyStudentInfo = asyncHandler(async (req, res) => {
   res.status(200).json(loggedStudent);
 });
 
-module.exports = {getThesisInfo, getStudentInfo, modifyStudentInfo};
+//@desc Get professors to invite
+//@route Get /api/student/professorList
+//@access Private
+const professorList = asyncHandler(async (req, res) => {
+  if ( req.user.role !== "student") {
+    res.status(401)
+    throw new Error("Not Authorized Endpoint");
+  }
+  const professors = await professor.findAll({attributes: ["first_name" , "last_name", "am"]});
+  res.status(200).json({
+  p: professors.map(prof => ({
+    name: `${prof.first_name} ${prof.last_name}`,
+    id: `${prof.am}`
+  }))
+});
+});
+
+module.exports = {getThesisInfo, getStudentInfo, modifyStudentInfo, professorList};
