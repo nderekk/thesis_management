@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
-const {sequelize, student, thesis, thesis_topics, professor} = require("../config/dbConnection");
+const {sequelize, student, thesis, thesis_topics, professor, trimelis_requests} = require("../config/dbConnection");
+const {fn} = require('sequelize');
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -13,19 +14,41 @@ const getThesisInfo = asyncHandler(async (req, res) => {
   const supervisor = await professor.findOne({ where: {am: studentThesis.supervisor_am}});
   const prof2 = await professor.findOne({ where: {am: studentThesis.prof2_am} });
   const prof3 = await professor.findOne({ where: {am: studentThesis.prof3_am} });
+  const invitedProfessors = await trimelis_requests.findAll({ attributes : ["prof_am"], where: {thesis_id: studentThesis.id , answer: 'pending'}});
+  const profAms = invitedProfessors.map(req => req.prof_am);
+  const invitedProfessorsInfo = await professor.findAll({attributes: ["first_name" , "last_name", "am"] , where: {am : profAms}});
+  var committeeMembers = null;
 
-  res.status(200).json({
-    title: thesisTopic.title, 
-    description: thesisTopic.description,
-    assignedDate: studentThesis.assignment_date,
-    status: studentThesis.thesis_status,
-    supervisor: `${supervisor.first_name} ${supervisor.last_name}`,
-    committeeMembers: [
+  if(!prof2 || !prof3){
+     if(prof2){
+      committeeMembers = [
       `${supervisor.first_name} ${supervisor.last_name}`,
-      `${prof2.first_name} ${prof2.last_name}`,
-      `${prof3.first_name} ${prof3.last_name}`, 
-    ]
-  });
+      `${prof2.first_name} ${prof2.last_name}`
+    ];
+     }else{
+      committeeMembers = [
+      `${supervisor.first_name} ${supervisor.last_name}`,
+      `${prof3.first_name} ${prof3.last_name}`,
+      ];
+     }
+  }else{
+    committeeMembers= [
+        `${supervisor.first_name} ${supervisor.last_name}`,
+        `${prof2.first_name} ${prof2.last_name}` ,
+        `${prof3.first_name} ${prof3.last_name}` , 
+      ];
+  }
+
+    res.status(200).json({
+      title: thesisTopic.title, 
+      description: thesisTopic.description,
+      assignedDate: studentThesis.assignment_date,
+      status: studentThesis.thesis_status,
+      supervisor: `${supervisor.first_name} ${supervisor.last_name}`,
+      committeeMembers : committeeMembers,
+      invitedProfessors : invitedProfessorsInfo,
+      });
+  
 
 });
 
@@ -94,11 +117,30 @@ const professorList = asyncHandler(async (req, res) => {
   }
   const professors = await professor.findAll({attributes: ["first_name" , "last_name", "am"]});
   res.status(200).json({
-  p: professors.map(prof => ({
-    name: `${prof.first_name} ${prof.last_name}`,
-    id: `${prof.am}`
-  }))
-});
+    p: professors.map(prof => ({
+      name: `${prof.first_name} ${prof.last_name}`,
+      id: prof.am
+    }))
+  });
 });
 
-module.exports = {getThesisInfo, getStudentInfo, modifyStudentInfo, professorList};
+//@desc Post invited professor
+//@route Post /api/student/inviteProfessor
+//@access Private
+const inviteProfessor = asyncHandler(async (req, res) => {
+  if ( req.user.role !== "student") {
+    res.status(401)
+    throw new Error("Not Authorized Endpoint");
+  }
+  const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
+  const studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
+  const invitedProfessor = await trimelis_requests.create({ 
+    thesis_id : studentThesis.id,
+    prof_am : req.body.prof_am,
+    answer : 'pending',
+    invite_date : fn('NOW'),
+  });
+  res.status(200).json(invitedProfessor);
+});
+
+module.exports = {getThesisInfo, getStudentInfo, modifyStudentInfo, professorList, inviteProfessor};

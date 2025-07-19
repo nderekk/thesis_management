@@ -6,6 +6,7 @@ const {
     getStudentInfo,
     modifyStudentInfo,
     professorList,
+    inviteProfessor,
 } = require("../controllers/studentController");
 
 // public
@@ -15,6 +16,7 @@ router.get("/thesis", getThesisInfo);
 router.get("/", getStudentInfo);
 router.put("/", modifyStudentInfo);
 router.get("/professorList", professorList);
+router.post("/inviteProfessor", inviteProfessor);
 
 
 module.exports = router;

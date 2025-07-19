@@ -245,8 +245,9 @@ async function  getPendingThesisContent(thesis) {
                 <div class="invited-members">
                     ${invitedProfessors.length === 0 ? '<p>Δεν έχουν σταλεί προσκλήσεις.</p>' : invitedProfessors.map(inv => `
                         <div class="invited-member">
-                            <span>${inv.professorId}</span>
-                            <span class="status-badge status-${inv.status}">${getInvitationStatusText(inv.status)}</span>
+                            <span>${inv.first_name} ${inv.last_name} </span>
+                            <!-- <span class="status-badge status-${inv.answer}">${getInvitationStatusText(inv.answer)}</span> -->
+                            <span class="status-badge status-pending">${getInvitationStatusText("pending")}</span>
                         </div>
                     `).join('')}
                 </div>
@@ -257,9 +258,10 @@ async function  getPendingThesisContent(thesis) {
                         <label for="professorSelect">Προσθήκη μέλους:</label>
                         <select id="professorSelect" required>
                             <option value="">Επιλέξτε...</option>
-                            ${professors.filter(p => !invitedProfessors.find(inv => inv.professorId === p.id)).map(prof => 
+                            ${professors.filter(p => !invitedProfessors.find(inv => inv.am === p.id)).map(prof => 
                                 `<option value="${prof.id}">${prof.name}</option>`
-                            ).join('')}
+                            ).join('')} 
+                            ${console.log(professors, invitedProfessors)}
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary">Αποστολή Πρόσκλησης</button>
@@ -500,34 +502,30 @@ function viewExaminationReport() {
     showModal(reportContent);
 }
 
-function handleInviteProfessor() {
+async function handleInviteProfessor() {
     const professorId = parseInt(document.getElementById('professorSelect').value);
-    const studentThesis = theses.find(t => t.studentId === currentUser.id);
+
+    const response = await fetch("http://localhost:5001/api/student/inviteProfessor", {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'  // important for JSON data
+            },
+            body: JSON.stringify({
+                "prof_am": professorId,
+            })
+        });
+        const r = await response.json();
+        if (!response.ok) {
+            alert(r.message);
+            throw new Error(`Error: ${r.message}`);
+        }
+        alert('Η πρόσκληση στάλθηκε.');
     
-    if (!professorId || !studentThesis) {
+    if (!professorId ) {
         alert('Παρακαλώ επιλέξτε έναν διδάσκοντα.');
         return;
     }
-    
-    // Initialize invitedProfessors array if it doesn't exist
-    if (!studentThesis.invitedProfessors) {
-        studentThesis.invitedProfessors = [];
-    }
-    
-    // Check if professor is already invited
-    if (studentThesis.invitedProfessors.find(inv => inv.professorId === professorId)) {
-        alert('Ο διδάσκων έχει ήδη προσκληθεί.');
-        return;
-    }
-    
-    // Add invitation
-    studentThesis.invitedProfessors.push({
-        professorId: professorId,
-        status: 'pending',
-        invitedDate: new Date().toISOString()
-    });
-    
-    alert('Η πρόσκληση αποστάλθηκε επιτυχώς!');
     
     // Refresh the content
     loadContent('manageThesis');
