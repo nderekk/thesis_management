@@ -261,7 +261,6 @@ async function  getPendingThesisContent(thesis) {
                             ${professors.filter(p => !invitedProfessors.find(inv => inv.am === p.id)).map(prof => 
                                 `<option value="${prof.id}">${prof.name}</option>`
                             ).join('')} 
-                            ${console.log(professors, invitedProfessors)}
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary">Αποστολή Πρόσκλησης</button>

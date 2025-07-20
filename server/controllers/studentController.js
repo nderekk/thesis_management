@@ -25,12 +25,13 @@ const getThesisInfo = asyncHandler(async (req, res) => {
       `${supervisor.first_name} ${supervisor.last_name}`,
       `${prof2.first_name} ${prof2.last_name}`
     ];
-     }else{
+     }else if(prof3){
       committeeMembers = [
       `${supervisor.first_name} ${supervisor.last_name}`,
       `${prof3.first_name} ${prof3.last_name}`,
       ];
-     }
+     }else
+        committeeMembers = [`${supervisor.first_name} ${supervisor.last_name}`,];
   }else{
     committeeMembers= [
         `${supervisor.first_name} ${supervisor.last_name}`,
