@@ -228,8 +228,9 @@ async function  getPendingThesisContent(thesis) {
     }
     professors = professors.p.filter(p => p.name !== thesis.supervisor);
     console.log(thesis.supervisor);
-    const invitedProfessors = thesis.invitedProfessors || [];
-    const acceptedInvitations = invitedProfessors.filter(inv => inv.status === 'accepted').length;
+    const invitedProfessors = thesis.invitedProfessors.filter(inv => inv.answer === 'pending') || [];
+    const acceptedProfessors = thesis.invitedProfessors.filter(inv => inv.answer === 'accepted') || [];
+    const acceptedInvitations = invitedProfessors.filter(inv => inv.answer === 'accepted').length;
     return `
         <div class="card mt-20">
             <div class="card-header">
@@ -258,7 +259,7 @@ async function  getPendingThesisContent(thesis) {
                         <label for="professorSelect">Προσθήκη μέλους:</label>
                         <select id="professorSelect" required>
                             <option value="">Επιλέξτε...</option>
-                            ${professors.filter(p => !invitedProfessors.find(inv => inv.am === p.id)).map(prof => 
+                            ${professors.filter(p => ((!invitedProfessors.find(inv => inv.am === p.id)) && (!acceptedProfessors.find(inv => inv.am === p.id)))).map(prof => 
                                 `<option value="${prof.id}">${prof.name}</option>`
                             ).join('')} 
                         </select>

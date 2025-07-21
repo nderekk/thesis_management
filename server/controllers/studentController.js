@@ -14,9 +14,18 @@ const getThesisInfo = asyncHandler(async (req, res) => {
   const supervisor = await professor.findOne({ where: {am: studentThesis.supervisor_am}});
   const prof2 = await professor.findOne({ where: {am: studentThesis.prof2_am} });
   const prof3 = await professor.findOne({ where: {am: studentThesis.prof3_am} });
-  const invitedProfessors = await trimelis_requests.findAll({ attributes : ["prof_am"], where: {thesis_id: studentThesis.id , answer: 'pending'}});
-  const profAms = invitedProfessors.map(req => req.prof_am);
-  const invitedProfessorsInfo = await professor.findAll({attributes: ["first_name" , "last_name", "am"] , where: {am : profAms}});
+  const committeeProfessors = await trimelis_requests.findAll({ attributes : ["prof_am" , "answer"], where: {thesis_id: studentThesis.id}});
+  const profAms = committeeProfessors.map(req => req.prof_am);
+  const committeeProfessorsInfo = await professor.findAll({attributes: ["first_name" , "last_name", "am"] , where: {am : profAms}});
+  const finalCommitteProfessors = committeeProfessorsInfo.map(prof => {
+    const req = committeeProfessors.find(r => r.prof_am === prof.am);
+      return {
+        first_name: `${prof.first_name}`,
+        last_name: `${prof.last_name}`,
+        am: prof.am,
+        answer: req.answer || 'unknown'
+      };
+  });
   var committeeMembers = null;
 
   if(!prof2 || !prof3){
@@ -47,7 +56,7 @@ const getThesisInfo = asyncHandler(async (req, res) => {
       status: studentThesis.thesis_status,
       supervisor: `${supervisor.first_name} ${supervisor.last_name}`,
       committeeMembers : committeeMembers,
-      invitedProfessors : invitedProfessorsInfo,
+      invitedProfessors : finalCommitteProfessors,
       });
   
 
