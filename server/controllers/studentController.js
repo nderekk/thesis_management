@@ -19,13 +19,13 @@ const getThesisInfo = asyncHandler(async (req, res) => {
   const committeeProfessorsInfo = await professor.findAll({attributes: ["first_name" , "last_name", "am"] , where: {am : profAms}});
   const finalCommitteProfessors = committeeProfessorsInfo.map(prof => {
     const req = committeeProfessors.find(r => r.prof_am === prof.am);
-      return {
-        first_name: `${prof.first_name}`,
-        last_name: `${prof.last_name}`,
-        am: prof.am,
-        answer: req.answer || 'unknown'
-      };
-  });
+        return {
+          first_name: `${prof.first_name}`,
+          last_name: `${prof.last_name}`,
+          am: prof.am,
+          answer: req.answer || 'unknown'
+        };
+    });
   var committeeMembers = null;
 
   if(!prof2 || !prof3){

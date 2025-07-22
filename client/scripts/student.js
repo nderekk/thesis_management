@@ -316,7 +316,7 @@ function getReviewThesisContent(thesis) {
                     <label for="additionalLinks">Σύνδεσμοι Υλικού:</label>
                     <textarea id="additionalLinks" rows="2" placeholder="Ένας σύνδεσμος ανά γραμμή"></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">Ανέβασμα Υλικού</button>
+                <button type="submit" class="btn btn-primary">Ανάρτηση Υλικού</button>
             </form>
         </div>
         <div class="card mt-20">
