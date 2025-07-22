@@ -531,10 +531,9 @@ async function handleInviteProfessor() {
     loadContent('manageThesis');
 }
 
-function handleThesisSubmission() {
+async function handleThesisSubmission() {
     const thesisFile = document.getElementById('thesisFile').files[0];
     const additionalLinks = document.getElementById('additionalLinks').value;
-    const studentThesis = theses.find(t => t.studentId === currentUser.id);
     
     if (!thesisFile) {
         alert('Παρακαλώ επιλέξτε ένα αρχείο PDF.');
@@ -553,12 +552,20 @@ function handleThesisSubmission() {
         return;
     }
     
+    const formData = new FormData();
+    formData.append('file', thesisFile);
+
     // Update thesis with submission data
-    studentThesis.thesisFile = {
-        name: thesisFile.name,
-        size: thesisFile.size,
-        uploadedDate: new Date().toISOString()
-    };
+    const response = await fetch("http://localhost:5001/api/student/upload-pdf", {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+    });
+    const upload = await response.json();
+    if (!response.ok) {
+        alert(upload.message);
+        throw new Error(`Error: ${upload.message}`);
+    }
     
     if (additionalLinks.trim()) {
         studentThesis.additionalLinks = additionalLinks.split('\n').filter(link => link.trim());
@@ -570,13 +577,12 @@ function handleThesisSubmission() {
     loadContent('manageThesis');
 }
 
-function handleExaminationForm() {
+async function handleExaminationForm() {
     const examDate = document.getElementById('examDate').value;
     const examTime = document.getElementById('examTime').value;
     const examType = document.getElementById('examType').value;
     const examRoom = document.getElementById('examRoom').value;
     const examLink = document.getElementById('examLink').value;
-    const studentThesis = theses.find(t => t.studentId === currentUser.id);
     
     if (!examDate || !examTime || !examType) {
         alert('Παρακαλώ συμπληρώστε όλα τα υποχρεωτικά πεδία.');
@@ -593,12 +599,26 @@ function handleExaminationForm() {
         return;
     }
     
+    const date_time = `${examDate}T${examTime}`;
     // Update thesis with examination data
-    studentThesis.examDate = examDate;
-    studentThesis.examTime = examTime;
-    studentThesis.examType = examType;
-    studentThesis.examRoom = examRoom;
-    studentThesis.examLink = examLink;
+    const response = await fetch("http://localhost:5001/api/student/exam-date", {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+                'Content-Type': 'application/json'  // important for JSON data
+        },
+        body: JSON.stringify({
+            date_time: date_time,
+            presentation_type: examType,
+            venue: examRoom,
+        }),
+    });
+    const upload = await response.json();
+    if (!response.ok) {
+        alert(upload.message);
+        throw new Error(`Error: ${upload.message}`);
+    }
+    //to do LINK
     
     alert('Οι πληροφορίες εξέτασης καταχωρήθηκαν επιτυχώς!');
     

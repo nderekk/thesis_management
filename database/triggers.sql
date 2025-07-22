@@ -47,7 +47,8 @@ DELIMITER ;
 -- update student set email = 'andpet@upatras.gr' where am= 1;
 -- drop trigger update_committee;
 -- select * from trimelis_requests;
--- select * from thesis;
+select * from thesis;
+select * from thesis_presentation;
 
 
 

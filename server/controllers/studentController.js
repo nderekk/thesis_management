@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const {sequelize, student, thesis, thesis_topics, professor, trimelis_requests} = require("../config/dbConnection");
+const {sequelize, student, thesis, thesis_topics, professor, trimelis_requests, thesis_presentation} = require("../config/dbConnection");
 const {fn} = require('sequelize');
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -153,4 +153,58 @@ const inviteProfessor = asyncHandler(async (req, res) => {
   res.status(200).json(invitedProfessor);
 });
 
-module.exports = {getThesisInfo, getStudentInfo, modifyStudentInfo, professorList, inviteProfessor};
+//@desc student uploads pdf
+//@route Post /api/student/upload-pdf
+//@access Private
+const uploadPdf = asyncHandler(async (req, res) => {
+  if ( req.user.role !== "student") {
+    res.status(401)
+    throw new Error("Not Authorized Endpoint");
+  }
+  
+  const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
+  const studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
+  const filePath = `/uploads/${req.file.filename}`;
+
+  if (!studentThesis) {
+    return res.status(404).json({ message: 'Thesis not found for student' });
+  }
+
+  studentThesis.thesis_content_file = filePath;
+  await studentThesis.save();
+  
+  res.status(200);
+  res.json({
+    message: 'Upload successful',
+    filePath: `/uploads/${req.file.filename}`
+  });
+});
+
+//@desc set exam date
+//@route Post /api/student/exam-date
+//@access Private
+const setExamDate = asyncHandler(async (req, res) => {
+  if ( req.user.role !== "student") {
+    res.status(401)
+    throw new Error("Not Authorized Endpoint");
+  }
+  const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
+  const studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
+
+  // const thesis_presentation = await thesis.findOne({ where: {id: studentThesis.id}});
+  
+  // if (!thesis_presentation) {
+  //   return res.status(404).json({ message: 'No Thesis Presentation found for student' });
+  // }
+  const pres = await thesis_presentation.create({
+        thesis_id: studentThesis.id,
+        date_time: new Date(req.body.date_time),
+        presentation_type: req.body.presentation_type,
+        venue: req.body.venue
+  });
+  // res.status(200).json("Presentation logged Successfully");
+  res.status(200).json(pres);
+
+});
+
+module.exports = {getThesisInfo, getStudentInfo, modifyStudentInfo, professorList, inviteProfessor, uploadPdf, setExamDate};

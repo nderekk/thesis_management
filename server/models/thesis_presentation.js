@@ -20,7 +20,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     presentation_type: {
-      type: DataTypes.ENUM('In Person','Online'),
+      type: DataTypes.ENUM('in-Person','online'),
       allowNull: true
     },
     venue: {
