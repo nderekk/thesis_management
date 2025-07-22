@@ -11,6 +11,7 @@ END$
 
 DELIMITER ;
  -- -------------------------------------------------------------------- 
+
 DELIMITER $
 
 CREATE TRIGGER update_committee
@@ -30,19 +31,24 @@ IF new.answer = "accepted" THEN
 		UPDATE thesis SET thesis.prof2_am = new.prof_am WHERE thesis.id = new.thesis_id;
 	ELSE
 		UPDATE thesis SET thesis.prof3_am = new.prof_am WHERE thesis.id = new.thesis_id;
+        UPDATE thesis SET thesis.thesis_status = 'Review' WHERE thesis.id = new.thesis_id;
 	END IF;
 END IF;
 END$
 
 DELIMITER ;
- 
+
+
+
 
 --  SHOW TRIGGERS FROM diplomatiki_sys;
 -- select * from student;
 -- select * from users;
 -- update student set email = 'andpet@upatras.gr' where am= 1;
 -- drop trigger update_committee;
--- select * from thesis;
 -- select * from trimelis_requests;
+-- select * from thesis;
+
+
 
 
