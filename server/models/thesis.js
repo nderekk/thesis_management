@@ -48,7 +48,7 @@ module.exports = function(sequelize, DataTypes) {
       }
     },
     thesis_status: {
-      type: DataTypes.ENUM('Pending','Active','Completed','Cancelled'),
+      type: DataTypes.ENUM('Pending','Active','Completed','Cancelled','Review'), 
       allowNull: true
     },
     assignment_date: {

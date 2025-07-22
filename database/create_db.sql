@@ -79,7 +79,7 @@ create table thesis(
     supervisor_am int not null,
     prof2_am int,
     prof3_am int,
-    thesis_status enum("Pending", "Active", "Completed", "Cancelled"),
+    thesis_status enum("Pending", "Active", "Completed", "Cancelled", "Review"),
     assignment_date date,
     thesis_content_file varchar(255),
     nemertes_link varchar(255),
