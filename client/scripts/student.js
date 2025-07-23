@@ -76,10 +76,7 @@ function getProfileEditForm() {
             <form id="profileForm">
                 <div class="form-group">
                     <label for="address">Πλήρης Ταχυδρομική Διεύθυνση:</label>
-                    <input type="text" id="address" value="${currentUser.address + 
-                      ", " + currentUser.city + 
-                      ", " + currentUser.post_code 
-                      || ''}" required>
+                    <input type="text" id="address" value="${currentUser.address + ", " + currentUser.city + ", " + currentUser.post_code || ''}" required>
                 </div>
                 
                 <div class="form-group">
@@ -98,11 +95,46 @@ function getProfileEditForm() {
                     </div>
                 </div>
                 
-                <button type="submit" class="btn btn-primary">Αποθήκευση</button>
+                <button type="submit" id="saveProfileBtn" class="btn btn-primary" disabled>Αποθήκευση</button>
             </form>
         </div>
     `;
 }
+
+// --- Ενεργοποίηση κουμπιού αποθήκευσης μόνο αν αλλάξει κάτι και να είναι ανενεργό στην αρχή ---
+function setupProfileFormListeners() {
+    const initialAddress = (currentUser.address + ", " + currentUser.city + ", " + currentUser.post_code) || '';
+    const initialEmail = currentUser.email || '';
+    const initialMobile = currentUser.mobile_number || '';
+    const initialPhone = currentUser.phone_number || '';
+
+    function checkProfileChanged() {
+        const address = document.getElementById('address').value;
+        const email = document.getElementById('email').value;
+        const mobile = document.getElementById('mobile').value;
+        const phone = document.getElementById('phone').value;
+        const changed = address !== initialAddress ||
+                        email !== initialEmail ||
+                        mobile !== initialMobile ||
+                        phone !== initialPhone;
+        document.getElementById('saveProfileBtn').disabled = !changed;
+    }
+
+    ['address', 'email', 'mobile', 'phone'].forEach(id => {
+        document.getElementById(id).addEventListener('input', checkProfileChanged);
+    });
+    checkProfileChanged(); // Εξασφαλίζει ότι στην αρχή είναι ανενεργό
+}
+
+// Κάλεσέ το αμέσως μετά το render της φόρμας
+const origLoadContent = window.loadContent;
+window.loadContent = async function(pageId, event) {
+    await origLoadContent.apply(this, arguments);
+    if (pageId === 'editProfile') {
+        setTimeout(setupProfileFormListeners, 100); // Μικρή καθυστέρηση για να φορτωθεί το DOM
+    }
+};
+
 
 document.addEventListener('submit', async function (e) {
     if (e.target.id === 'profileForm') {
