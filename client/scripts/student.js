@@ -350,7 +350,7 @@ async function getReviewThesisContent(thesis) {
                 </div>
                 <div class="form-group">
                     <label for="examType">Τρόπος Εξέτασης:</label>
-                    <select id="examType" onchange="toggleExamLocation(${examInfo.presentation_type})" required>
+                    <select id="examType" onchange="toggleExamLocation()" required>
                         <option value="">Επιλέξτε...</option>
                         <option value="in-person">Δια Ζώσης</option>
                         <option value="online">Διαδικτυακά</option>
@@ -435,7 +435,8 @@ function getInvitationStatusText(status) {
     return statuses[status] || status;
 }
 
-function toggleExamLocation(examType) {
+function toggleExamLocation() {
+    const examType = document.getElementById('examType').value;
     const examLocationGroup = document.getElementById('examLocationGroup');
     const roomGroup = document.getElementById('roomGroup');
     const linkGroup = document.getElementById('linkGroup');
