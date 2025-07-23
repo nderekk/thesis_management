@@ -856,3 +856,9 @@ tr:hover {
     font-weight: 500;
 } 
 
+.btn[disabled], .btn:disabled {
+  background: #e0e0e0 !important;
+  color: #aaa !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+}
