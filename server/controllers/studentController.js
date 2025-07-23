@@ -1,5 +1,8 @@
 const asyncHandler = require("express-async-handler");
-const {sequelize, student, thesis, thesis_topics, professor, trimelis_requests, thesis_presentation} = require("../config/dbConnection");
+const {
+  sequelize, student, thesis, thesis_topics, 
+  professor, trimelis_requests, thesis_presentation, thesis_grade
+} = require("../config/dbConnection");
 const {fn} = require('sequelize');
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -49,16 +52,18 @@ const getThesisInfo = asyncHandler(async (req, res) => {
       ];
   }
 
-    res.status(200).json({
-      title: thesisTopic.title, 
-      description: thesisTopic.description,
-      assignedDate: studentThesis.assignment_date,
-      status: studentThesis.thesis_status,
-      supervisor: `${supervisor.first_name} ${supervisor.last_name}`,
-      committeeMembers : committeeMembers,
-      invitedProfessors : finalCommitteProfessors,
-      });
-  
+  const thesisGrade = await thesis_grade.findOne({ where: {thesis_id: studentThesis.id}});
+
+  res.status(200).json({
+    title: thesisTopic.title, 
+    description: thesisTopic.description,
+    assignedDate: studentThesis.assignment_date,
+    status: studentThesis.thesis_status,
+    supervisor: `${supervisor.first_name} ${supervisor.last_name}`,
+    committeeMembers : committeeMembers,
+    invitedProfessors : finalCommitteProfessors,
+    grade: thesisGrade ? thesisGrade.final_grade : null
+  });
 
 });
 
@@ -244,12 +249,16 @@ const modifyExamDate = asyncHandler(async (req, res) => {
 });
 
 //@desc get thesis grade
-//@route Get /api/thesis/grade
+//@route Get /api/student/thesis/grade
 //@access Private
 const getThesisGrade = asyncHandler(async (req, res) => {
   const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
   const studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
-
+  const thesisGrade = await thesis_grade.findOne({ where: {thesis_id: studentThesis.id}});
+  if (thesisGrade)
+    res.status(200).json(thesisGrade.final_grade);
+  else 
+    res.status(200).json("ungraded");
 });
 
 module.exports = {getThesisInfo, getStudentInfo, modifyStudentInfo, 

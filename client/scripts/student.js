@@ -300,7 +300,6 @@ function getActiveThesisContent(thesis) {
 }
 
 async function getReviewThesisContent(thesis) {
-
     const response = await fetch("http://localhost:5001/api/student/exam-date", {
         method: 'GET',
         credentials: 'include',
