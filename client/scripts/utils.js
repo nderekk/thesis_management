@@ -157,13 +157,14 @@ function getMenuItems() {
             { id: 'topics', title: 'Θέματα Διπλωματικών', icon: 'fas fa-book' },
             { id: 'assignTopic', title: 'Ανάθεση Θέματος', icon: 'fas fa-user-plus' },
             { id: 'thesesList', title: 'Λίστα Διπλωματικών', icon: 'fas fa-list' },
+            { id: 'manageTheses', title: 'Διαχείριση Διπλωματικών', icon: 'fas fa-cogs' },
             { id: 'invitations', title: 'Προσκλήσεις Τριμελούς', icon: 'fas fa-envelope' },
             { id: 'statistics', title: 'Στατιστικά', icon: 'fas fa-chart-bar' }
         ],
         secretary: [
             { id: 'viewTheses', title: 'Προβολή ΔΕ', icon: 'fas fa-eye' },
             { id: 'importData', title: 'Εισαγωγή Δεδομένων', icon: 'fas fa-upload' },
-            { id: 'manageTheses', title: 'Διαχείριση ΔΕ', icon: 'fas fa-cogs' }
+            { id: 'secretaryManageTheses', title: 'Διαχείριση ΔΕ', icon: 'fas fa-cogs' }
         ]
     };
     return baseItems[currentUserType] || [];
@@ -191,11 +192,12 @@ async function loadContent(pageId, event) {
         topics: typeof getTopicsManagement === 'function' ? getTopicsManagement : () => '',
         assignTopic: typeof getTopicAssignment === 'function' ? getTopicAssignment : () => '',
         thesesList: typeof getThesesList === 'function' ? getThesesList : () => '',
+        manageTheses: typeof getThesesManagement === 'function' ? getThesesManagement : () => '',
         invitations: typeof getInvitationsList === 'function' ? getInvitationsList : () => '',
         statistics: typeof getStatistics === 'function' ? getStatistics : () => '',
         viewTheses: typeof getSecretaryThesesView === 'function' ? getSecretaryThesesView : () => '',
         importData: typeof getDataImport === 'function' ? getDataImport : () => '',
-        manageTheses: typeof getSecretaryThesesManagement === 'function' ? getSecretaryThesesManagement : () => ''
+        secretaryManageTheses: typeof getSecretaryThesesManagement === 'function' ? getSecretaryThesesManagement : () => ''
     };
 
     contentArea.innerHTML = await contentMap[pageId]();

@@ -781,5 +781,78 @@ tr:hover {
     color: #666;
     font-style: italic;
     padding: 40px 20px;
+}
+
+/* Thesis Management Styles */
+.notes-list {
+    margin-top: 20px;
+}
+
+.note {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border-left: 4px solid #667eea;
+}
+
+.note p {
+    margin: 0 0 8px 0;
+    color: #333;
+}
+
+.note small {
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.thesis-draft {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.draft-content {
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 10px;
+    border: 1px solid #dee2e6;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.grades-summary {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #e9ecef;
+}
+
+.grade-item {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.final-grade {
+    text-align: center;
+    padding: 20px;
+}
+
+.final-grade h3 {
+    font-size: 3rem;
+    color: #667eea;
+    margin: 0;
+}
+
+/* Character counter for notes */
+#charCount {
+    color: #667eea;
+    font-weight: 500;
 } 
 
