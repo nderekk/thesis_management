@@ -1,6 +1,7 @@
 const express = require("express");
 const validateToken = require("../middleware/validateTokenHandler");
 const upload = require('../middleware/uploadHandler');
+const {authStudent} = require('../middleware/authHandler');
 const router = express.Router();
 const {
     getThesisInfo,
@@ -12,11 +13,13 @@ const {
     setExamDate,
     getExamDate,
     modifyExamDate,
+    getThesisGrade,
 } = require("../controllers/studentController");
 
 // public
 // private
 router.use(validateToken);
+router.use(authStudent);
 router.get("/thesis", getThesisInfo);
 router.get("/", getStudentInfo);
 router.put("/", modifyStudentInfo);
@@ -26,6 +29,7 @@ router.post('/upload-pdf', upload.single('file'), uploadPdf);
 router.post("/exam-date", setExamDate);
 router.get("/exam-date", getExamDate);
 router.put("/exam-date", modifyExamDate);
+router.get("/thesis/grade", getThesisGrade);
 
 
 module.exports = router;

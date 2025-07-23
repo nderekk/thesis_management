@@ -66,10 +66,6 @@ const getThesisInfo = asyncHandler(async (req, res) => {
 //@route Get /api/student
 //@access Private
 const getStudentInfo = asyncHandler(async (req, res) => {
-  if ( req.user.role !== "student") {
-    res.status(401)
-    throw new Error("Not Authorized Endpoint");
-  }
   const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
   res.status(200).json(loggedStudent);
 });
@@ -78,10 +74,6 @@ const getStudentInfo = asyncHandler(async (req, res) => {
 //@route Put /api/student
 //@access Private
 const modifyStudentInfo = asyncHandler(async (req, res) => {
-  if ( req.user.role !== "student") {
-    res.status(401)
-    throw new Error("Not Authorized Endpoint");
-  }
   const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
 
   const {
@@ -121,10 +113,6 @@ const modifyStudentInfo = asyncHandler(async (req, res) => {
 //@route Get /api/student/professorList
 //@access Private
 const professorList = asyncHandler(async (req, res) => {
-  if ( req.user.role !== "student") {
-    res.status(401)
-    throw new Error("Not Authorized Endpoint");
-  }
   const professors = await professor.findAll({attributes: ["first_name" , "last_name", "am"]});
   res.status(200).json({
     p: professors.map(prof => ({
@@ -138,10 +126,6 @@ const professorList = asyncHandler(async (req, res) => {
 //@route Post /api/student/inviteProfessor
 //@access Private
 const inviteProfessor = asyncHandler(async (req, res) => {
-  if ( req.user.role !== "student") {
-    res.status(401)
-    throw new Error("Not Authorized Endpoint");
-  }
   const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
   const studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
   const invitedProfessor = await trimelis_requests.create({ 
@@ -156,12 +140,7 @@ const inviteProfessor = asyncHandler(async (req, res) => {
 //@desc student uploads pdf
 //@route Post /api/student/upload-pdf
 //@access Private
-const uploadPdf = asyncHandler(async (req, res) => {
-  if ( req.user.role !== "student") {
-    res.status(401)
-    throw new Error("Not Authorized Endpoint");
-  }
-  
+const uploadPdf = asyncHandler(async (req, res) => {  
   const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
   const studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
   const filePath = `/uploads/${req.file.filename}`;
@@ -184,10 +163,6 @@ const uploadPdf = asyncHandler(async (req, res) => {
 //@route Post /api/student/exam-date
 //@access Private
 const setExamDate = asyncHandler(async (req, res) => {
-  if ( req.user.role !== "student") {
-    res.status(401)
-    throw new Error("Not Authorized Endpoint");
-  }
   const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
   const studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
 
@@ -205,10 +180,6 @@ const setExamDate = asyncHandler(async (req, res) => {
 //@route Get /api/student/exam-date
 //@access Private
 const getExamDate = asyncHandler(async (req, res) => {
-  if ( req.user.role !== "student") {
-    res.status(401)
-    throw new Error("Not Authorized Endpoint");
-  }
   const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
   const studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
 
@@ -233,10 +204,6 @@ const getExamDate = asyncHandler(async (req, res) => {
 //@route Put /api/student/exam-date
 //@access Private
 const modifyExamDate = asyncHandler(async (req, res) => {
-  if ( req.user.role !== "student") {
-    res.status(401)
-    throw new Error("Not Authorized Endpoint");
-  }
   const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
   const studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
 
@@ -276,5 +243,16 @@ const modifyExamDate = asyncHandler(async (req, res) => {
   }
 });
 
+//@desc get thesis grade
+//@route Get /api/thesis/grade
+//@access Private
+const getThesisGrade = asyncHandler(async (req, res) => {
+  const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
+  const studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
+
+});
+
 module.exports = {getThesisInfo, getStudentInfo, modifyStudentInfo, 
-  professorList, inviteProfessor, uploadPdf, setExamDate, getExamDate, modifyExamDate};
+  professorList, inviteProfessor, uploadPdf, setExamDate, 
+  getExamDate, modifyExamDate, getThesisGrade};
+  
