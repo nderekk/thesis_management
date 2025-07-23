@@ -191,18 +191,12 @@ const setExamDate = asyncHandler(async (req, res) => {
   const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
   const studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
 
-  // const thesis_presentation = await thesis.findOne({ where: {id: studentThesis.id}});
-  
-  // if (!thesis_presentation) {
-  //   return res.status(404).json({ message: 'No Thesis Presentation found for student' });
-  // }
   const pres = await thesis_presentation.create({
         thesis_id: studentThesis.id,
         date_time: new Date(req.body.date_time),
         presentation_type: req.body.presentation_type,
         venue: req.body.venue
   });
-  // res.status(200).json("Presentation logged Successfully");
   res.status(200).json(pres);
 
 });
@@ -221,7 +215,7 @@ const getExamDate = asyncHandler(async (req, res) => {
   const pres = await thesis_presentation.findOne({ where: {thesis_id: studentThesis.id}});
 
   if (!pres) {
-    res.status(404).json({ date: "YY-MM-DD", time: "--:--" , venue: " "});
+    res.status(404).json({ date: "YYYY-MM-DD", time: "--:--" , venue: " "});
   }
   else {
     const [date, timeWithMs] = pres.date_time.toISOString().split("T");
@@ -233,8 +227,54 @@ const getExamDate = asyncHandler(async (req, res) => {
       venue: pres.venue
     });
   }
+});
 
+//@desc get exam date
+//@route Put /api/student/exam-date
+//@access Private
+const modifyExamDate = asyncHandler(async (req, res) => {
+  if ( req.user.role !== "student") {
+    res.status(401)
+    throw new Error("Not Authorized Endpoint");
+  }
+  const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
+  const studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
+
+  const pres = await thesis_presentation.findOne({ where: {thesis_id: studentThesis.id}});
+
+  if (!pres) {
+    res.status(404)
+    throw new Error("Presentation Date not Found");
+  }
+  else {
+    const {
+      presentation_type,
+      date,
+      time,
+      venue,
+    } = req.body;
+
+    const updateData = {};
+    if (presentation_type !== undefined) updateData.presentation_type = presentation_type;
+    if (date !== undefined) updateData.date = date;
+    if (time !== undefined) updateData.time = time;
+    if (venue !== undefined) updateData.venue = venue;
+
+    if (Object.keys(updateData).length === 0) {
+        res.status(400);
+        throw new Error('No fields provided for update');
+    }  
+
+    await pres.update({
+      presentation_type: presentation_type,
+      date: date,
+      time: time,
+      venue: venue
+    });
+
+    res.status(200).json(pres);
+  }
 });
 
 module.exports = {getThesisInfo, getStudentInfo, modifyStudentInfo, 
-  professorList, inviteProfessor, uploadPdf, setExamDate, getExamDate};
+  professorList, inviteProfessor, uploadPdf, setExamDate, getExamDate, modifyExamDate};

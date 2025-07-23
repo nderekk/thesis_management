@@ -11,6 +11,7 @@ const {
     uploadPdf,
     setExamDate,
     getExamDate,
+    modifyExamDate,
 } = require("../controllers/studentController");
 
 // public
@@ -24,6 +25,7 @@ router.post("/inviteProfessor", inviteProfessor);
 router.post('/upload-pdf', upload.single('file'), uploadPdf);
 router.post("/exam-date", setExamDate);
 router.get("/exam-date", getExamDate);
+router.put("/exam-date", modifyExamDate);
 
 
 module.exports = router;

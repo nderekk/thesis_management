@@ -361,11 +361,11 @@ async function getReviewThesisContent(thesis) {
                 <div id="examLocationGroup" style="display: none;">
                     <div class="form-group" id="roomGroup" style="display: none;">
                         <label for="examRoom">Αίθουσα Εξέτασης:</label>
-                        <input type="text" id="examRoom" value = ${examInfo.venue} placeholder="π.χ. Αίθουσα 101">
+                        <input type="text" id="examRoom" value = "${examInfo.venue}" placeholder="π.χ. Αίθουσα 101">
                     </div>
                     <div class="form-group" id="linkGroup" style="display: none;">
                         <label for="examLink">Σύνδεσμος Σύνδεσης:</label>
-                        <input type="url" id="examLink" value = ${examInfo.venue} placeholder="https://...">
+                        <input type="url" id="examLink" value = "${examInfo.venue}" placeholder="https://...">
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary">Καταχώρηση Πληροφοριών</button>
@@ -617,24 +617,45 @@ async function handleExaminationForm() {
     const examVenue = (examRoom) ? examRoom : examLink;
     const date_time = `${examDate}T${examTime}`;
     // Update thesis with examination data
-    const response = await fetch("http://localhost:5001/api/student/exam-date", {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-                'Content-Type': 'application/json'  // important for JSON data
-        },
-        body: JSON.stringify({
-            date_time: date_time,
-            presentation_type: examType,
-            venue: examVenue,
-        }),
-    });
-    const upload = await response.json();
-    if (!response.ok) {
-        alert(upload.message);
-        throw new Error(`Error: ${upload.message}`);
+    if (examTime === "--:--"){
+        const response = await fetch("http://localhost:5001/api/student/exam-date", {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                    'Content-Type': 'application/json'  // important for JSON data
+            },
+            body: JSON.stringify({
+                date_time: date_time,
+                presentation_type: examType,
+                venue: examVenue,
+            }),
+        });
+        const upload = await response.json();
+        if (!response.ok) {
+            alert(upload.message);
+            throw new Error(`Error: ${upload.message}`);
+        }
+    } else {
+        const response = await fetch("http://localhost:5001/api/student/exam-date", {
+            method: 'PUT',
+            credentials: 'include',
+            headers: {
+                    'Content-Type': 'application/json'  // important for JSON data
+            },
+            body: JSON.stringify({
+                date: examDate,
+                time: examTime,
+                presentation_type: examType,
+                venue: examVenue,
+            }),
+        });
+        const upload = await response.json();
+        if (!response.ok) {
+            alert(upload.message);
+            throw new Error(`Error: ${upload.message}`);
+        }
     }
-    //to do LINK
+    
     
     alert('Οι πληροφορίες εξέτασης καταχωρήθηκαν επιτυχώς!');
     
