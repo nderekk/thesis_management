@@ -202,7 +202,7 @@ async function getThesisManagement() {
             content +=  getActiveThesisContent(studentThesis);
             break;
         case 'review':
-            content += getReviewThesisContent(studentThesis);
+            content += await getReviewThesisContent(studentThesis);
             break;
         case 'completed':
             content += getCompletedThesisContent(studentThesis);
@@ -299,7 +299,20 @@ function getActiveThesisContent(thesis) {
     `;
 }
 
-function getReviewThesisContent(thesis) {
+async function getReviewThesisContent(thesis) {
+
+    const response = await fetch("http://localhost:5001/api/student/exam-date", {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'  // important for JSON data
+        },
+    });
+    const examInfo = await response.json();
+    if (!response.ok) {
+        alert(examInfo.message);
+        throw new Error(`Error: ${examInfo.message}`);
+    }
     return `
         <div class="card mt-20">
             <div class="card-header">
@@ -328,29 +341,31 @@ function getReviewThesisContent(thesis) {
                 <div class="form-row">
                 <div class="form-group">
                         <label for="examDate">Ημερομηνία Εξέτασης:</label>
-                        <input type="date" id="examDate" value="1222-12-12" required>
+                        <input type="date" id="examDate" value=${examInfo.date} required>
                     </div>
                     <div class="form-group">
                         <label for="examTime">Ώρα Εξέτασης:</label>
-                        <input type="time" id="examTime" value="10:37:08.000Z" required>
+                        <input type="time" id="examTime" value=${examInfo.time} required>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="examType">Τρόπος Εξέτασης:</label>
-                    <select id="examType" onchange="toggleExamLocation()" required>
+                    <select id="examType" onchange="toggleExamLocation(${examInfo.presentation_type})" required>
                         <option value="">Επιλέξτε...</option>
                         <option value="in-person">Δια Ζώσης</option>
                         <option value="online">Διαδικτυακά</option>
                     </select>
                 </div>
+
+
                 <div id="examLocationGroup" style="display: none;">
                     <div class="form-group" id="roomGroup" style="display: none;">
                         <label for="examRoom">Αίθουσα Εξέτασης:</label>
-                        <input type="text" id="examRoom" placeholder="π.χ. Αίθουσα 101">
+                        <input type="text" id="examRoom" value = ${examInfo.venue} placeholder="π.χ. Αίθουσα 101">
                     </div>
                     <div class="form-group" id="linkGroup" style="display: none;">
                         <label for="examLink">Σύνδεσμος Σύνδεσης:</label>
-                        <input type="url" id="examLink" placeholder="https://...">
+                        <input type="url" id="examLink" value = ${examInfo.venue} placeholder="https://...">
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary">Καταχώρηση Πληροφοριών</button>
@@ -420,8 +435,7 @@ function getInvitationStatusText(status) {
     return statuses[status] || status;
 }
 
-function toggleExamLocation() {
-    const examType = document.getElementById('examType').value;
+function toggleExamLocation(examType) {
     const examLocationGroup = document.getElementById('examLocationGroup');
     const roomGroup = document.getElementById('roomGroup');
     const linkGroup = document.getElementById('linkGroup');

@@ -23,7 +23,7 @@ router.get("/professorList", professorList);
 router.post("/inviteProfessor", inviteProfessor);
 router.post('/upload-pdf', upload.single('file'), uploadPdf);
 router.post("/exam-date", setExamDate);
-router.get("/exam-date", getExamDate)
+router.get("/exam-date", getExamDate);
 
 
 module.exports = router;
