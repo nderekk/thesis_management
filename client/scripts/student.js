@@ -615,8 +615,20 @@ async function handleExaminationForm() {
     
     const examVenue = (examRoom) ? examRoom : examLink;
     const date_time = `${examDate}T${examTime}`;
+    const response = await fetch("http://localhost:5001/api/student/exam-date", {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'  // important for JSON data
+        },
+    });
+    const examInfo = await response.json();
+    if (!response.ok) {
+        alert(examInfo.message);
+        throw new Error(`Error: ${examInfo.message}`);
+    }
     // Update thesis with examination data
-    if (examTime === "--:--"){
+    if (examInfo.venue === ""){
         const response = await fetch("http://localhost:5001/api/student/exam-date", {
             method: 'POST',
             credentials: 'include',

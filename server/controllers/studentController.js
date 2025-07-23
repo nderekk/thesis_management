@@ -164,7 +164,7 @@ const uploadPdf = asyncHandler(async (req, res) => {
   });
 });
 
-//@desc set exam date
+//@desc create exam date
 //@route Post /api/student/exam-date
 //@access Private
 const setExamDate = asyncHandler(async (req, res) => {
