@@ -1,4 +1,4 @@
--- use diplomatiki_sys;
+use diplomatiki_sys;
 
 DELIMITER $
 
@@ -47,8 +47,9 @@ DELIMITER ;
 -- update student set email = 'andpet@upatras.gr' where am= 1;
 -- drop trigger update_committee;
 -- select * from trimelis_requests;
-select * from thesis;
-select * from thesis_presentation;
+select * from professor;
+select * from users;
+select * from thesis_topics;
 
 
 

@@ -34,15 +34,17 @@ INSERT INTO secretary (am, first_name, last_name, phone_number, address, email, 
 (2, 'Katerina', 'Vlachou', '2610960011', 'Οδός Αγ. Ανδρέα 30', 'kvlachou@ceid.upatras.gr', 8);
 
 -- Insert thesis topics
-INSERT INTO thesis_topics (id, prof_am, title, description, attached_discription_file, topic_status, student_am) VALUES
-(1, 1, 'RISC-V CPU', 'Designing a custom RISC-V CPU in Verilog', 'riscv_description.pdf', 'assigned', 1),
-(2, 2, 'AI Tutor', 'Creating an adaptive learning system using ML', 'ai_tutor_description.pdf', 'assigned', 2),
-(3, 3, 'Secure App', 'Developing a secure messaging app for Android', 'secure_app_description.pdf', 'assigned', 3),
-(4, 1, 'FPGA Vision', 'Using FPGAs for real-time image processing', 'fpga_vision.pdf', 'unassigned', NULL),
-(5, 2, 'ML Compiler', 'AutoML for optimizing compiler pipelines', 'ml_compiler.pdf', 'unassigned', NULL);
+INSERT INTO thesis_topics (id, prof_am, title, description, attached_discription_file, topic_status, student_am, createdAt, updatedAt) VALUES
+(1, 1, 'RISC-V CPU', 'Designing a custom RISC-V CPU in Verilog', 'riscv_description.pdf', 'assigned', 1, "2025-01-15", "2025-01-15"),
+(2, 2, 'AI Tutor', 'Creating an adaptive learning system using ML', 'ai_tutor_description.pdf', 'assigned', 2, "2025-01-15", "2025-01-15"),
+(3, 3, 'Secure App', 'Developing a secure messaging app for Android', 'secure_app_description.pdf', 'assigned', 3, "2025-01-15", "2025-01-15"),
+(4, 1, 'FPGA Vision', 'Using FPGAs for real-time image processing', 'fpga_vision.pdf', 'unassigned', NULL, "2025-01-15", "2025-01-15"),
+(5, 2, 'ML Compiler', 'AutoML for optimizing compiler pipelines', 'ml_compiler.pdf', 'unassigned', NULL, "2025-01-15", "2025-01-15");
 
 -- Insert thesis
 INSERT INTO thesis (id, topic_id, student_am, supervisor_am, prof2_am, prof3_am, thesis_status, assignment_date, thesis_content_file, nemertes_link, ap_from_gs) VALUES 
 (1, 1, 1, 1, 2, 3, 'Active', '2025-01-15', 'thesis1.pdf', 'https://nemertes.upatras.gr/thesis1', 1001),
 (2, 2, 2, 2, 1, 3, 'Active', '2025-01-20', 'thesis2.pdf', 'https://nemertes.upatras.gr/thesis2', 1002),
 (3, 3, 3, 3, 1, 2, 'Pending', '2025-01-25', 'thesis3.pdf', 'https://nemertes.upatras.gr/thesis3', 1003);
+
+-- Insert grade
