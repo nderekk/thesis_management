@@ -326,13 +326,13 @@ function getReviewThesisContent(thesis) {
             </div>
             <form id="examinationForm">
                 <div class="form-row">
-                    <div class="form-group">
+                <div class="form-group">
                         <label for="examDate">Ημερομηνία Εξέτασης:</label>
-                        <input type="date" id="examDate" required>
+                        <input type="date" id="examDate" value="1222-12-12" required>
                     </div>
                     <div class="form-group">
                         <label for="examTime">Ώρα Εξέτασης:</label>
-                        <input type="time" id="examTime" required>
+                        <input type="time" id="examTime" value="10:37:08.000Z" required>
                     </div>
                 </div>
                 <div class="form-group">
@@ -599,6 +599,7 @@ async function handleExaminationForm() {
         return;
     }
     
+    const examVenue = (examRoom) ? examRoom : examLink;
     const date_time = `${examDate}T${examTime}`;
     // Update thesis with examination data
     const response = await fetch("http://localhost:5001/api/student/exam-date", {
@@ -610,7 +611,7 @@ async function handleExaminationForm() {
         body: JSON.stringify({
             date_time: date_time,
             presentation_type: examType,
-            venue: examRoom,
+            venue: examVenue,
         }),
     });
     const upload = await response.json();

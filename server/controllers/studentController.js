@@ -207,4 +207,34 @@ const setExamDate = asyncHandler(async (req, res) => {
 
 });
 
-module.exports = {getThesisInfo, getStudentInfo, modifyStudentInfo, professorList, inviteProfessor, uploadPdf, setExamDate};
+//@desc get exam date
+//@route Get /api/student/exam-date
+//@access Private
+const getExamDate = asyncHandler(async (req, res) => {
+  if ( req.user.role !== "student") {
+    res.status(401)
+    throw new Error("Not Authorized Endpoint");
+  }
+  const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
+  const studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
+
+  const pres = await thesis_presentation.findOne({ where: {thesis_id: studentThesis.id}});
+
+  if (!pres) {
+    res.status(404).json({ date: "YY-MM-DD", time: "--:--" });
+  }
+  else {
+    const [date, timeWithMs] = pres.date_time.toISOString().split("T");
+    const time = timeWithMs.slice(0, 5);
+    res.status(200).json({
+      date: date, 
+      time: time, 
+      presentation_type: pres.presentation_type,
+      venue: pres.venue
+    });
+  }
+
+});
+
+module.exports = {getThesisInfo, getStudentInfo, modifyStudentInfo, 
+  professorList, inviteProfessor, uploadPdf, setExamDate, getExamDate};
