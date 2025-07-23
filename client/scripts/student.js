@@ -344,6 +344,10 @@ async function getReviewThesisContent(thesis) {
         alert(examInfo.message);
         throw new Error(`Error: ${examInfo.message}`);
     }
+
+    const roomValue = examInfo.presentation_type === 'in-person' ? (examInfo.venue || '') : '';
+    const linkValue = examInfo.presentation_type === 'online' ? (examInfo.venue || '') : '';
+
     return `
         <div class="card mt-20">
             <div class="card-header">
@@ -382,26 +386,30 @@ async function getReviewThesisContent(thesis) {
                 <div class="form-group">
                     <label for="examType">Τρόπος Εξέτασης:</label>
                     <select id="examType" onchange="toggleExamLocation()" required>
-                        <option value="">Επιλέξτε...</option>
-                        <option value="in-person">Δια Ζώσης</option>
-                        <option value="online">Διαδικτυακά</option>
+                        <option value="" ${!examInfo.presentation_type ? 'selected' : ''}>Επιλέξτε...</option>
+                        <option value="in-person" ${examInfo.presentation_type === 'in-person' ? 'selected' : ''}>Δια Ζώσης</option>
+                        <option value="online" ${examInfo.presentation_type === 'online' ? 'selected' : ''}>Διαδικτυακά</option>
                     </select>
                 </div>
 
-
-                <div id="examLocationGroup" style="display: none;">
-                    <div class="form-group" id="roomGroup" style="display: none;">
+                <div id="examLocationGroup">
+                    <div class="form-group" id="roomGroup" style="display:${examInfo.presentation_type === 'in-person' ? 'block' : 'none'};">
                         <label for="examRoom">Αίθουσα Εξέτασης:</label>
-                        <input type="text" id="examRoom" value = "${examInfo.venue}" placeholder="π.χ. Αίθουσα 101">
+                        <input type="text" id="examRoom" value = "${roomValue}" placeholder="π.χ. Αίθουσα 101">
                     </div>
-                    <div class="form-group" id="linkGroup" style="display: none;">
+                    <div class="form-group" id="linkGroup" style="display:${examInfo.presentation_type === 'online' ? 'block' : 'none'};">
                         <label for="examLink">Σύνδεσμος Σύνδεσης:</label>
-                        <input type="url" id="examLink" value = "${examInfo.venue}" placeholder="https://...">
+                        <input type="url" id="examLink" value = "${linkValue}" placeholder="https://...">
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary">Καταχώρηση Πληροφοριών</button>
             </form>
         </div>
+        <script>
+        setTimeout(function() {
+            toggleExamLocation();
+        }, 0);
+        </script>
         <div class="card mt-20">
             <div class="card-header">
                 <h3 class="card-title">Πρακτικό και Νημερτής</h3>
@@ -468,20 +476,18 @@ function getInvitationStatusText(status) {
 
 function toggleExamLocation() {
     const examType = document.getElementById('examType').value;
-    const examLocationGroup = document.getElementById('examLocationGroup');
     const roomGroup = document.getElementById('roomGroup');
     const linkGroup = document.getElementById('linkGroup');
-    
+
     if (examType === 'in-person') {
-        examLocationGroup.style.display = 'block';
         roomGroup.style.display = 'block';
         linkGroup.style.display = 'none';
     } else if (examType === 'online') {
-        examLocationGroup.style.display = 'block';
         roomGroup.style.display = 'none';
         linkGroup.style.display = 'block';
     } else {
-        examLocationGroup.style.display = 'none';
+        roomGroup.style.display = 'none';
+        linkGroup.style.display = 'none';
     }
 }
 
