@@ -19,6 +19,6 @@ router.get("/", getProfessorInfo);
 router.get("/topics", getTopics);
 router.post("/topic", upload.single('file'), createTopic);
 router.delete("/topic", deleteTopic);
-router.put("/topic", editTopic);
+router.put("/topic", upload.single('file'), editTopic);
 
 module.exports = router;

@@ -52,7 +52,7 @@ const createTopic = asyncHandler(async (req, res) => {
 const editTopic = asyncHandler(async (req, res) => {
   const loggedProfessor = await professor.findOne({ where: {prof_userid: req.user.id} });
   const targetTopic = await thesis_topics.findOne({where: {prof_am: loggedProfessor.am, id:req.body.id} });
-  const filePath = `/uploads/${req.file.filename}`;
+  const prevFile = targetTopic.attached_discription_file
 
   if (!targetTopic) {
     res.status(404)
@@ -78,7 +78,7 @@ const editTopic = asyncHandler(async (req, res) => {
     await targetTopic.update({
       title: title,
       description: description,
-      attached_discription_file: filePath,
+      attached_discription_file: (req.body.file) ? `/uploads/${req.file.filename}` : prevFile,
       prof_am: loggedProfessor.am,
       topic_status: topic_status
     });
