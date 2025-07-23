@@ -191,7 +191,7 @@ const getExamDate = asyncHandler(async (req, res) => {
   const pres = await thesis_presentation.findOne({ where: {thesis_id: studentThesis.id}});
 
   if (!pres) {
-    res.status(404).json({ date: "YYYY-MM-DD", time: "--:--" , venue: " "});
+    res.status(200).json({ date: "YYYY-MM-DD", time: "--:--" , venue: "", presentation_type: ""});
   }
   else {
     const [date, timeWithMs] = pres.date_time.toISOString().split("T");
