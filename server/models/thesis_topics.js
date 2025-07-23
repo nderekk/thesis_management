@@ -16,7 +16,7 @@ module.exports = function(sequelize, DataTypes) {
       }
     },
     title: {
-      type: DataTypes.STRING(15),
+      type: DataTypes.STRING(255),
       allowNull: false
     },
     description: {
@@ -42,7 +42,6 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     sequelize,
     tableName: 'thesis_topics',
-    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",

@@ -1,16 +1,24 @@
 const express = require("express");
 const validateToken = require("../middleware/validateTokenHandler");
+const upload = require('../middleware/uploadHandler');
+const {authProfessor} = require('../middleware/authHandler');
 const router = express.Router();
 const {
     getProfessorInfo,
-    getProfessorThesis
+    getTopics,
+    createTopic,
+    editTopic,
+    deleteTopic,
 } = require("../controllers/professorController");
 
 // public
 // private
 router.use(validateToken);
+router.use(authProfessor);
 router.get("/", getProfessorInfo);
-router.get("/thesis", getProfessorThesis);
-
+router.get("/topics", getTopics);
+router.post("/topic", upload.single('file'), createTopic);
+router.delete("/topic", deleteTopic);
+router.put("/topic", editTopic);
 
 module.exports = router;

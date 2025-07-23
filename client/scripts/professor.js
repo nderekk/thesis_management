@@ -1,5 +1,17 @@
-function getTopicsManagement() {
-    const userTopics = topics.filter(t => t.creatorId === currentUser.id);
+async function getTopicsManagement() {
+    const response = await fetch("http://localhost:5001/api/professor/topics", {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      }
+    });
+    const thesisTopics = await response.json();
+    if (!response.ok) {
+        alert(thesisTopics.message);
+        throw new Error(`Error: ${thesisTopics.message}`);
+    }
+    console.log(thesisTopics);
     
     return `
         <div class="content-header">
@@ -48,7 +60,7 @@ function getTopicsManagement() {
                         </tr>
                     </thead>
                     <tbody>
-                        ${userTopics.map(topic => `
+                        ${thesisTopics.data.map(topic => `
                             <tr>
                                 <td>${topic.title}</td>
                                 <td><span class="status-badge status-${topic.status}">${getStatusText(topic.status)}</span></td>
