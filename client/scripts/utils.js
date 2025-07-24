@@ -39,6 +39,9 @@ function initializeApp() {
         } else if (e.target.id === 'examinationForm') {
             e.preventDefault();
             if (typeof handleExaminationForm === 'function') handleExaminationForm();
+        } else if (e.target.id === 'newTopicForm') {
+            e.preventDefault();
+            if (typeof createTopic === 'function') createTopic();
         }
     });
 }

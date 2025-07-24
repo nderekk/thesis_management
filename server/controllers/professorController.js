@@ -34,12 +34,11 @@ const getTopics = asyncHandler(async (req, res) => {
 //@access Private
 const createTopic = asyncHandler(async (req, res) => {
   const loggedProfessor = await professor.findOne({ where: {prof_userid: req.user.id} });
-  const filePath = `/uploads/${req.file.filename}`;
 
   const topic = await thesis_topics.create({
     title: req.body.title, 
     description: req.body.description,
-    attached_discription_file: filePath,
+    attached_discription_file: (req.body.file) ? `/uploads/${req.file.filename}` : null,
     prof_am: loggedProfessor.am,
     topic_status: "unassigned"
   });
