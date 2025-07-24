@@ -98,8 +98,28 @@ async function createTopic() {
         alert(ans.message);
         throw new Error(`Error: ${ans.message}`);
     }
-    console.log(ans);
     alert("Topic Created");
+
+    loadContent("topics");
+}
+
+async function deleteTopic(id) {
+  console.log(id);
+  const response = await fetch("http://localhost:5001/api/professor/topic", {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      },
+      body: JSON.stringify({
+        id: id
+      })
+    });
+    const ans = await response.json();
+    if (!response.ok) {
+        alert(ans.message);
+        throw new Error(`Error: ${ans.message}`);
+    }
 
     loadContent("topics");
 }
