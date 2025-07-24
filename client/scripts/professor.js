@@ -103,8 +103,33 @@ async function createTopic() {
     loadContent("topics");
 }
 
+// thelei allagh sto ui touto
+async function editTopic(id) {
+  const topicFile = document.getElementById('topicFile').files[0];
+  const topicTitle = document.getElementById('topicTitle').value;
+  const topicDescription = document.getElementById('topicDescription').value;
+
+  const formData = new FormData();
+  (topicFile) ? formData.append('file', topicFile) : {};
+  formData.append('title', topicTitle);
+  formData.append('description', topicDescription);
+  formData.append('id', id);
+
+  const response = await fetch("http://localhost:5001/api/professor/topic", {
+      method: 'PUT',
+      credentials: 'include',
+      body: formData
+    });
+    const ans = await response.json();
+    if (!response.ok) {
+        alert(ans.message);
+        throw new Error(`Error: ${ans.message}`);
+    }
+
+    loadContent("topics");
+}
+
 async function deleteTopic(id) {
-  console.log(id);
   const response = await fetch("http://localhost:5001/api/professor/topic", {
       method: 'DELETE',
       credentials: 'include',
