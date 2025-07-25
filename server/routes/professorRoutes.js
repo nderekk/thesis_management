@@ -9,6 +9,7 @@ const {
     createTopic,
     editTopic,
     deleteTopic,
+    getThesesList,
 } = require("../controllers/professorController");
 
 // public
@@ -20,5 +21,6 @@ router.get("/topics", getTopics);
 router.post("/topic", upload.single('file'), createTopic);
 router.delete("/topic", deleteTopic);
 router.put("/topic", upload.single('file'), editTopic);
+router.get("/thesesList", getThesesList);
 
 module.exports = router;

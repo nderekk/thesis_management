@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
-const {sequelize, professor, thesis_topics} = require("../config/dbConnection");
+const {sequelize, professor, thesis_topics, thesis, student} = require("../config/dbConnection");
 const deleteUploadedFile = require("../utils/fileDeleter");
+const { Op } = require('sequelize');
 
 //@desc Get current professor
 //@route Get /api/professor
@@ -105,4 +106,46 @@ const deleteTopic = asyncHandler(async (req, res) => {
   res.status(200).json(`Topic ${req.body.id} deleted`);
 });
 
-module.exports = {getProfessorInfo, getTopics, createTopic, editTopic, deleteTopic};
+//@desc Get professor's theses list
+//@route Get /api/professor/thesesList
+//@access Private
+const getThesesList = asyncHandler(async (req, res) => {
+  const loggedProfessor = await professor.findOne({ where: {prof_userid: req.user.id} });
+  const professorThesesSupervisor = await thesis.findAll({
+    [Op.or]: [
+      { supervisor_am: loggedProfessor.am },
+      { prof2_am: loggedProfessor.am },
+      { prof3_am: loggedProfessor.am}
+    ]
+  })
+  const topicIDs = professorThesesSupervisor.map(thesis => thesis.topic_id);
+  const professorThesesTopics = await thesis_topics.findAll({where: { id: topicIDs }});
+
+  const studentIDs = professorThesesSupervisor.map(thesis => thesis.student_am);
+  const studentThesesIDs = await student.findAll({where: { am: studentIDs }});
+
+  const professorThesesInfo = professorThesesSupervisor.map(prof => {
+    const req = professorThesesTopics.find(r => r.id === prof.topic_id);
+    const stud = studentThesesIDs.find(st => st.am === prof.student_am);
+
+    let role = null;
+    if (prof.supervisor_am === loggedProfessor.am) {
+      role = 'Supervisor';
+    }else {
+      role = 'Committee Member';
+    }
+
+        return {
+          thesis_id: prof.id,
+          thesis_title: req.title,
+          professor_role: role,
+          thesis_status: prof.thesis_status,
+          thesis_ass_date: prof.assignment_date,
+          student_name: `${stud.first_name} ${stud.last_name}`
+        };
+    });
+
+  res.status(200).json(professorThesesInfo);
+});
+
+module.exports = {getProfessorInfo, getTopics, createTopic, editTopic, deleteTopic,getThesesList};

@@ -196,11 +196,20 @@ function getTopicAssignment() {
     `;
 }
 
-function getThesesList() {
-    const userTheses = theses.filter(t => 
-        t.supervisorId === currentUser.id || 
-        t.committeeMembers.includes(currentUser.id)
-    );
+async function getThesesList() {
+    const response = await fetch("http://localhost:5001/api/professor/thesesList", {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      }
+    });
+    const thesesList = await response.json();
+    if (!response.ok) {
+        alert(thesesList.message);
+        throw new Error(`Error: ${thesesList.message}`);
+    }
+    console.log(thesesList);
     
     return `
         <div class="content-header">
@@ -258,16 +267,16 @@ function getThesesList() {
                         </tr>
                     </thead>
                     <tbody>
-                        ${userTheses.map(thesis => `
+                        ${thesesList.map(thesis => `
                             <tr>
-                                <td>${thesis.title}</td>
-                                <td>${getUserName(thesis.studentId)}</td>
-                                <td><span class="status-badge status-${thesis.status}">${getStatusText(thesis.status)}</span></td>
-                                <td>${thesis.supervisorId === currentUser.id ? 'Επιβλέπων' : 'Μέλος Τριμελούς'}</td>
-                                <td>${formatDate(thesis.assignedDate)}</td>
+                                <td>${thesis.thesis_title}</td>
+                                <td>${thesis.student_name}</td>
+                                <td>${thesis.thesis_status}</span></td>
+                                <td>${thesis.professor_role}</td>
+                                <td>${thesis.thesis_ass_date}</td>
                                 <td>
-                                    <button class="btn btn-secondary" onclick="viewThesisDetails(${thesis.id})">Προβολή</button>
-                                    <button class="btn btn-primary" onclick="manageThesis(${thesis.id})">Διαχείριση</button>
+                                    <button class="btn btn-secondary" onclick="viewThesisDetails(${thesis.thesis_id})">Προβολή</button>
+                                    <button class="btn btn-primary" onclick="manageThesis(${thesis.thesis_id})">Διαχείριση</button>
                                 </td>
                             </tr>
                         `).join('')}
@@ -276,6 +285,87 @@ function getThesesList() {
             </div>
         </div>
     `;
+}
+
+function filterTheses() {
+  const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+  const roleFilter = document.getElementById('roleFilter').value.toLowerCase();
+
+  const tableRows = document.querySelectorAll('tbody tr');
+
+  tableRows.forEach(row => {
+    const statusCell = row.children[2].textContent.toLowerCase().trim();
+    const roleCell = row.children[3].textContent.toLowerCase().trim();
+
+    const matchesStatus = !statusFilter || statusCell === statusFilter;
+    const matchesRole = !roleFilter || (
+      roleFilter === 'committee'
+        ? roleCell.includes('committee')
+        : roleCell === roleFilter
+    );
+
+    if (matchesStatus && matchesRole) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+}
+
+function exportTheses(type){
+    const tableRows = document.querySelectorAll('tbody tr');
+    const exportedData = [];
+
+    tableRows.forEach(row => {
+        if(row.style.display === 'none') return ; //So it can skip the hidden (by filtering) rows.
+
+        const cells = row.querySelectorAll('td');
+
+    const rowData = {
+      title: cells[0].textContent.trim(),
+      student: cells[1].textContent.trim(),
+      status: cells[2].textContent.trim(),
+      role: cells[3].textContent.trim(),
+      assignementDate: cells[4].textContent.trim()
+    };
+
+        exportedData.push(rowData);
+    });
+
+
+   if (type === 'json') {
+    const jsonString = JSON.stringify(exportedData, null, 2);
+    downloadFile(jsonString, 'theses.json', 'application/json');
+  } else if (type === 'csv') {
+        const csvRows = [
+            ['Τίτλος', 'Φοιτητής', 'Κατάσταση', 'Ρόλος', 'Ημερομηνία Ανάθεσης'],
+            ...exportedData.map(item => [
+            item.title ?? '',
+            item.student ?? '',
+            item.status ?? '',
+            item.role ?? '',
+            item.assignementDate ?? ''
+            ])
+        ];
+
+        const csvContent = csvRows.map(row =>
+            row.map(cell => `"${(cell ?? '').toString().replace(/"/g, '""')}"`).join(',')
+        ).join('\n');
+
+    downloadFile(csvContent, 'theses.csv', 'text/csv');
+  }
+}
+
+function downloadFile(content, filename, mimeType) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 function getStatistics() {
