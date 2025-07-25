@@ -1,3 +1,5 @@
+let editingTopicId = null;
+
 async function getTopicsManagement() {
     const response = await fetch("http://localhost:5001/api/professor/topics", {
       method: 'GET',
@@ -60,18 +62,40 @@ async function getTopicsManagement() {
                         </tr>
                     </thead>
                     <tbody>
-                        ${thesisTopics.data.map(topic => `
-                            <tr>
-                                <td>${topic.title}</td>
-                                <td><span class="status-badge status-${topic.status}">${getStatusText(topic.status)}</span></td>
-                                <td>${formatDate(topic.createdDate)}</td>
-                                <td>
-                                    <button class="btn btn-secondary" onclick="editTopic(${topic.id})">Επεξεργασία</button>
-                                    <button class="btn btn-danger" onclick="deleteTopic(${topic.id})">Διαγραφή</button>
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
+${thesisTopics.data.map(topic => `
+    <tr>
+        <td>${topic.title}</td>
+        <td><span class="status-badge status-${topic.status}">${getStatusText(topic.status)}</span></td>
+        <td>${formatDate(topic.createdDate)}</td>
+        <td>
+            <button class="btn btn-secondary" onclick="editTopic(${topic.id})">Επεξεργασία</button>
+            <button class="btn btn-danger" onclick="deleteTopic(${topic.id})">Διαγραφή</button>
+        </td>
+    </tr>
+    ${editingTopicId === topic.id ? `
+    <tr class="edit-form-row">
+        <td colspan="4">
+            <form id="editTopicForm-${topic.id}" onsubmit="submitEditTopic(event, ${topic.id})">
+                <div class="form-group">
+                    <label>Τίτλος:</label>
+                    <input type="text" id="editTitle-${topic.id}" value="${topic.title}" required>
+                </div>
+                <div class="form-group">
+                    <label>Περιγραφή:</label>
+                    <textarea id="editDescription-${topic.id}" required>${topic.description}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Αρχείο PDF (προαιρετικό):</label>
+                    <input type="file" id="editFile-${topic.id}" value="${topic.original_file_name}" accept=".pdf">
+                    <span id="fileLabel" class="file-label">Έχετε ήδη ανεβάσει: "${topic.original_file_name}"</span>
+                </div>
+                <button type="submit" class="btn btn-primary">Αποθήκευση</button>
+                <button type="button" class="btn btn-secondary" onclick="cancelEdit()">Άκυρο</button>
+            </form>
+        </td>
+    </tr>` : ''}
+`).join('')}
+</tbody>
                 </table>
             </div>
         </div>
@@ -103,11 +127,22 @@ async function createTopic() {
     loadContent("topics");
 }
 
+function editTopic(id) {
+  editingTopicId = id;
+  loadContent("topics");
+}
+
+function cancelEdit() {
+  editingTopicId = null;
+  loadContent("topics");
+}
+
 // thelei allagh sto ui touto
-async function editTopic(id) {
-  const topicFile = document.getElementById('topicFile').files[0];
-  const topicTitle = document.getElementById('topicTitle').value;
-  const topicDescription = document.getElementById('topicDescription').value;
+async function submitEditTopic(e, id) {
+  e.preventDefault();
+  const topicFile = document.getElementById(`editFile-${id}`).files[0];
+  const topicTitle = document.getElementById(`editTitle-${id}`).value;
+  const topicDescription = document.getElementById(`editDescription-${id}`).value;
 
   const formData = new FormData();
   (topicFile) ? formData.append('file', topicFile) : {};
@@ -126,7 +161,7 @@ async function editTopic(id) {
         throw new Error(`Error: ${ans.message}`);
     }
 
-    loadContent("topics");
+    cancelEdit();
 }
 
 async function deleteTopic(id) {

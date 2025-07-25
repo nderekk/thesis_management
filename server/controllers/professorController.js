@@ -25,6 +25,7 @@ const getTopics = asyncHandler(async (req, res) => {
       title: topic.title,
       description: topic.description,
       status: topic.topic_status,
+      original_file_name: topic.original_file_name,
       createdDate: topic.createdAt.toISOString().split("T")[0]
     })),
   });
@@ -40,6 +41,7 @@ const createTopic = asyncHandler(async (req, res) => {
     title: req.body.title, 
     description: req.body.description,
     attached_discription_file: (req.file) ? `${req.file.filename}` : null,
+    original_file_name: (req.file) ? `${req.file.originalname}` : null,
     prof_am: loggedProfessor.am,
     topic_status: "unassigned"
   });
@@ -53,6 +55,7 @@ const editTopic = asyncHandler(async (req, res) => {
   const loggedProfessor = await professor.findOne({ where: {prof_userid: req.user.id} });
   const targetTopic = await thesis_topics.findOne({where: {prof_am: loggedProfessor.am, id:req.body.id} });
   const prevFile = targetTopic.attached_discription_file
+  const prevOriginalFile = targetTopic.original_file_name;
 
   if (!targetTopic) {
     res.status(404)
@@ -74,14 +77,17 @@ const editTopic = asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error('No fields provided for update');
     }  
-
     await targetTopic.update({
       title: title,
       description: description,
-      attached_discription_file: (req.body.file) ? `/uploads/${req.file.filename}` : prevFile,
+      attached_discription_file: (req.file && `${req.file.originalname}` !== prevOriginalFile) ? `${req.file.filename}` : prevFile,
+      original_file_name: (req.file && `${req.file.originalname}` !== prevOriginalFile) ? `${req.file.originalname}` : prevOriginalFile,
       prof_am: loggedProfessor.am,
       topic_status: topic_status
     });
+    if (req.file && `${req.file.originalname}` !== prevOriginalFile)
+      deleteUploadedFile(prevFile);
+
 
     res.status(200).json(targetTopic);
   }

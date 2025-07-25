@@ -27,6 +27,10 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(255),
       allowNull: true
     },
+    original_file_name: {
+      type: DataTypes.STRING(255),
+      allowNull: true
+    },
     topic_status: {
       type: DataTypes.ENUM('assigned','temp_assigned','unassigned'),
       allowNull: false
