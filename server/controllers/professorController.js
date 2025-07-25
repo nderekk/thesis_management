@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
-const {sequelize, professor, thesis_topics} = require("../config/dbConnection");
+const {sequelize, professor, thesis_topics, thesis} = require("../config/dbConnection");
+const {QueryTypes} = require("sequelize");
 const deleteUploadedFile = require("../utils/fileDeleter");
 
 //@desc Get current professor
@@ -98,11 +99,47 @@ const editTopic = asyncHandler(async (req, res) => {
 //@access Private
 const deleteTopic = asyncHandler(async (req, res) => {
   const loggedProfessor = await professor.findOne({ where: {prof_userid: req.user.id} });
-  const targetTopic = await thesis_topics.findOne({where: {prof_am: loggedProfessor.am, id:req.body.id} })
+  const targetTopic = await thesis_topics.findOne({where: {prof_am: loggedProfessor.am, id:req.body.id} });
 
   await targetTopic.destroy();
   deleteUploadedFile(targetTopic.attached_discription_file);
   res.status(200).json(`Topic ${req.body.id} deleted`);
 });
 
-module.exports = {getProfessorInfo, getTopics, createTopic, editTopic, deleteTopic};
+//@desc get ALL professor's thesis
+//@route Get /api/professor/thesis
+//@access Private
+const getThesis = asyncHandler(async (req, res) => {
+  const loggedProfessor = await professor.findOne({ where: {prof_userid: req.user.id} });
+  const [supervisorResults] = await sequelize.query(`
+    SELECT AVG(DATEDIFF(completion_date, assignment_date)) AS avg_days, COUNT(*) AS n1
+    FROM thesis
+    WHERE thesis_status = 'Completed'
+      AND (supervisor_am = :am)
+  `, {
+    replacements: { am: loggedProfessor.am },
+    type: sequelize.QueryTypes.SELECT
+  });
+  const [committeeResults] = await sequelize.query(`
+    SELECT AVG(DATEDIFF(completion_date, assignment_date)) AS avg_days, COUNT(*) AS n2
+    FROM thesis
+    WHERE thesis_status = 'Completed'
+      AND (prof2_am = :am OR prof3_am = :am)
+  `, {
+    replacements: { am: loggedProfessor.am },
+    type: sequelize.QueryTypes.SELECT
+  });
+  const totalAvg = (committeeResults.avg_days * committeeResults.n2) +
+  (supervisorResults.avg_days * supervisorResults.n1) / supervisorResults.n1 + committeeResults.n2
+
+  res.status(200).json({
+    supervisorAvg: Number(supervisorResults.avg_days), 
+    committeeAvg: Number(committeeResults.avg_days), 
+    totalAvg: totalAvg,
+  });
+});
+
+module.exports = {
+  getProfessorInfo, getTopics, createTopic, 
+  editTopic, deleteTopic, getThesis
+};
