@@ -39,12 +39,19 @@ INSERT INTO thesis_topics (id, prof_am, title, description, attached_discription
 (2, 2, 'AI Tutor', 'Creating an adaptive learning system using ML', 'ai_tutor_description.pdf', 'assigned', 2, "2025-01-15", "2025-01-15"),
 (3, 3, 'Secure App', 'Developing a secure messaging app for Android', 'secure_app_description.pdf', 'assigned', 3, "2025-01-15", "2025-01-15"),
 (4, 1, 'FPGA Vision', 'Using FPGAs for real-time image processing', 'fpga_vision.pdf', 'unassigned', NULL, "2025-01-15", "2025-01-15"),
-(5, 2, 'ML Compiler', 'AutoML for optimizing compiler pipelines', 'ml_compiler.pdf', 'unassigned', NULL, "2025-01-15", "2025-01-15");
+(5, 2, 'ML Compiler', 'AutoML for optimizing compiler pipelines', 'ml_compiler.pdf', 'unassigned', NULL, "2025-01-15", "2025-01-15"),
+(25, 1, 'The Divine Feats of Chunkus Maximus', 'he fat asf fasdfasdf', '1753440448217-668114698.pdf', 'unassigned', NULL, '2025-07-25', '2025-07-25');
 
 -- Insert thesis
-INSERT INTO thesis (id, topic_id, student_am, supervisor_am, prof2_am, prof3_am, thesis_status, assignment_date, thesis_content_file, nemertes_link, ap_from_gs) VALUES 
-(1, 1, 1, 1, 2, 3, 'Active', '2025-01-15', 'thesis1.pdf', 'https://nemertes.upatras.gr/thesis1', 1001),
-(2, 2, 2, 2, 1, 3, 'Active', '2025-01-20', 'thesis2.pdf', 'https://nemertes.upatras.gr/thesis2', 1002),
-(3, 3, 3, 3, 1, 2, 'Pending', '2025-01-25', 'thesis3.pdf', 'https://nemertes.upatras.gr/thesis3', 1003);
+INSERT INTO thesis (id, topic_id, student_am, supervisor_am, prof2_am, prof3_am, thesis_status, assignment_date, thesis_content_file, nemertes_link, ap_from_gs, completion_date) VALUES 
+(1, 1, 1, 1, 2, 3, 'Completed', '2025-01-15', 'thesis1.pdf', 'https://nemertes.upatras.gr/thesis1', 1001, '2025-07-25'),
+(2, 2, 2, 2, 1, 3, 'Active', '2025-01-20', 'thesis2.pdf', 'https://nemertes.upatras.gr/thesis2', 1002, NULL),
+(3, 3, 3, 3, 1, 2, 'Pending', '2025-01-25', 'thesis3.pdf', 'https://nemertes.upatras.gr/thesis3', 1003, NULL),
+(4, 4, 2, 1, 2, 3, 'Completed', '2025-05-30', NULL, 'https://nemertes.upatras.gr/thesis4', 1004, '2025-07-25'),
+(5, 25, 2, 2, 1, 3, 'Completed', '2025-05-30', NULL, NULL, NULL, '2025-07-25');
 
 -- Insert grade
+INSERT INTO thesis_grade (id, thesis_id, final_grade) VALUES 
+(1, 1, 8.5),
+(2, 4, 7.5),
+(3, 5, 10);
