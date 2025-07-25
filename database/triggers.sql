@@ -67,7 +67,9 @@ select * from thesis_topics;
 select * from thesis;
 select * from thesis_grade;
 
-
+SELECT AVG(final_grade) FROM thesis_grade as grade INNER JOIN thesis 
+	on thesis_id = thesis.id 
+    AND (thesis.supervisor_am = 1);
 
 
 

@@ -204,6 +204,7 @@ async function loadContent(pageId, event) {
     };
 
     contentArea.innerHTML = await contentMap[pageId]();
+    if (pageId === 'statistics') await renderGraphs();
 }
 
 
