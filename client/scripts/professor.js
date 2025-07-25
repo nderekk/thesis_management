@@ -98,7 +98,7 @@ async function createTopic() {
         alert(ans.message);
         throw new Error(`Error: ${ans.message}`);
     }
-    alert("Topic Created");
+    // alert("Topic Created");
 
     loadContent("topics");
 }

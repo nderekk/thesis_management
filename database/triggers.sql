@@ -10,7 +10,8 @@ UPDATE users SET email = new.email WHERE id = new.student_userid;
 END$
 
 DELIMITER ;
- -- -------------------------------------------------------------------- 
+
+ ----------------------------------------------------------------------- 
 
 DELIMITER $
 
@@ -37,9 +38,6 @@ END IF;
 END$
 
 DELIMITER ;
-
-
-
 
 --  SHOW TRIGGERS FROM diplomatiki_sys;
 -- select * from student;

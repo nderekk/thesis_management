@@ -148,7 +148,7 @@ const inviteProfessor = asyncHandler(async (req, res) => {
 const uploadPdf = asyncHandler(async (req, res) => {  
   const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
   const studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
-  const filePath = `/uploads/${req.file.filename}`;
+  const filePath = `${req.file.filename}`;
 
   if (!studentThesis) {
     return res.status(404).json({ message: 'Thesis not found for student' });

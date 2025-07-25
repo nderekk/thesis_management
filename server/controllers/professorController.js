@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const {sequelize, professor, thesis_topics} = require("../config/dbConnection");
+const deleteUploadedFile = require("../utils/fileDeleter");
 
 //@desc Get current professor
 //@route Get /api/professor
@@ -35,10 +36,10 @@ const getTopics = asyncHandler(async (req, res) => {
 const createTopic = asyncHandler(async (req, res) => {
   const loggedProfessor = await professor.findOne({ where: {prof_userid: req.user.id} });
 
-  const topic = await thesis_topics.create({
+    const topic = await thesis_topics.create({
     title: req.body.title, 
     description: req.body.description,
-    attached_discription_file: (req.body.file) ? `/uploads/${req.file.filename}` : null,
+    attached_discription_file: (req.file) ? `${req.file.filename}` : null,
     prof_am: loggedProfessor.am,
     topic_status: "unassigned"
   });
@@ -94,6 +95,7 @@ const deleteTopic = asyncHandler(async (req, res) => {
   const targetTopic = await thesis_topics.findOne({where: {prof_am: loggedProfessor.am, id:req.body.id} })
 
   await targetTopic.destroy();
+  deleteUploadedFile(targetTopic.attached_discription_file);
   res.status(200).json(`Topic ${req.body.id} deleted`);
 });
 
