@@ -58,7 +58,7 @@ DELIMITER ;
 
 DELIMITER $
 
-DROP TRIGGER delete_temp_thesis$
+-- DROP TRIGGER delete_temp_thesis$
 CREATE TRIGGER delete_temp_thesis
 BEFORE UPDATE ON thesis_topics
 FOR EACH ROW
