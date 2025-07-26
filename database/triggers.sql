@@ -54,6 +54,24 @@ END$
 
 DELIMITER ;
 
+----------------------------------------------------------------------- 
+
+DELIMITER $
+
+DROP TRIGGER delete_temp_thesis$
+CREATE TRIGGER delete_temp_thesis
+BEFORE UPDATE ON thesis_topics
+FOR EACH ROW
+BEGIN
+	IF new.topic_status = "unassigned" THEN 
+		DELETE FROM thesis WHERE new.id = thesis.topic_Id;
+	END IF;
+END$
+
+DELIMITER ;
+
+UPDATE thesis_topics SET topic_status="unassigned" WHERE id=25;
+
 
 --  SHOW TRIGGERS FROM diplomatiki_sys;
 -- select * from student;
@@ -65,7 +83,7 @@ select * from professor;
 select * from users;
 select * from thesis_topics;
 select * from thesis;
-select * from thesis_grade;
+select * from thesis_presentation;
 
 SELECT AVG(final_grade) FROM thesis_grade as grade INNER JOIN thesis 
 	on thesis_id = thesis.id 

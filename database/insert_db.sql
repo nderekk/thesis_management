@@ -11,6 +11,7 @@ INSERT INTO users (id, email, password, role) VALUES
 (4, 'andpet@upatras.gr', 'hashed_password_4', 'student'),
 (5, 'elmakri@upatras.gr', 'hashed_password_5', 'student'),
 (6, 'nikchar@upatras.gr', 'hashed_password_6', 'student'),
+(9, 'mpampis@upatras.gr', 'hashed_password_9', 'student'),
 
 -- Insert users (secretaries)
 (7, 'gspanou@ceid.upatras.gr', 'hashed_password_7', 'secretary'),
@@ -26,6 +27,7 @@ INSERT INTO professor (am, first_name, last_name, email, phone_number, field_of_
 INSERT INTO student (am, first_name, last_name, father_name, semester, email, phone_number, mobile_number, address, city, post_code, student_userid) VALUES 
 (1, 'Andreas', 'Petrou', 'Giorgos', 8, 'andpet@upatras.gr', '2610991101', '6944111111', 'Οδός Παπαδιαμάντη 12', 'Patras', 26223, 4),
 (2, 'Eleni', 'Makri', 'Nikos', 7, 'elmakri@upatras.gr', '2610991102', '6944222222', 'Οδός Καποδιστρίου 25', 'Patras', 26224, 5),
+(4, 'Mpampis', 'Kuriakos', 'Nikos', 7, 'mpampis@upatras.gr', '2610991102', '6944222222', 'Οδός poutsas 25', 'Patras', 26224, 9),
 (3, 'Nikos', 'Charalampous', 'Dimitris', 9, 'nikchar@upatras.gr', '2610991103', '6944333333', 'Οδός Ερμού 88', 'Patras', 26225, 6);
 
 -- Insert secretaries
@@ -46,12 +48,8 @@ INSERT INTO thesis_topics (id, prof_am, title, description, attached_discription
 INSERT INTO thesis (id, topic_id, student_am, supervisor_am, prof2_am, prof3_am, thesis_status, assignment_date, thesis_content_file, nemertes_link, ap_from_gs, completion_date) VALUES 
 (1, 1, 1, 1, 2, 3, 'Completed', '2025-01-15', 'thesis1.pdf', 'https://nemertes.upatras.gr/thesis1', 1001, '2025-07-25'),
 (2, 2, 2, 2, 1, 3, 'Active', '2025-01-20', 'thesis2.pdf', 'https://nemertes.upatras.gr/thesis2', 1002, NULL),
-(3, 3, 3, 3, 1, 2, 'Pending', '2025-01-25', 'thesis3.pdf', 'https://nemertes.upatras.gr/thesis3', 1003, NULL),
-(4, 4, 2, 1, 2, 3, 'Completed', '2025-05-30', NULL, 'https://nemertes.upatras.gr/thesis4', 1004, '2025-07-25'),
-(5, 25, 2, 2, 1, 3, 'Completed', '2025-05-30', NULL, NULL, NULL, '2025-07-25');
+(3, 3, 3, 3, 1, 2, 'Pending', '2025-01-25', 'thesis3.pdf', 'https://nemertes.upatras.gr/thesis3', 1003, NULL);
 
 -- Insert grade
 INSERT INTO thesis_grade (id, thesis_id, final_grade) VALUES 
-(1, 1, 8.5),
-(2, 4, 7.5),
-(3, 5, 10);
+(1, 1, 8.5);
