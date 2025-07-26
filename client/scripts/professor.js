@@ -368,29 +368,20 @@ function downloadFile(content, filename, mimeType) {
   URL.revokeObjectURL(url);
 }
 
-function getStatistics() {
-    const userTheses = theses.filter(t => 
-        t.supervisorId === currentUser.id || 
-        t.committeeMembers.includes(currentUser.id)
-    );
-    
-    const supervisedTheses = userTheses.filter(t => t.supervisorId === currentUser.id);
-    const committeeTheses = userTheses.filter(t => t.committeeMembers.includes(currentUser.id));
-    
-    // Calculate statistics for supervised theses
-    const avgCompletionTimeSupervised = calculateAverageCompletionTime(supervisedTheses);
-    const avgGradeSupervised = calculateAverageGrade(supervisedTheses);
-    const totalSupervised = supervisedTheses.length;
-    
-    // Calculate statistics for committee member theses
-    const avgCompletionTimeCommittee = calculateAverageCompletionTime(committeeTheses);
-    const avgGradeCommittee = calculateAverageGrade(committeeTheses);
-    const totalCommittee = committeeTheses.length;
-    
-    // Calculate overall statistics
-    const avgCompletionTimeOverall = calculateAverageCompletionTime(userTheses);
-    const avgGradeOverall = calculateAverageGrade(userTheses);
-    const totalOverall = userTheses.length;
+async function getStatistics() {
+    const response = await fetch("http://localhost:5001/api/professor/stats", {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      }
+    });
+    const stats = await response.json();
+    if (!response.ok) {
+        alert(stats.message);
+        throw new Error(`Error: ${stats.message}`);
+    }
+    console.log(stats);
     
     return `
         <div class="content-header">
