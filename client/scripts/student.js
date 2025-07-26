@@ -1,18 +1,22 @@
 async function getStudentThesisView() {
-    const response = await fetch("http://localhost:5001/api/student/thesis", {
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json'  // important for JSON data
-      }
-    });
-    const studentThesis = await response.json();
-    if (!response.ok) {
-        alert(studentThesis.message);
-        throw new Error(`Error: ${studentThesis.message}`);
+    if (!currentThesis){
+        const response = await fetch("http://localhost:5001/api/student/thesis", {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'  // important for JSON data
+        }
+        });
+        const studentThesis = await response.json();
+        if (!response.ok) {
+            alert(studentThesis.message);
+            throw new Error(`Error: ${studentThesis.message}`);
+        }
+        currentThesis = studentThesis;
+        localStorage.setItem('currentThesis', JSON.stringify(currentThesis));
     }
-    console.log(studentThesis);
-    if (!studentThesis) {
+    // console.log(currentThesis);
+    if (!currentThesis) {
         return `<div class="content-header">
                     <h1>Προβολή Θέματος</h1>
                     <p>Δεν έχετε αναλάβει ακόμα διπλωματική εργασία.</p>
@@ -26,39 +30,39 @@ async function getStudentThesisView() {
         
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">${studentThesis.title}</h3>
-                <span class="status-badge status-${studentThesis.status}">${getStatusText(studentThesis.status)}</span>    
+                <h3 class="card-title">${currentThesis.title}</h3>
+                <span class="status-badge status-${currentThesis.status}">${getStatusText(currentThesis.status)}</span>    
             </div>
             
             <div class="form-row">
                 <div class="form-group">
                     <label>Επιβλέπων:</label>
-                    <p>${studentThesis.supervisor}</p>
+                    <p>${currentThesis.supervisor}</p>
                 </div>
                 <div class="form-group">
                     <label>Ημερομηνία Ανάθεσης:</label>
-                    <p>${formatDate(studentThesis.assignedDate)}</p>
+                    <p>${formatDate(currentThesis.assignedDate)}</p>
                 </div>
             </div>
             
             <div class="form-group">
                 <label>Περιγραφή:</label>
-                <p>${studentThesis.description}</p>
+                <p>${currentThesis.description}</p>
             </div>
             
-            ${studentThesis.committeeMembers.length > 0 ? `
+            ${currentThesis.committeeMembers.length > 0 ? `
                 <div class="form-group">
                     <label>Μέλη Τριμελούς:</label>
                     <ul>
-                        ${studentThesis.committeeMembers.map(member => `<li>${member}</li>`).join('')}
+                        ${currentThesis.committeeMembers.map(member => `<li>${member}</li>`).join('')}
                     </ul>
                 </div>
             ` : ''}
             
-            ${studentThesis.assignedDate ? `
+            ${currentThesis.assignedDate ? `
                 <div class="form-group">
                     <label>Χρόνος από την Ανάθεση:</label>
-                    <p>${calculateTimeSince(studentThesis.assignedDate)}</p>
+                    <p>${calculateTimeSince(currentThesis.assignedDate)}</p>
                 </div>
             ` : ''}
         </div>
@@ -173,25 +177,27 @@ document.addEventListener('submit', async function (e) {
 // Additional functions for other pages will be implemented as needed
 async function getThesisManagement() {
     console.log("getThesisManagement called");
-    console.log("currentUser:", currentUser);
-    console.log("theses:", theses);
-    console.log("currentUser.am:", currentUser.am);
+    // console.log("currentUser:", currentUser);
     
-    const response = await fetch("http://localhost:5001/api/student/thesis", {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json'  // important for JSON data
-        },
-    });
-    const studentThesis = await response.json();
-    if (!response.ok) {
-        alert(studentThesis.message);
-        throw new Error(`Error: ${studentThesis.message}`);
+    if (!currentThesis){
+        const response = await fetch("http://localhost:5001/api/student/thesis", {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'  // important for JSON data
+            },
+        });
+        studentThesis = await response.json();
+        if (!response.ok) {
+            alert(studentThesis.message);
+            throw new Error(`Error: ${studentThesis.message}`);
+        }
+        currentThesis = studentThesis;
+        localStorage.setItem('currentThesis', JSON.stringify(currentThesis));
     }
-    console.log("studentThesis found:", studentThesis);
+    // console.log("studentThesis found:", currentThesis);
     
-    if (!studentThesis) {
+    if (!currentThesis) {
         console.log("No thesis found for student");
         return `
             <div class="content-header">
@@ -207,37 +213,37 @@ async function getThesisManagement() {
         </div>
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">${studentThesis.title}</h3>
-                <span class="status-badge status-${studentThesis.status}">${getStatusText(studentThesis.status)}</span>
+                <h3 class="card-title">${currentThesis.title}</h3>
+                <span class="status-badge status-${currentThesis.status}">${getStatusText(currentThesis.status)}</span>
             </div>
             <div class="form-row">
                 <div class="form-group">
                     <label>Επιβλέπων:</label>
-                    <p>${studentThesis.supervisor}</p>
+                    <p>${currentThesis.supervisor}</p>
                 </div>
                 <div class="form-group">
                     <label>Ημερομηνία Ανάθεσης:</label>
-                    <p>${formatDate(studentThesis.assignedDate)}</p>
+                    <p>${formatDate(currentThesis.assignedDate)}</p>
                 </div>
             </div>
             <div class="form-group">
                 <label>Περιγραφή:</label>
-                <p>${studentThesis.description}</p>
+                <p>${currentThesis.description}</p>
             </div>
         </div>
     `;
-    switch(studentThesis.status.toLowerCase()) {
+    switch(currentThesis.status.toLowerCase()) {
         case 'pending':
-            content += await getPendingThesisContent(studentThesis);
+            content += await getPendingThesisContent(currentThesis);
             break;
         case 'active':
-            content +=  getActiveThesisContent(studentThesis);
+            content +=  getActiveThesisContent(currentThesis);
             break;
         case 'review':
-            content += await getReviewThesisContent(studentThesis);
+            content += await getReviewThesisContent(currentThesis);
             break;
         case 'completed':
-            content += getCompletedThesisContent(studentThesis);
+            content += getCompletedThesisContent(currentThesis);
             break;
         default:
             content += `<div class="card"><p>Η κατάσταση της διπλωματικής σας δεν επιτρέπει επιπλέον ενέργειες.</p></div>`;
@@ -255,8 +261,8 @@ async function  getPendingThesisContent(thesis) {
     });
     var professors = await response.json();
     if (!response.ok) {
-        alert(studentThesis.message);
-        throw new Error(`Error: ${studentThesis.message}`);
+        alert(professors.message);
+        throw new Error(`Error: ${professors.message}`);
     }
     professors = professors.p.filter(p => p.name !== thesis.supervisor);
     console.log(thesis.supervisor);
@@ -452,7 +458,7 @@ function getCompletedThesisContent(thesis) {
             </div>
             <div class="form-group">
                 <label>Ημερομηνία Ολοκλήρωσης:</label>
-                <p>${formatDate(thesis.completedDate)}</p>
+                <p>${formatDate(thesis.completionDate)}</p>
             </div>
             ${thesis.libraryLink ? `
                 <div class="form-group">
@@ -493,18 +499,16 @@ function toggleExamLocation() {
 
 function saveLibraryLink() {
     const libraryLink = document.getElementById('libraryLink').value;
-    const studentThesis = theses.find(t => t.studentId === currentUser.id);
+    const currentThesis = theses.find(t => t.studentId === currentUser.id);
     
-    if (studentThesis) {
-        studentThesis.libraryLink = libraryLink;
+    if (currentThesis) {
+        currentThesis.libraryLink = libraryLink;
         alert('Ο σύνδεσμος αποθηκεύτηκε επιτυχώς!');
     }
 }
 
-function viewExaminationReport() {
-    const studentThesis = theses.find(t => t.studentId === currentUser.id);
-    
-    if (!studentThesis) return;
+function viewExaminationReport() {    
+    if (!currentThesis) return;
     
     const reportContent = `
         <div class="examination-report">
@@ -512,16 +516,16 @@ function viewExaminationReport() {
             
             <div class="report-section">
                 <h3>Στοιχεία Διπλωματικής</h3>
-                <p><strong>Τίτλος:</strong> ${studentThesis.title}</p>
+                <p><strong>Τίτλος:</strong> ${currentThesis.title}</p>
                 <p><strong>Φοιτητής:</strong> ${currentUser.name}</p>
                 <p><strong>Αριθμός Μητρώου:</strong> ${currentUser.am}</p>
             </div>
             
             <div class="report-section">
                 <h3>Τριμελής Επιτροπή</h3>
-                <p><strong>Επιβλέπων:</strong> ${getUserName(studentThesis.supervisorId)}</p>
+                <p><strong>Επιβλέπων:</strong> ${getUserName(currentThesis.supervisorId)}</p>
                 <ul>
-                    ${studentThesis.committeeMembers.map(memberId => 
+                    ${currentThesis.committeeMembers.map(memberId => 
                         `<li><strong>Μέλος:</strong> ${getUserName(memberId)}</li>`
                     ).join('')}
                 </ul>
@@ -529,15 +533,15 @@ function viewExaminationReport() {
             
             <div class="report-section">
                 <h3>Αποτελέσματα Εξέτασης</h3>
-                <p><strong>Βαθμός:</strong> ${studentThesis.grade}/10</p>
-                <p><strong>Ημερομηνία Εξέτασης:</strong> ${formatDate(studentThesis.examDate)}</p>
-                <p><strong>Τύπος Εξέτασης:</strong> ${studentThesis.examType === 'in-person' ? 'Δια Ζώσης' : 'Διαδικτυακά'}</p>
+                <p><strong>Βαθμός:</strong> ${currentThesis.grade}/10</p>
+                <p><strong>Ημερομηνία Εξέτασης:</strong> ${formatDate(currentThesis.examDate)}</p>
+                <p><strong>Τύπος Εξέτασης:</strong> ${currentThesis.examType === 'in-person' ? 'Δια Ζώσης' : 'Διαδικτυακά'}</p>
             </div>
             
-            ${studentThesis.committeeComments ? `
+            ${currentThesis.committeeComments ? `
                 <div class="report-section">
                     <h3>Σχόλια Τριμελούς</h3>
-                    ${studentThesis.committeeComments.map(comment => `
+                    ${currentThesis.committeeComments.map(comment => `
                         <div class="comment">
                             <strong>${getUserName(comment.professorId)}:</strong> ${comment.comment}
                         </div>
@@ -620,7 +624,7 @@ async function handleThesisSubmission() {
     }
     
     if (additionalLinks.trim()) {
-        studentThesis.additionalLinks = additionalLinks.split('\n').filter(link => link.trim());
+        currentThesis.additionalLinks = additionalLinks.split('\n').filter(link => link.trim());
     }
     
     alert('Το υλικό ανέβηκε επιτυχώς!');

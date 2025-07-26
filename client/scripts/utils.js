@@ -1,12 +1,13 @@
 // Global Variables
 let currentUser = null;
 let currentUserType = null;
-let theses = [];
+let currentThesis = null;
 let users = [];
 let topics = [];
 
 document.addEventListener('DOMContentLoaded', function () {
     initializeApp();
+    localStorage.removeItem('currentThesis');
 });
 
 function initializeApp() {
@@ -22,8 +23,10 @@ function initializeApp() {
 
     const savedUser = localStorage.getItem('currentUser');
     const savedRole = localStorage.getItem('currentUserType');
-    
+    const savedThesis = localStorage.getItem("currentThesis");
     if (savedUser) {
+        if (savedRole === 'student')
+            currentThesis = JSON.parse(savedThesis);
         currentUser = JSON.parse(savedUser);
         currentUserType = savedRole;
         showMainApp();
@@ -88,8 +91,10 @@ async function handleLogout() {
     }
     currentUser = null;
     currentUserType = null;
+    currentThesis = null;
     localStorage.removeItem('currentUser');
     localStorage.removeItem('currentUserType');
+    localStorage.removeItem('currentThesis');
     showLoginScreen();
 }
 
@@ -125,6 +130,7 @@ async function updateUserInfo() {
       throw new Error(`Error: ${currentUser.message}`);
     }
     console.log(currentUser);
+    console.log(currentThesis);
     const userInfo = document.getElementById('userInfo');
     userInfo.textContent = `${currentUser.first_name} ${currentUser.last_name} (${getUserTypeName(currentUserType)})`;
 }
@@ -277,29 +283,3 @@ function getStatusText(status) {
     return statuses[status] || status;
 }
 
-function loadSampleData() {
-    fetch('data/sample-data.json')
-        .then(response => response.json())
-        .then(data => {
-            users = data.users || [];
-            topics = data.topics || [];
-            theses = data.theses || [];
-            console.log('Sample data loaded successfully');
-        })
-        .catch(error => {
-            console.log('Could not load sample-data.json, using fallback data');
-            loadFallbackData();
-        });
-}
-
-function loadFallbackData() {
-    users = [
-        { id: 1, username: 'student1', name: 'Γιώργος Παπαδόπουλος', am: '123456', type: 'student' },
-        { id: 2, username: 'student2', name: 'Μαρία Κωνσταντίνου', am: '123457', type: 'student' },
-        { id: 3, username: 'prof1', name: 'Δρ. Αλέξανδρος Σμιθ', type: 'professor' },
-        { id: 4, username: 'prof2', name: 'Δρ. Ελένη Παπαδοπούλου', type: 'professor' },
-        { id: 5, username: 'secretary1', name: 'Κατερίνα Δημητρίου', type: 'secretary' }
-    ];
-    topics = [];
-    theses = [];
-}
