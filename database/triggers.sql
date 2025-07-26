@@ -39,6 +39,22 @@ END$
 
 DELIMITER ;
 
+----------------------------------------------------------------------- 
+
+DELIMITER $
+
+CREATE TRIGGER mark_completion_date
+BEFORE UPDATE ON thesis
+FOR EACH ROW
+BEGIN
+	IF new.thesis_status = "Completed" THEN 
+		SET new.completion_date = CURDATE();
+	END IF;
+END$
+
+DELIMITER ;
+
+
 --  SHOW TRIGGERS FROM diplomatiki_sys;
 -- select * from student;
 -- select * from users;
@@ -48,7 +64,12 @@ DELIMITER ;
 select * from professor;
 select * from users;
 select * from thesis_topics;
+select * from thesis;
+select * from thesis_grade;
 
+SELECT AVG(final_grade) FROM thesis_grade as grade INNER JOIN thesis 
+	on thesis_id = thesis.id 
+    AND (thesis.supervisor_am = 1);
 
 
 

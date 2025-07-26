@@ -99,7 +99,7 @@ const editTopic = asyncHandler(async (req, res) => {
 //@access Private
 const deleteTopic = asyncHandler(async (req, res) => {
   const loggedProfessor = await professor.findOne({ where: {prof_userid: req.user.id} });
-  const targetTopic = await thesis_topics.findOne({where: {prof_am: loggedProfessor.am, id:req.body.id} })
+  const targetTopic = await thesis_topics.findOne({where: {prof_am: loggedProfessor.am, id:req.body.id} });
 
   await targetTopic.destroy();
   deleteUploadedFile(targetTopic.attached_discription_file);
@@ -148,4 +148,91 @@ const getThesesList = asyncHandler(async (req, res) => {
   res.status(200).json(professorThesesInfo);
 });
 
-module.exports = {getProfessorInfo, getTopics, createTopic, editTopic, deleteTopic,getThesesList};
+//@desc get ALL professor's thesis
+//@route Get /api/professor/Stats
+//@access Private
+const getStats = asyncHandler(async (req, res) => {
+  const loggedProfessor = await professor.findOne({ where: {prof_userid: req.user.id} });
+
+  // avg time stats
+  const [supervisorResults] = await sequelize.query(`
+    SELECT AVG(DATEDIFF(completion_date, assignment_date)) AS avg_days, COUNT(*) AS n1
+    FROM thesis
+    WHERE thesis_status = 'Completed'
+      AND (supervisor_am = :am)
+  `, {
+    replacements: { am: loggedProfessor.am },
+    type: sequelize.QueryTypes.SELECT
+  });
+  const [committeeResults] = await sequelize.query(`
+    SELECT AVG(DATEDIFF(completion_date, assignment_date)) AS avg_days, COUNT(*) AS n2
+    FROM thesis
+    WHERE thesis_status = 'Completed'
+      AND (prof2_am = :am OR prof3_am = :am)
+  `, {
+    replacements: { am: loggedProfessor.am },
+    type: sequelize.QueryTypes.SELECT
+  });
+  const totalAvg = ((committeeResults.avg_days * committeeResults.n2) +
+    (supervisorResults.avg_days * supervisorResults.n1)) / (supervisorResults.n1 + committeeResults.n2);
+  
+
+  // avg grade stats
+  const [supervisorGrade] = await sequelize.query(`
+    SELECT AVG(final_grade) AS grade, COUNT(*) AS n1 FROM thesis_grade INNER JOIN thesis 
+      ON thesis_id = thesis.id AND (thesis.supervisor_am = :am)
+  `, {
+    replacements: { am: loggedProfessor.am },
+    type: sequelize.QueryTypes.SELECT
+  });
+
+  const [committeeGrade] = await sequelize.query(`
+    SELECT AVG(final_grade) AS grade, COUNT(*) AS n2 FROM thesis_grade INNER JOIN thesis 
+      ON thesis_id = thesis.id AND (thesis.prof2_am = :am OR thesis.prof3_am = :am)
+  `, {
+    replacements: { am: loggedProfessor.am },
+    type: sequelize.QueryTypes.SELECT
+  });
+  const totalGrade = (((supervisorGrade.grade * supervisorGrade.n1) +
+    (committeeGrade.grade * committeeGrade.n2)) / (supervisorGrade.n1 + committeeGrade.n2)).toFixed(2);
+
+
+  // count stats
+  const [supervisorCount] = await sequelize.query(`
+    SELECT COUNT(*) AS n1
+    FROM thesis
+    WHERE (supervisor_am = :am)
+  `, {
+    replacements: { am: loggedProfessor.am },
+    type: sequelize.QueryTypes.SELECT
+  });
+  const [committeeCount] = await sequelize.query(`
+    SELECT COUNT(*) AS n2
+    FROM thesis
+    WHERE (prof2_am = :am OR prof3_am = :am)
+  `, {
+    replacements: { am: loggedProfessor.am },
+    type: sequelize.QueryTypes.SELECT
+  });
+  const totalCount = supervisorCount.n1 + committeeCount.n2;
+
+  
+  res.status(200).json({
+    supervisorAvg: Number(supervisorResults.avg_days), 
+    committeeAvg: Number(committeeResults.avg_days), 
+    totalAvg: Number(totalAvg),
+
+    supervisorGrade: Number(supervisorGrade.grade),
+    committeeGrade: Number(committeeGrade.grade),
+    totalGrade: Number(totalGrade),
+
+    supervisorCount: Number(supervisorCount.n1),
+    committeeCount: Number(committeeCount.n2),
+    totalCount: Number(totalCount)
+  });
+});
+
+module.exports = {
+  getProfessorInfo, getTopics, createTopic, 
+  editTopic, deleteTopic, getStats, getThesesList
+};

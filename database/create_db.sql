@@ -82,6 +82,7 @@ create table thesis(
     prof3_am int,
     thesis_status enum("Pending", "Active", "Completed", "Cancelled", "Review"),
     assignment_date date,
+    completion_date date,
     thesis_content_file varchar(255),
     nemertes_link varchar(255),
     ap_from_gs int,

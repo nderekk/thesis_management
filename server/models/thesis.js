@@ -55,6 +55,10 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.DATEONLY,
       allowNull: true
     },
+    completion_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: true
+    },
     thesis_content_file: {
       type: DataTypes.STRING(255),
       allowNull: true

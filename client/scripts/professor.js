@@ -403,20 +403,25 @@ function getStatistics() {
             <div class="card-header">
                 <h3 class="card-title">Μέσος Χρόνος Περάτωσης (μήνες)</h3>
             </div>
+            <div class="card">
+                <div id="statusChart">
+                    <canvas id="AvgTimeChartCanvas"></canvas>
+                </div>
+            </div>
             <div class="grid grid-3">
                 <div class="stats-card">
-                    <div class="stats-number">${avgCompletionTimeSupervised}</div>
+                    <div class="stats-number">${stats.supervisorAvg}</div>
                     <div class="stats-label">Επιβλεπόμενες ΔΕ</div>
                 </div>
                 <div class="stats-card">
-                    <div class="stats-number">${avgCompletionTimeCommittee}</div>
+                    <div class="stats-number">${stats.committeeAvg}</div>
                     <div class="stats-label">Μέλος Τριμελούς</div>
                 </div>
                 <div class="stats-card">
-                    <div class="stats-number">${avgCompletionTimeOverall}</div>
+                    <div class="stats-number">${stats.totalAvg}</div>
                     <div class="stats-label">Συνολικά</div>
                 </div>
-            </div>
+            </div>   
         </div>
         
         <!-- Μέσος βαθμός -->
@@ -424,20 +429,25 @@ function getStatistics() {
             <div class="card-header">
                 <h3 class="card-title">Μέσος Βαθμός</h3>
             </div>
+            <div class="card">
+                <div id="gradeChart">
+                    <canvas id="gradeChartCanvas"></canvas>
+                </div>
+            </div>
             <div class="grid grid-3">
                 <div class="stats-card">
-                    <div class="stats-number">${avgGradeSupervised.toFixed(1)}</div>
+                    <div class="stats-number">${stats.supervisorGrade}</div>
                     <div class="stats-label">Επιβλεπόμενες ΔΕ</div>
                 </div>
                 <div class="stats-card">
-                    <div class="stats-number">${avgGradeCommittee.toFixed(1)}</div>
+                    <div class="stats-number">${stats.committeeGrade}</div>
                     <div class="stats-label">Μέλος Τριμελούς</div>
                 </div>
                 <div class="stats-card">
-                    <div class="stats-number">${avgGradeOverall.toFixed(1)}</div>
+                    <div class="stats-number">${stats.totalGrade}</div>
                     <div class="stats-label">Συνολικά</div>
                 </div>
-            </div>
+            </div>   
         </div>
         
         <!-- Συνολικό πλήθος -->
@@ -445,38 +455,23 @@ function getStatistics() {
             <div class="card-header">
                 <h3 class="card-title">Συνολικό Πλήθος Διπλωματικών</h3>
             </div>
+            <div class="card">
+                <div id="countChart">
+                    <canvas id="countChartCanvas"></canvas>
+                </div>
+            </div>
             <div class="grid grid-3">
                 <div class="stats-card">
-                    <div class="stats-number">${totalSupervised}</div>
+                    <div class="stats-number">${stats.supervisorCount}</div>
                     <div class="stats-label">Επιβλεπόμενες ΔΕ</div>
                 </div>
                 <div class="stats-card">
-                    <div class="stats-number">${totalCommittee}</div>
+                    <div class="stats-number">${stats.committeeCount}</div>
                     <div class="stats-label">Μέλος Τριμελούς</div>
                 </div>
                 <div class="stats-card">
-                    <div class="stats-number">${totalOverall}</div>
+                    <div class="stats-number">${stats.totalCount}</div>
                     <div class="stats-label">Συνολικά</div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="grid grid-2">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Κατανομή Καταστάσεων</h3>
-                </div>
-                <div id="statusChart">
-                    ${generateStatusChart(userTheses)}
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Κατανομή Βαθμών</h3>
-                </div>
-                <div id="gradeChart">
-                    ${generateGradeChart(userTheses)}
                 </div>
             </div>
         </div>
@@ -499,27 +494,155 @@ function getStatistics() {
                     <tbody>
                         <tr>
                             <td><strong>Μέσος χρόνος περάτωσης (μήνες)</strong></td>
-                            <td>${avgCompletionTimeSupervised}</td>
-                            <td>${avgCompletionTimeCommittee}</td>
-                            <td>${avgCompletionTimeOverall}</td>
+                            <td>${stats.supervisorAvg}</td>
+                            <td>${stats.committeeAvg}</td>
+                            <td>${stats.totalAvg}</td>
                         </tr>
                         <tr>
                             <td><strong>Μέσος βαθμός</strong></td>
-                            <td>${avgGradeSupervised.toFixed(1)}</td>
-                            <td>${avgGradeCommittee.toFixed(1)}</td>
-                            <td>${avgGradeOverall.toFixed(1)}</td>
+                            <td>${stats.supervisorGrade}</td>
+                            <td>${stats.committeeGrade}</td>
+                            <td>${stats.totalGrade}</td>
                         </tr>
                         <tr>
                             <td><strong>Συνολικό πλήθος</strong></td>
-                            <td>${totalSupervised}</td>
-                            <td>${totalCommittee}</td>
-                            <td>${totalOverall}</td>
+                            <td>${stats.supervisorCount}</td>
+                            <td>${stats.committeeCount}</td>
+                            <td>${stats.totalCount}</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
     `;
+}
+
+function renderTimeGraph(data) {
+  const ctx = document.getElementById('AvgTimeChartCanvas').getContext('2d');
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(data),
+      datasets: [{
+        label: 'Ρόλος Καθηγητή',
+        data: Object.values(data),
+        backgroundColor: ['#36a2eb', '#ffcd56', '#ff6384'],
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom',
+        },
+        title: {
+          display: true,
+          text: 'Μέσος Χρόνος Περάτωσης (μήνες)'
+        }
+      }
+    }
+  });
+}
+
+function renderGradeChart(data) {
+  const ctx = document.getElementById('gradeChartCanvas').getContext('2d');
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(data),
+      datasets: [{
+        label: 'Ρόλος Καθηγητή',
+        data: Object.values(data),
+        backgroundColor: ['#36a2eb', '#ffcd56', '#ff6384'],
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 10,
+          ticks: {
+            stepSize: 1
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          position: 'bottom',
+        },
+        title: {
+          display: true,
+          text: 'Κατανομή Βαθμών'
+        }
+      }
+    }
+  });
+}
+
+function renderCountChart(data) {
+  const ctx = document.getElementById('countChartCanvas').getContext('2d');
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(data),
+      datasets: [{
+        label: 'Ρόλος Καθηγητή',
+        data: Object.values(data),
+        backgroundColor: ['#36a2eb', '#ffcd56', '#ff6384'],
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom',
+        },
+        title: {
+          display: true,
+          text: 'Πλήθος Διπλωματικών'
+        }
+      }
+    }
+  });
+}
+
+async function renderGraphs(){
+  const response = await fetch("http://localhost:5001/api/professor/stats", {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      }
+    });
+    const stats = await response.json();
+    if (!response.ok) {
+        alert(stats.message);
+        throw new Error(`Error: ${stats.message}`);
+    }
+    console.log(stats);
+  
+  //render graphs with fetched data
+  renderTimeGraph({
+    Supervisor: stats.supervisorAvg/30,
+    Committee: stats.committeeAvg/30,
+    Total: stats.totalAvg/30
+  });
+
+  renderGradeChart({
+    Supervisor: stats.supervisorGrade,
+    Committee: stats.committeeGrade,
+    Total: stats.totalGrade
+  });
+
+  renderCountChart({
+    Supervisor: stats.supervisorCount,
+    Committee: stats.committeeCount,
+    Total: stats.totalCount
+  });
 }
 
 // Helper function to generate status distribution chart
