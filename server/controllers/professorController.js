@@ -232,7 +232,52 @@ const getStats = asyncHandler(async (req, res) => {
   });
 });
 
+//@desc Search students by AM or name
+//@route GET /api/professor/searchStudent
+//@access Private
+const searchStudent = asyncHandler(async (req, res) => {
+  const { query } = req.query;
+  if (!query) return res.status(400).json({ message: 'Missing query' });
+  const students = await student.findAll({
+    where: {
+      [Op.or]: [
+        { am: { [Op.like]: `%${query}%` } },
+        { first_name: { [Op.like]: `%${query}%` } },
+        { last_name: { [Op.like]: `%${query}%` } },
+      ]
+    },
+    attributes: ['am', 'first_name', 'last_name', 'email']
+  });
+  res.status(200).json(students);
+});
+
+//@desc Assign topic to student (temp assignment)
+//@route POST /api/professor/assignTopic
+//@access Private
+const assignTopicToStudent = asyncHandler(async (req, res) => {
+  const { topicId, studentAm } = req.body;
+  if (!topicId || !studentAm) return res.status(400).json({ message: 'Missing topicId or studentAm' });
+  // Find topic and check if available
+  const topic = await thesis_topics.findOne({ where: { id: topicId, topic_status: 'unassigned' } });
+  if (!topic) return res.status(404).json({ message: 'Topic not available' });
+  // Check if student already has a thesis
+  const existingThesis = await thesis.findOne({ where: { student_am: studentAm } });
+  if (existingThesis) return res.status(400).json({ message: 'Student already has a thesis' });
+  // Set topic as temp_assigned
+  await topic.update({ topic_status: 'temp_assigned', student_am: studentAm });
+  // Create thesis row with Pending status
+  const newThesis = await thesis.create({
+    topic_id: topicId,
+    student_am: studentAm,
+    supervisor_am: topic.prof_am,
+    thesis_status: 'Pending',
+    assignment_date: new Date()
+  });
+  res.status(200).json({ message: 'Topic temporarily assigned', thesis: newThesis });
+});
+
 module.exports = {
   getProfessorInfo, getTopics, createTopic, 
-  editTopic, deleteTopic, getStats, getThesesList
+  editTopic, deleteTopic, getStats, getThesesList,
+  searchStudent, assignTopicToStudent
 };

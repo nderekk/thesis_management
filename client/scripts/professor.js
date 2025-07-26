@@ -184,6 +184,9 @@ async function deleteTopic(id) {
     loadContent("topics");
 }
 
+let selectedStudent = null;
+let selectedTopic = null;
+
 function getTopicAssignment() {
     return `
         <div class="content-header">
@@ -191,10 +194,133 @@ function getTopicAssignment() {
             <p>Επιλέξτε φοιτητή για να του αναθέσετε διαθέσιμο θέμα.</p>
         </div>
         <div class="card">
-            <p>Η λειτουργικότητα ανάθεσης δεν έχει υλοποιηθεί ακόμα.</p>
+            <div class="form-group">
+                <label for="studentSearchInput">Αναζήτηση Φοιτητή (ΑΜ ή Ονοματεπώνυμο):</label>
+                <input type="text" id="studentSearchInput" placeholder="ΑΜ ή Ονοματεπώνυμο">
+                <button class="btn btn-primary" onclick="searchStudentUI()">Αναζήτηση</button>
+            </div>
+            <div id="studentSearchResults" class="placeholder"></div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Διαθέσιμα Θέματα</h3></div>
+            <div id="availableTopics" class="placeholder"></div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Προσωρινές Αναθέσεις</h3></div>
+            <div id="tempAssignments" class="placeholder"></div>
         </div>
     `;
 }
+
+async function searchStudentUI() {
+    const query = document.getElementById('studentSearchInput').value.trim();
+    if (!query) return;
+    const res = await fetch(`http://localhost:5001/api/professor/searchStudent?query=${encodeURIComponent(query)}`, {
+        credentials: 'include'
+    });
+    const students = await res.json();
+    if (!Array.isArray(students)) return;
+    const resultsDiv = document.getElementById('studentSearchResults');
+    resultsDiv.innerHTML = students.length === 0 ? '<p>Δεν βρέθηκαν φοιτητές.</p>' :
+        `<ul>${students.map(s => `<li>
+            <button class="btn btn-link" onclick="selectStudent(${s.am}, '${s.first_name}', '${s.last_name}')">
+                ${s.am} - ${s.first_name} ${s.last_name} (${s.email})
+            </button>
+        </li>`).join('')}</ul>`;
+}
+
+function selectStudent(am, firstName, lastName) {
+    selectedStudent = { am, firstName, lastName };
+    document.getElementById('studentSearchResults').innerHTML = `<p>Επιλεγμένος φοιτητής: <strong>${am} - ${firstName} ${lastName}</strong></p>`;
+    loadAvailableTopics();
+}
+
+async function loadAvailableTopics() {
+    const res = await fetch('http://localhost:5001/api/professor/topics', { credentials: 'include' });
+    const data = await res.json();
+    if (!data.data) return;
+    const available = data.data.filter(t => t.status === 'unassigned');
+    const div = document.getElementById('availableTopics');
+    if (!selectedStudent) {
+        div.innerHTML = '<p>Επιλέξτε φοιτητή για να δείτε τα διαθέσιμα θέματα.</p>';
+        return;
+    }
+    div.innerHTML = available.length === 0 ? '<p>Δεν υπάρχουν διαθέσιμα θέματα.</p>' :
+        `<ul>${available.map(t => `<li>
+            <button class="btn btn-link" onclick="selectTopic(${t.id}, '${t.title.replace(/'/g, "\\'")}')">
+                ${t.title}
+            </button>
+        </li>`).join('')}</ul>`;
+}
+
+function selectTopic(id, title) {
+    selectedTopic = { id, title };
+    const div = document.getElementById('availableTopics');
+    div.innerHTML = `<p>Επιλεγμένο θέμα: <strong>${title}</strong></p>
+        <button class="btn btn-primary" onclick="assignTopicToStudentUI()">Ανάθεση Θέματος</button>`;
+}
+
+async function assignTopicToStudentUI() {
+    if (!selectedStudent || !selectedTopic) return;
+    const res = await fetch('http://localhost:5001/api/professor/assignTopic', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topicId: selectedTopic.id, studentAm: selectedStudent.am })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        alert(data.message || 'Σφάλμα ανάθεσης.');
+        return;
+    }
+    alert('Το θέμα ανατέθηκε προσωρινά!');
+    selectedStudent = null;
+    selectedTopic = null;
+    document.getElementById('studentSearchResults').innerHTML = '';
+    loadAvailableTopics();
+    loadTempAssignments();
+}
+
+async function loadTempAssignments() {
+    // Fetch all topics and show those with status temp_assigned
+    const res = await fetch('http://localhost:5001/api/professor/topics', { credentials: 'include' });
+    const data = await res.json();
+    if (!data.data) return;
+    const temp = data.data.filter(t => t.status === 'temp_assigned');
+    const div = document.getElementById('tempAssignments');
+    if (temp.length === 0) {
+        div.innerHTML = '<p>Δεν υπάρχουν προσωρινές αναθέσεις.</p>';
+        return;
+    }
+    div.innerHTML = `<ul>${temp.map(t => `<li>
+        <span>${t.title} - ${t.original_file_name ? `Αρχείο: ${t.original_file_name}` : ''} (Φοιτητής ΑΜ: ${t.student_am})</span>
+        <button class="btn btn-danger" onclick="cancelTempAssignment(${t.id})">Ακύρωση</button>
+    </li>`).join('')}</ul>`;
+}
+
+async function cancelTempAssignment(topicId) {
+    // For now, just revert topic to unassigned and remove student_am
+    const res = await fetch('http://localhost:5001/api/professor/topic', {
+        method: 'PUT',
+        credentials: 'include',
+        body: (() => { const fd = new FormData(); fd.append('id', topicId); fd.append('topic_status', 'unassigned'); fd.append('student_am', ''); return fd; })()
+    });
+    if (!res.ok) {
+        const data = await res.json();
+        alert(data.message || 'Σφάλμα ακύρωσης.');
+        return;
+    }
+    alert('Η προσωρινή ανάθεση ακυρώθηκε.');
+    loadTempAssignments();
+    loadAvailableTopics();
+}
+
+// Patch: When loading the assignment page, also load temp assignments
+const origGetTopicAssignment = getTopicAssignment;
+getTopicAssignment = function() {
+    setTimeout(() => { loadTempAssignments(); }, 100);
+    return origGetTopicAssignment();
+};
 
 async function getThesesList() {
     const response = await fetch("http://localhost:5001/api/professor/thesesList", {

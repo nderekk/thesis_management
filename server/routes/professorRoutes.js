@@ -11,6 +11,8 @@ const {
     deleteTopic,
     getStats,
     getThesesList,
+    searchStudent,
+    assignTopicToStudent
 } = require("../controllers/professorController");
 
 // public
@@ -25,5 +27,7 @@ router.put("/topic", upload.single('file'), editTopic);
 
 router.get("/stats", getStats)
 router.get("/thesesList", getThesesList);
+router.get("/searchStudent", searchStudent);
+router.post("/assignTopic", assignTopicToStudent);
 
 module.exports = router;

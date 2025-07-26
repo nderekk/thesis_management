@@ -857,8 +857,9 @@ tr:hover {
 } 
 
 .btn[disabled], .btn:disabled {
-  background: #e0e0e0 !important;
-  color: #aaa !important;
-  cursor: not-allowed !important;
-  box-shadow: none !important;
-}
+    background: #e0e0e0;
+    color: #aaa;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  
