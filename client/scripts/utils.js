@@ -2,6 +2,7 @@
 let currentUser = null;
 let currentUserType = null;
 let currentThesis = null;
+let theses = [];
 let users = [];
 let topics = [];
 
