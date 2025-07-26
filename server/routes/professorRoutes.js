@@ -28,6 +28,6 @@ router.put("/topic", upload.single('file'), editTopic);
 router.get("/stats", getStats)
 router.get("/thesesList", getThesesList);
 router.get("/searchStudent", searchStudent);
-router.post("/assignTopic", assignTopicToStudent);
+router.put("/assignTopic", assignTopicToStudent);
 
 module.exports = router;

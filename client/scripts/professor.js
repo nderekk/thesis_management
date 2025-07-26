@@ -263,7 +263,7 @@ function selectTopic(id, title) {
 async function assignTopicToStudentUI() {
     if (!selectedStudent || !selectedTopic) return;
     const res = await fetch('http://localhost:5001/api/professor/assignTopic', {
-        method: 'POST',
+        method: 'PUT',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ topicId: selectedTopic.id, studentAm: selectedStudent.am })

@@ -92,26 +92,19 @@ const modifyStudentInfo = asyncHandler(async (req, res) => {
   } = req.body;
 
   const updateData = {};
-  if (newAddress !== undefined) updateData.newAddress = newAddress;
-  if (newCity !== undefined) updateData.newCity = newCity;
-  if (newPostCode !== undefined) updateData.newPostCode = newPostCode;
-  if (newEmail !== undefined) updateData.newEmail = newEmail;
-  if (newMobile !== undefined) updateData.newMobile = newMobile;
-  if (newPhone !== undefined) updateData.newPhone = newPhone;
+  if (newAddress !== undefined) updateData.address = newAddress;
+  if (newCity !== undefined) updateData.city = newCity;
+  if (newPostCode !== undefined) updateData.post_code = newPostCode;
+  if (newEmail !== undefined) updateData.email = newEmail;
+  if (newMobile !== undefined) updateData.mobile_number = newMobile;
+  if (newPhone !== undefined) updateData.phone_number = newPhone;
 
   if (Object.keys(updateData).length === 0) {
       res.status(400);
       throw new Error('No fields provided for update');
   }  
 
-  await loggedStudent.update({
-    address: newAddress, 
-    email: newEmail,
-    phone_number: newPhone,
-    mobile_number: newMobile,
-    city: newCity,
-    post_code: newPostCode
-  });
+  await loggedStudent.update(updateData);
   res.status(200).json(loggedStudent);
 });
 
@@ -236,14 +229,11 @@ const modifyExamDate = asyncHandler(async (req, res) => {
     if (Object.keys(updateData).length === 0) {
         res.status(400);
         throw new Error('No fields provided for update');
-    }  
+    } 
+    
+    console.log(updateData)
 
-    await pres.update({
-      presentation_type: presentation_type,
-      date: date,
-      time: time,
-      venue: venue
-    });
+    await pres.update(updateData);
 
     res.status(200).json(pres);
   }

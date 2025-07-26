@@ -27,7 +27,8 @@ const getTopics = asyncHandler(async (req, res) => {
       description: topic.description,
       status: topic.topic_status,
       original_file_name: topic.original_file_name,
-      createdDate: topic.createdAt.toISOString().split("T")[0]
+      createdDate: topic.createdAt.toISOString().split("T")[0],
+      student_am: topic.student_am
     })),
   });
 });
@@ -55,7 +56,7 @@ const createTopic = asyncHandler(async (req, res) => {
 const editTopic = asyncHandler(async (req, res) => {
   const loggedProfessor = await professor.findOne({ where: {prof_userid: req.user.id} });
   const targetTopic = await thesis_topics.findOne({where: {prof_am: loggedProfessor.am, id:req.body.id} });
-  const prevFile = targetTopic.attached_discription_file
+  const prevFile = targetTopic.attached_discription_file;
   const prevOriginalFile = targetTopic.original_file_name;
 
   if (!targetTopic) {
@@ -66,29 +67,33 @@ const editTopic = asyncHandler(async (req, res) => {
     const {
       title,
       description,
-      topic_status
+      topic_status,
+      student_am,
     } = req.body;
+    console.log(student_am);
 
     const updateData = {};
     if (title !== undefined) updateData.title = title;
     if (description !== undefined) updateData.description = description;
     if (topic_status !== undefined) updateData.topic_status = topic_status;
+    if (student_am !== undefined) updateData.student_am = student_am;
+    if (student_am === "") updateData.student_am = null;
+    if (req.file && `${req.file.originalname}` !== prevOriginalFile) {
+      updateData.attached_discription_file = `${req.file.filename}`;
+      updateData.original_file_name = `${req.file.originalname}`;
+    }
+    else {
+      updateData.attached_discription_file = prevFile;
+      updateData.original_file_name = prevOriginalFile;
+    }
 
     if (Object.keys(updateData).length === 0) {
         res.status(400);
         throw new Error('No fields provided for update');
     }  
-    await targetTopic.update({
-      title: title,
-      description: description,
-      attached_discription_file: (req.file && `${req.file.originalname}` !== prevOriginalFile) ? `${req.file.filename}` : prevFile,
-      original_file_name: (req.file && `${req.file.originalname}` !== prevOriginalFile) ? `${req.file.originalname}` : prevOriginalFile,
-      prof_am: loggedProfessor.am,
-      topic_status: topic_status
-    });
+    await targetTopic.update(updateData);
     if (req.file && `${req.file.originalname}` !== prevOriginalFile)
       deleteUploadedFile(prevFile);
-
 
     res.status(200).json(targetTopic);
   }
@@ -252,7 +257,7 @@ const searchStudent = asyncHandler(async (req, res) => {
 });
 
 //@desc Assign topic to student (temp assignment)
-//@route POST /api/professor/assignTopic
+//@route PUT /api/professor/assignTopic
 //@access Private
 const assignTopicToStudent = asyncHandler(async (req, res) => {
   const { topicId, studentAm } = req.body;
