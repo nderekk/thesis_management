@@ -401,15 +401,15 @@ async function getStatistics() {
             </div>
             <div class="grid grid-3">
                 <div class="stats-card">
-                    <div class="stats-number">${stats.supervisorAvg}</div>
+                    <div class="stats-number">${stats.supervisorAvg.toFixed(1)}</div>
                     <div class="stats-label">Επιβλεπόμενες ΔΕ</div>
                 </div>
                 <div class="stats-card">
-                    <div class="stats-number">${stats.committeeAvg}</div>
+                    <div class="stats-number">${stats.committeeAvg.toFixed(1)}</div>
                     <div class="stats-label">Μέλος Τριμελούς</div>
                 </div>
                 <div class="stats-card">
-                    <div class="stats-number">${stats.totalAvg}</div>
+                    <div class="stats-number">${stats.totalAvg.toFixed(1)}</div>
                     <div class="stats-label">Συνολικά</div>
                 </div>
             </div>   
@@ -427,15 +427,15 @@ async function getStatistics() {
             </div>
             <div class="grid grid-3">
                 <div class="stats-card">
-                    <div class="stats-number">${stats.supervisorGrade}</div>
+                    <div class="stats-number">${stats.supervisorGrade.toFixed(1)}</div>
                     <div class="stats-label">Επιβλεπόμενες ΔΕ</div>
                 </div>
                 <div class="stats-card">
-                    <div class="stats-number">${stats.committeeGrade}</div>
+                    <div class="stats-number">${stats.committeeGrade.toFixed(1)}</div>
                     <div class="stats-label">Μέλος Τριμελούς</div>
                 </div>
                 <div class="stats-card">
-                    <div class="stats-number">${stats.totalGrade}</div>
+                    <div class="stats-number">${stats.totalGrade.toFixed(1)}</div>
                     <div class="stats-label">Συνολικά</div>
                 </div>
             </div>   
@@ -485,15 +485,15 @@ async function getStatistics() {
                     <tbody>
                         <tr>
                             <td><strong>Μέσος χρόνος περάτωσης (μήνες)</strong></td>
-                            <td>${stats.supervisorAvg}</td>
-                            <td>${stats.committeeAvg}</td>
-                            <td>${stats.totalAvg}</td>
+                            <td>${stats.supervisorAvg.toFixed(2)}</td>
+                            <td>${stats.committeeAvg.toFixed(2)}</td>
+                            <td>${stats.totalAvg.toFixed(2)}</td>
                         </tr>
                         <tr>
                             <td><strong>Μέσος βαθμός</strong></td>
-                            <td>${stats.supervisorGrade}</td>
-                            <td>${stats.committeeGrade}</td>
-                            <td>${stats.totalGrade}</td>
+                            <td>${stats.supervisorGrade.toFixed(2)}</td>
+                            <td>${stats.committeeGrade.toFixed(2)}</td>
+                            <td>${stats.totalGrade.toFixed(2)}</td>
                         </tr>
                         <tr>
                             <td><strong>Συνολικό πλήθος</strong></td>

@@ -193,8 +193,8 @@ const getStats = asyncHandler(async (req, res) => {
     replacements: { am: loggedProfessor.am },
     type: sequelize.QueryTypes.SELECT
   });
-  const totalGrade = (((supervisorGrade.grade * supervisorGrade.n1) +
-    (committeeGrade.grade * committeeGrade.n2)) / (supervisorGrade.n1 + committeeGrade.n2)).toFixed(2);
+  const totalGrade = ((supervisorGrade.grade * supervisorGrade.n1) +
+    (committeeGrade.grade * committeeGrade.n2)) / (supervisorGrade.n1 + committeeGrade.n2);
 
 
   // count stats
