@@ -44,7 +44,7 @@ const getThesisInfo = asyncHandler(async (req, res) => {
       ];
      }else
         committeeMembers = [`${supervisor.first_name} ${supervisor.last_name}`,];
-  }else{
+  } else{
     committeeMembers= [
         `${supervisor.first_name} ${supervisor.last_name}`,
         `${prof2.first_name} ${prof2.last_name}` ,
@@ -62,7 +62,8 @@ const getThesisInfo = asyncHandler(async (req, res) => {
     supervisor: `${supervisor.first_name} ${supervisor.last_name}`,
     committeeMembers : committeeMembers,
     invitedProfessors : finalCommitteProfessors,
-    grade: thesisGrade ? thesisGrade.final_grade : null
+    grade: thesisGrade ? thesisGrade.final_grade : null,
+    completionDate: studentThesis.completion_date
   });
 
 });
