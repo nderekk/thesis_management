@@ -212,6 +212,7 @@ async function loadContent(pageId, event) {
 
     contentArea.innerHTML = await contentMap[pageId]();
     if (pageId === 'statistics') await renderGraphs();
+    if (pageId === 'viewTheses') await attachEventListener();
 }
 
 
@@ -281,6 +282,6 @@ function getStatusText(status) {
         completed: 'Περατωμένη',
         cancelled: 'Ακυρωμένη'
     };
-    return statuses[status] || status;
+    return statuses[status.toLowerCase()] || status;
 }
 
