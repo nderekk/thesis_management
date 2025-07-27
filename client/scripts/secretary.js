@@ -31,7 +31,7 @@ async function getSecretaryThesesView() {
                     </thead>
                     <tbody>
                         ${activeTheses.map(t => `
-                            <tr>
+                            <tr class="clickable-row" data-id="${t.id}">
                                 <td>${t.title}</td>
                                 <td>${t.student_name}</td>
                                 <td>${t.supervisor_name}</td>
