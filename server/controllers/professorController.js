@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const {sequelize, professor, thesis_topics, thesis, student} = require("../config/dbConnection");
+const {sequelize, professor, thesis_topics, thesis, student , trimelis_requests} = require("../config/dbConnection");
 const deleteUploadedFile = require("../utils/fileDeleter");
 const { Op } = require('sequelize');
 
@@ -283,8 +283,31 @@ const assignTopicToStudent = asyncHandler(async (req, res) => {
   res.status(200).json({ message: 'Topic temporarily assigned' });
 });
 
+//@desc Get committee professors for a thesis
+//@route GET /api/professor/getCommitteeRequests
+//@access Private 
+const getCommitteeRequests = asyncHandler(async (req, res) => {
+  const committeeProfessors = await trimelis_requests.findAll();
+  const profIDs = committeeProfessors.map(prof => prof.prof_am);
+  const professorNames = await professor.findAll({where: { am: profIDs}});
+
+  const committeeInfo = committeeProfessors.map(prof => {
+    const names = professorNames.find(r => r.am === prof.prof_am);
+
+    return {
+      thesis_id: prof.thesis_id,
+      answer: prof.answer,
+      invite_date: prof.invite_date,
+      answer_date: prof.answer_date,
+      professor_name: `${names.first_name} ${names.last_name}`
+    };
+  });
+  
+  res.status(200).json(committeeInfo);
+});
+
 module.exports = {
   getProfessorInfo, getTopics, createTopic, 
   editTopic, deleteTopic, getStats, getThesesList,
-  searchStudent, assignTopicToStudent
+  searchStudent, assignTopicToStudent, getCommitteeRequests
 };

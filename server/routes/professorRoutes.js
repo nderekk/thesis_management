@@ -12,7 +12,8 @@ const {
     getStats,
     getThesesList,
     searchStudent,
-    assignTopicToStudent
+    assignTopicToStudent,
+    getCommitteeRequests,
 } = require("../controllers/professorController");
 
 // public
@@ -29,5 +30,6 @@ router.get("/stats", getStats)
 router.get("/thesesList", getThesesList);
 router.get("/searchStudent", searchStudent);
 router.put("/assignTopic", assignTopicToStudent);
+router.get("/committeeRequests", getCommitteeRequests);
 
 module.exports = router;

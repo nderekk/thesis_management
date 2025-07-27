@@ -832,11 +832,19 @@ function generateGradeChart(theses) {
     return chartHTML;
 }
 
-function getThesesManagement() {
-    const userTheses = theses.filter(t => 
-        t.supervisorId === currentUser.id || 
-        t.committeeMembers.includes(currentUser.id)
-    );
+async function getThesesManagement() {
+    const response = await fetch("http://localhost:5001/api/professor/thesesList", {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      }
+    });
+    const thesesList = await response.json();
+    if (!response.ok) {
+        alert(thesesList.message);
+        throw new Error(`Error: ${thesesList.message}`);
+    }
     
     return `
         <div class="content-header">
@@ -844,33 +852,6 @@ function getThesesManagement() {
             <p>Διαχείριση διπλωματικών ανάλογα με την κατάστασή τους</p>
         </div>
         
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Φίλτρα</h3>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="statusFilter">Κατάσταση:</label>
-                    <select id="statusFilter" onchange="filterManageTheses()">
-                        <option value="">Όλες</option>
-                        <option value="pending">Υπό Ανάθεση</option>
-                        <option value="active">Ενεργή</option>
-                        <option value="review">Υπό Εξέταση</option>
-                        <option value="completed">Περατωμένη</option>
-                        <option value="cancelled">Ακυρωμένη</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="roleFilter">Ρόλος:</label>
-                    <select id="roleFilter" onchange="filterManageTheses()">
-                        <option value="">Όλοι</option>
-                        <option value="supervisor">Επιβλέπων</option>
-                        <option value="committee">Μέλος Τριμελούς</option>
-                    </select>
-                </div>
-            </div>
-        </div>
         
         <div class="card">
             <div class="card-header">
@@ -890,16 +871,16 @@ function getThesesManagement() {
                         </tr>
                     </thead>
                     <tbody>
-                        ${userTheses.map(thesis => `
+                        ${thesesList.map(thesis => `
                             <tr>
-                                <td>${thesis.title}</td>
-                                <td>${getUserName(thesis.studentId)}</td>
-                                <td><span class="status-badge status-${thesis.status}">${getStatusText(thesis.status)}</span></td>
-                                <td>${thesis.supervisorId === currentUser.id ? 'Επιβλέπων' : 'Μέλος Τριμελούς'}</td>
-                                <td>${formatDate(thesis.assignedDate)}</td>
+                                <td>${thesis.thesis_title}</td>
+                                <td>${thesis.student_name}</td>
+                                <td><span class="status-badge status-${thesis.thesis_status}">${getStatusText(thesis.thesis_status)}</span></td>
+                                <td>${thesis.professor_role}</td>
+                                <td>${formatDate(thesis.thesis_ass_date)}</td>
                                 <td>
-                                    <button class="btn btn-secondary" onclick="viewThesisDetails(${thesis.id})">Προβολή</button>
-                                    <button class="btn btn-primary" onclick="manageThesis(${thesis.id})">Διαχείριση</button>
+                                    <button class="btn btn-secondary" onclick='viewThesisDetails(${JSON.stringify(thesis)})'>Προβολή</button>
+                                    <button class="btn btn-primary" onclick='manageThesis(${JSON.stringify(thesis)})'>Διαχείριση</button>
                                 </td>
                             </tr>
                         `).join('')}
@@ -911,12 +892,7 @@ function getThesesManagement() {
 }
 
 // Function to manage individual thesis based on status
-function manageThesis(thesisId) {
-    const thesis = theses.find(t => t.id === thesisId);
-    if (!thesis) return;
-    
-    const isSupervisor = thesis.supervisorId === currentUser.id;
-    const isCommitteeMember = thesis.committeeMembers.includes(currentUser.id);
+async function manageThesis(thesis) {
     
     let modalContent = `
         <div class="modal-header">
@@ -924,29 +900,31 @@ function manageThesis(thesisId) {
             <button class="modal-close" onclick="closeModal()">&times;</button>
         </div>
         <div class="modal-body">
-            <h3>${thesis.title}</h3>
-            <p><strong>Φοιτητής:</strong> ${getUserName(thesis.studentId)}</p>
-            <p><strong>Κατάσταση:</strong> <span class="status-badge status-${thesis.status}">${getStatusText(thesis.status)}</span></p>
-            <p><strong>Ρόλος:</strong> ${isSupervisor ? 'Επιβλέπων' : 'Μέλος Τριμελούς'}</p>
+            <h3>${thesis.thesis_title}</h3>
+            <p><strong>Φοιτητής:</strong> ${thesis.student_name}</p>
+            <p><strong>Κατάσταση:</strong> <span class="status-badge status-${thesis.thesis_status}">${getStatusText(thesis.thesis_status)}</span></p>
+            <p><strong>Ρόλος:</strong>${thesis.professor_role}</p>
             <hr>
     `;
+
+    console.log(thesis.thesis_status.toLowerCase());
     
     // Actions based on status
-    switch(thesis.status) {
+    switch(thesis.thesis_status.toLowerCase()) {
         case 'pending':
-            modalContent += getPendingThesisActions(thesis, isSupervisor);
+            modalContent +=  await getPendingThesisActions(thesis);
             break;
         case 'active':
-            modalContent += getActiveThesisActions(thesis, isSupervisor);
+            modalContent += await getActiveThesisActions(thesis);
             break;
         case 'review':
-            modalContent += getReviewThesisActions(thesis, isSupervisor, isCommitteeMember);
+            modalContent += await getReviewThesisActions(thesis);
             break;
         case 'completed':
-            modalContent += getCompletedThesisActions(thesis, isSupervisor, isCommitteeMember);
+            modalContent += await getCompletedThesisActions(thesis);
             break;
         case 'cancelled':
-            modalContent += getCancelledThesisActions(thesis);
+            modalContent += await getCancelledThesisActions(thesis);
             break;
     }
     
@@ -954,11 +932,27 @@ function manageThesis(thesisId) {
         </div>
     `;
     
-    showModal(modalContent);
+    showModal(modalContent);    
 }
 
 // Actions for pending thesis
-function getPendingThesisActions(thesis, isSupervisor) {
+ async function getPendingThesisActions(thesis) {
+    console.log("Fetching pending thesis actions for:", thesis);
+    const response = await fetch("http://localhost:5001/api/professor/committeeRequests", {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      }
+    });
+    const committeeRequests = await response.json();
+    if (!response.ok) {
+        alert(committeeRequests.message);
+        throw new Error(`Error: ${committeeRequests.message}`);
+    }
+
+    const invitations = committeeRequests.filter(inv => inv.thesis_id === thesis.thesis_id) || [];
+
     let content = `
         <h4>Ενέργειες για Διπλωματική Υπό Ανάθεση</h4>
         
@@ -969,32 +963,41 @@ function getPendingThesisActions(thesis, isSupervisor) {
             <div class="invited-members">
     `;
     
-    if (thesis.invitedProfessors && thesis.invitedProfessors.length > 0) {
-        thesis.invitedProfessors.forEach(invitation => {
-            const professor = users.find(u => u.id === invitation.professorId);
+    if (invitations && invitations.length > 0) {
+        content += `
+            <div class="invited-member header">
+                <span><strong>Όνομα Καθηγητή</strong></span>
+                <span><strong>Ημ/νία Πρόσκλησης</strong></span>
+                <span><strong>Ημ/νία Απάντησης</strong></span>
+                <span><strong>Κατάσταση</strong></span>
+            </div>
+        `;
+
+        invitations.forEach(invitation => {
+            
             content += `
                 <div class="invited-member">
-                    <span>${professor ? professor.name : 'Άγνωστος'}</span>
-                    <span class="status-badge status-${invitation.status}">${getInvitationStatusText(invitation.status)}</span>
+                    <span>${invitation.professor_name}</span>
+                    <span>${invitation.invite_date}</span>
+                    <span>${invitation.answer_date ? invitation.answer_date : '-'}</span>
+                    <span class="status-badge status-${invitation.answer}">
+                        ${getInvitationStatusText(invitation.answer)}
+                    </span>
                 </div>
             `;
         });
     } else {
         content += '<p>Δεν υπάρχουν προσκλήσεις</p>';
     }
+
     
-    content += `
-            </div>
-        </div>
-    `;
-    
-    if (isSupervisor) {
+    if (thesis.professor_role === "Supervisor") {
         content += `
             <div class="card">
                 <div class="card-header">
                     <h5>Ενέργειες Επιβλέποντος</h5>
                 </div>
-                <button class="btn btn-danger" onclick="cancelThesisAssignment(${thesis.id})">
+                <button class="btn btn-danger" onclick="cancelThesisAssignment(${thesis.thesis_id})">
                     Ακύρωση Ανάθεσης Θέματος
                 </button>
             </div>
@@ -1005,7 +1008,7 @@ function getPendingThesisActions(thesis, isSupervisor) {
 }
 
 // Actions for active thesis
-function getActiveThesisActions(thesis, isSupervisor) {
+async function getActiveThesisActions(thesis, isSupervisor) {
     let content = `
         <h4>Ενέργειες για Ενεργή Διπλωματική</h4>
         
@@ -1068,7 +1071,7 @@ function getActiveThesisActions(thesis, isSupervisor) {
 }
 
 // Actions for review thesis
-function getReviewThesisActions(thesis, isSupervisor, isCommitteeMember) {
+async function getReviewThesisActions(thesis, isSupervisor, isCommitteeMember) {
     let content = `
         <h4>Ενέργειες για Διπλωματική Υπό Εξέταση</h4>
         
@@ -1159,7 +1162,7 @@ function getReviewThesisActions(thesis, isSupervisor, isCommitteeMember) {
 }
 
 // Actions for completed thesis
-function getCompletedThesisActions(thesis, isSupervisor, isCommitteeMember) {
+async function getCompletedThesisActions(thesis, isSupervisor, isCommitteeMember) {
     return `
         <h4>Διπλωματική Περατωμένη</h4>
         <p>Η διπλωματική έχει ολοκληρωθεί με επιτυχία.</p>
@@ -1176,7 +1179,7 @@ function getCompletedThesisActions(thesis, isSupervisor, isCommitteeMember) {
 }
 
 // Actions for cancelled thesis
-function getCancelledThesisActions(thesis) {
+async function getCancelledThesisActions(thesis) {
     return `
         <h4>Διπλωματική Ακυρωμένη</h4>
         <p>Η διπλωματική έχει ακυρωθεί.</p>
