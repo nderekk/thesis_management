@@ -878,3 +878,10 @@ tr:hover {
 .inner {
   margin-left: 10px;
 }
+
+.thesis-details {
+  background-color: #f9f9f9;
+  padding: 12px;
+  border-top: 1px solid #ccc;
+  font-size: 0.95em;
+}
