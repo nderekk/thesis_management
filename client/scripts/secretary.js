@@ -123,25 +123,37 @@ function getDataImport() {
     `;
 }
 
-document.addEventListener('submit', function(e) {
+document.addEventListener('submit', async function (e) {
     if (e.target.id === 'importForm') {
         e.preventDefault();
+
         const fileInput = document.getElementById('dataFile');
-        if (fileInput.files.length === 0) return alert('Παρακαλώ επιλέξτε αρχείο.');
+        if (fileInput.files.length === 0) {
+            alert('Παρακαλώ επιλέξτε αρχείο.');
+            return;
+        }
+
         const file = fileInput.files[0];
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-            try {
-                const data = JSON.parse(evt.target.result);
-                if (data.users) users = data.users;
-                if (data.topics) topics = data.topics;
-                if (data.theses) theses = data.theses;
-                alert('Τα δεδομένα εισήχθησαν επιτυχώς.');
-            } catch (err) {
-                alert('Σφάλμα κατά την εισαγωγή: μη έγκυρο αρχείο JSON.');
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch("http://localhost:5001/api/secretary/import-data", {
+                method: 'POST',
+                credentials: 'include',
+                body: formData
+            });
+
+            const r = await response.json();
+            if (!response.ok) {
+                alert(r.message);
+                throw new Error(`Error: ${r.message}`);
             }
-        };
-        reader.readAsText(file);
+
+            alert(r.success);
+        } catch (error) {
+            console.error('Upload failed:', error);
+        }
     }
 });
 
