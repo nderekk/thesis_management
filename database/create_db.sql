@@ -38,7 +38,7 @@ create table student(
     mobile_number varchar(50) not null,
     address varchar(255) not null,
     city varchar(30) not null,
-    post_code smallint not null,
+    post_code int not null,
 	student_userid integer not null,
     primary key(am)
 );
