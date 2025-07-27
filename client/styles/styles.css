@@ -691,13 +691,18 @@ tr:hover {
     padding: 20px;
 }
 
+.examination-report h2 {
+    margin-bottom: 15px;
+    padding-bottom: 16px;
+}
+
 .report-section {
     margin-bottom: 30px;
     padding-bottom: 20px;
     border-bottom: 1px solid #e9ecef;
 }
 
-.report-section:last-child {
+.report-section:last-of-class {
     border-bottom: none;
 }
 

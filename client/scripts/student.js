@@ -508,16 +508,16 @@ function viewExaminationReport() {
             <div class="report-section">
                 <h3>Στοιχεία Διπλωματικής</h3>
                 <p><strong>Τίτλος:</strong> ${currentThesis.title}</p>
-                <p><strong>Φοιτητής:</strong> ${currentUser.name}</p>
+                <p><strong>Φοιτητής:</strong> ${currentUser.first_name} ${currentUser.last_name} </p>
                 <p><strong>Αριθμός Μητρώου:</strong> ${currentUser.am}</p>
             </div>
             
             <div class="report-section">
                 <h3>Τριμελής Επιτροπή</h3>
-                <p><strong>Επιβλέπων:</strong> ${getUserName(currentThesis.supervisorId)}</p>
-                <ul>
-                    ${currentThesis.committeeMembers.map(memberId => 
-                        `<li><strong>Μέλος:</strong> ${getUserName(memberId)}</li>`
+                <p><strong>Επιβλέπων:</strong> ${currentThesis.supervisor}</p>
+                <ul style="list-style-type: none;" >
+                    ${currentThesis.committeeMembers.slice(1).map(member => 
+                        `<li><strong>Μέλος:</strong> ${member}</li>`
                     ).join('')}
                 </ul>
             </div>

@@ -118,15 +118,17 @@ async function updateUserInfo() {
         'Content-Type': 'application/json'  // important for JSON data
       },
     });
-    currentUser = await response.json();
+    person = await response.json();
     if (!response.ok) {
       currentUser = null;
       currentUserType = null;
       localStorage.removeItem('currentUser');
       localStorage.removeItem('currentUserType');
       showLoginScreen();
-      throw new Error(`Error: ${currentUser.message}`);
+      throw new Error(`Error: ${person.message}`);
     }
+    currentUser = person;
+    localStorage.setItem('currentUser', JSON.stringify(person));
     if (currentUserType === 'student') await refreshThesis(true);
     console.log(currentUser);
     console.log(currentThesis);
