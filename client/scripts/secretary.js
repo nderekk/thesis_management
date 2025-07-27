@@ -1,5 +1,17 @@
-function getSecretaryThesesView() {
-    const visibleTheses = theses; // Σε επόμενο βήμα μπορεί να φιλτραριστούν
+async function getSecretaryThesesView() {
+    const response = await fetch("http://localhost:5001/api/secretary/theses/active", {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'  // important for JSON data
+        }
+        });
+        const activeTheses = await response.json();
+        if (!response.ok) {
+            alert(activeTheses.message);
+            throw new Error(`Error: ${activeTheses.message}`);
+    }
+    console.log(activeTheses);
     return `
         <div class="content-header">
             <h1>Προβολή Διπλωματικών</h1>
@@ -18,13 +30,13 @@ function getSecretaryThesesView() {
                         </tr>
                     </thead>
                     <tbody>
-                        ${visibleTheses.map(t => `
+                        ${activeTheses.map(t => `
                             <tr>
                                 <td>${t.title}</td>
-                                <td>${getUserName(t.studentId)}</td>
-                                <td>${getUserName(t.supervisorId)}</td>
-                                <td>${getStatusText(t.status)}</td>
-                                <td>${formatDate(t.assignedDate)}</td>
+                                <td>${t.student_name}</td>
+                                <td>${t.supervisor_name}</td>
+                                <td>${t.status}</td>
+                                <td>${t.assignment_date}</td>
                             </tr>
                         `).join('')}
                     </tbody>

@@ -139,15 +139,14 @@ const getThesesList = asyncHandler(async (req, res) => {
     }else {
       role = 'Committee Member';
     }
-
-        return {
-          thesis_id: prof.id,
-          thesis_title: req.title,
-          professor_role: role,
-          thesis_status: prof.thesis_status,
-          thesis_ass_date: prof.assignment_date,
-          student_name: `${stud.first_name} ${stud.last_name}`
-        };
+      return {
+        thesis_id: prof.id,
+        thesis_title: req.title,
+        professor_role: role,
+        thesis_status: prof.thesis_status,
+        thesis_ass_date: prof.assignment_date,
+        student_name: `${stud.first_name} ${stud.last_name}`
+      };
     });
 
   res.status(200).json(professorThesesInfo);

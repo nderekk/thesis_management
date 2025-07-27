@@ -14,4 +14,12 @@ const authProfessor = (req, res, next) => {
   next();
 };
 
-module.exports = { authStudent, authProfessor };
+const authSecretary = (req, res, next) => {
+  if ( req.user.role !== "secretary") {
+    res.status(401)
+    throw new Error("Not Authorized Endpoint");
+  }
+  next();
+};
+
+module.exports = { authStudent, authProfessor, authSecretary };
