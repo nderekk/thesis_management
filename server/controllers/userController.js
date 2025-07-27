@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const {sequelize, user, blacklist} = require("../config/dbConnection");
+const {sequelize, users, blacklist} = require("../config/dbConnection");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -12,7 +12,7 @@ const loginUser = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("All fields are mandatory");
   }
-  const loggedUser = await user.findOne({ where: {email: email} });
+  const loggedUser = await users.findOne({ where: {email: email} });
   // if (user && await bcrypt.compare(password, user.password)){
   if (loggedUser && password === loggedUser.password){
     const accessToken = jwt.sign({
