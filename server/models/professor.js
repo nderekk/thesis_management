@@ -8,15 +8,15 @@ module.exports = function(sequelize, DataTypes) {
       primaryKey: true
     },
     first_name: {
-      type: DataTypes.STRING(30),
+      type: DataTypes.STRING(255),
       allowNull: false
     },
     last_name: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(255),
       allowNull: false
     },
     email: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(255),
       allowNull: false
     },
     phone_number: {
