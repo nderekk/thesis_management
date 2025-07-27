@@ -7,7 +7,7 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname)); // e.g., 1723893.pdf
+    cb(null, uniqueSuffix + path.extname(file.originalname));
   }
 });
 
@@ -22,4 +22,15 @@ const upload = multer({
   }
 });
 
-module.exports = upload;
+const uploadJSON = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/json') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only JSONs are allowed!'));
+    }
+  }
+});
+
+module.exports = { upload, uploadJSON};

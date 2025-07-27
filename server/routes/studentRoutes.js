@@ -1,6 +1,6 @@
 const express = require("express");
 const validateToken = require("../middleware/validateTokenHandler");
-const upload = require('../middleware/uploadHandler');
+const {upload} = require('../middleware/uploadHandler');
 const {authStudent, authStudentSecretary} = require('../middleware/authHandler');
 const router = express.Router();
 const {
