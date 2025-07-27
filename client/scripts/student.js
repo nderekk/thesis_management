@@ -53,9 +53,13 @@ async function getStudentThesisView() {
             ${currentThesis.committeeMembers.length > 0 ? `
                 <div class="form-group">
                     <label>Μέλη Τριμελούς:</label>
-                    <ul>
-                        ${currentThesis.committeeMembers.map(member => `<li>${member}</li>`).join('')}
-                    </ul>
+                    <div class="inner">
+                        <div class="inner">
+                            <ul>
+                                ${currentThesis.committeeMembers.map(member => `<li>${member}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             ` : ''}
             

@@ -70,6 +70,23 @@ END$
 
 DELIMITER ;
 
+----------------------------------------------------------------------- 
+
+DELIMITER $
+
+-- DROP TRIGGER delete_temp_thesis$
+CREATE TRIGGER create_pending_thesis
+AFTER UPDATE ON thesis_topics
+FOR EACH ROW
+BEGIN
+	IF new.topic_status = "temp_assigned" THEN 
+		INSERT INTO thesis (topic_id, student_am, supervisor_am, prof2_am, prof3_am, thesis_status, assignment_date) VALUES 
+		(new.id, new.student_am, new.prof_am, null, null, 'Pending', CURDATE());
+	END IF;
+END$
+
+DELIMITER ;
+
 UPDATE thesis_topics SET topic_status="unassigned" WHERE id=25;
 
 

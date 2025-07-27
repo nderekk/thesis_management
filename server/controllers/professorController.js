@@ -139,15 +139,14 @@ const getThesesList = asyncHandler(async (req, res) => {
     }else {
       role = 'Committee Member';
     }
-
-        return {
-          thesis_id: prof.id,
-          thesis_title: req.title,
-          professor_role: role,
-          thesis_status: prof.thesis_status,
-          thesis_ass_date: prof.assignment_date,
-          student_name: `${stud.first_name} ${stud.last_name}`
-        };
+      return {
+        thesis_id: prof.id,
+        thesis_title: req.title,
+        professor_role: role,
+        thesis_status: prof.thesis_status,
+        thesis_ass_date: prof.assignment_date,
+        student_name: `${stud.first_name} ${stud.last_name}`
+      };
     });
 
   res.status(200).json(professorThesesInfo);
@@ -269,16 +268,19 @@ const assignTopicToStudent = asyncHandler(async (req, res) => {
   const existingThesis = await thesis.findOne({ where: { student_am: studentAm } });
   if (existingThesis) return res.status(400).json({ message: 'Student already has a thesis' });
   // Set topic as temp_assigned
-  await topic.update({ topic_status: 'temp_assigned', student_am: studentAm });
-  // Create thesis row with Pending status
-  const newThesis = await thesis.create({
-    topic_id: topicId,
-    student_am: studentAm,
-    supervisor_am: topic.prof_am,
-    thesis_status: 'Pending',
-    assignment_date: new Date()
+  await sequelize.transaction(async (t) => {
+    await topic.update({ topic_status: 'temp_assigned', student_am: studentAm });
+    // Create thesis row with Pending status
+    /* @MHPWS NA TO KNAOUME TRIGGER??????? */
+    // await thesis.create({
+    //   topic_id: topicId,
+    //   student_am: studentAm,
+    //   supervisor_am: topic.prof_am,
+    //   thesis_status: 'Pending',
+    //   assignment_date: new Date()
+    // });
   });
-  res.status(200).json({ message: 'Topic temporarily assigned', thesis: newThesis });
+  res.status(200).json({ message: 'Topic temporarily assigned' });
 });
 
 module.exports = {

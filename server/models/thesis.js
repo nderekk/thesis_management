@@ -10,6 +10,7 @@ module.exports = function(sequelize, DataTypes) {
     topic_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      unique: true,
       references: {
         model: 'thesis_topics',
         key: 'id'
@@ -49,7 +50,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     thesis_status: {
       type: DataTypes.ENUM('Pending','Active','Completed','Cancelled','Review'), 
-      allowNull: true
+      allowNull: false,
     },
     assignment_date: {
       type: DataTypes.DATEONLY,
