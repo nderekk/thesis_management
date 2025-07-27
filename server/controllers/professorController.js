@@ -272,13 +272,13 @@ const assignTopicToStudent = asyncHandler(async (req, res) => {
     await topic.update({ topic_status: 'temp_assigned', student_am: studentAm });
     // Create thesis row with Pending status
     /* @MHPWS NA TO KNAOUME TRIGGER??????? */
-    await thesis.create({
-      topic_id: topicId,
-      student_am: studentAm,
-      supervisor_am: topic.prof_am,
-      thesis_status: 'Pending',
-      assignment_date: new Date()
-    });
+    // await thesis.create({
+    //   topic_id: topicId,
+    //   student_am: studentAm,
+    //   supervisor_am: topic.prof_am,
+    //   thesis_status: 'Pending',
+    //   assignment_date: new Date()
+    // });
   });
   res.status(200).json({ message: 'Topic temporarily assigned' });
 });
