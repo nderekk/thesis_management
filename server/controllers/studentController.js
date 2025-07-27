@@ -16,7 +16,7 @@ const getThesisInfo = asyncHandler(async (req, res) => {
     const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
     studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
   } else {
-    studentThesis = await thesis.findOne({ where: {id: req.body.id}});
+    studentThesis = await thesis.findOne({ where: {id: req.query.id}});
   }
   const thesisTopic = await thesis_topics.findOne({ where: {id: studentThesis.topic_id}});
   const supervisor = await professor.findOne({ where: {am: studentThesis.supervisor_am}});
