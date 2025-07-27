@@ -123,10 +123,7 @@ function getDataImport() {
     `;
 }
 
-document.addEventListener('submit', async function (e) {
-    if (e.target.id === 'importForm') {
-        e.preventDefault();
-
+async function importJSON() {
         const fileInput = document.getElementById('dataFile');
         if (fileInput.files.length === 0) {
             alert('Παρακαλώ επιλέξτε αρχείο.');
@@ -155,7 +152,6 @@ document.addEventListener('submit', async function (e) {
             console.error('Upload failed:', error);
         }
     }
-});
 
 function getSecretaryThesesManagement() {
     return `
