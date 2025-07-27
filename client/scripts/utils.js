@@ -6,9 +6,9 @@ let theses = [];
 let users = [];
 let topics = [];
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
+    console.log("REFRESH PAGE");
     initializeApp();
-    localStorage.removeItem('currentThesis');
 });
 
 function initializeApp() {
@@ -24,10 +24,7 @@ function initializeApp() {
 
     const savedUser = localStorage.getItem('currentUser');
     const savedRole = localStorage.getItem('currentUserType');
-    const savedThesis = localStorage.getItem("currentThesis");
     if (savedUser) {
-        if (savedRole === 'student')
-            currentThesis = JSON.parse(savedThesis);
         currentUser = JSON.parse(savedUser);
         currentUserType = savedRole;
         showMainApp();
@@ -130,6 +127,7 @@ async function updateUserInfo() {
       showLoginScreen();
       throw new Error(`Error: ${currentUser.message}`);
     }
+    if (currentUserType === 'student') await refreshThesis(true);
     console.log(currentUser);
     console.log(currentThesis);
     const userInfo = document.getElementById('userInfo');

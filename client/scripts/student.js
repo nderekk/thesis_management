@@ -1,4 +1,5 @@
-async function getStudentThesisView() {
+async function refreshThesis(hard) {
+    if (hard) currentThesis = null;
     if (!currentThesis){
         const response = await fetch("http://localhost:5001/api/student/thesis", {
         method: 'GET',
@@ -12,9 +13,14 @@ async function getStudentThesisView() {
             alert(studentThesis.message);
             throw new Error(`Error: ${studentThesis.message}`);
         }
-        currentThesis = studentThesis;
-        localStorage.setItem('currentThesis', JSON.stringify(currentThesis));
+        localStorage.setItem('currentThesis', JSON.stringify(studentThesis));
+        currentThesis = JSON.parse(localStorage.getItem('currentThesis'));
     }
+    console.log("THESIS", (hard) ? "FLUSHED" : "SAME");
+}
+
+async function getStudentThesisView() {
+    await refreshThesis()
     // console.log(currentThesis);
     if (!currentThesis) {
         return `<div class="content-header">
@@ -179,27 +185,8 @@ document.addEventListener('submit', async function (e) {
 });
 
 // Additional functions for other pages will be implemented as needed
-async function getThesisManagement() {
-    console.log("getThesisManagement called");
-    // console.log("currentUser:", currentUser);
-    
-    if (!currentThesis){
-        const response = await fetch("http://localhost:5001/api/student/thesis", {
-            method: 'GET',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json'  // important for JSON data
-            },
-        });
-        studentThesis = await response.json();
-        if (!response.ok) {
-            alert(studentThesis.message);
-            throw new Error(`Error: ${studentThesis.message}`);
-        }
-        currentThesis = studentThesis;
-        localStorage.setItem('currentThesis', JSON.stringify(currentThesis));
-    }
-    // console.log("studentThesis found:", currentThesis);
+async function getThesisManagement() {   
+    await refreshThesis();
     
     if (!currentThesis) {
         console.log("No thesis found for student");
@@ -581,6 +568,8 @@ async function handleInviteProfessor() {
             throw new Error(`Error: ${r.message}`);
         }
         alert('Η πρόσκληση στάλθηκε.');
+
+        await refreshThesis(true);
     
     if (!professorId ) {
         alert('Παρακαλώ επιλέξτε έναν διδάσκοντα.');
