@@ -1382,7 +1382,31 @@ function copyAnnouncement() {
     alert('Η ανακοίνωση αντιγράφηκε στο clipboard!');
 }
 
-function getInvitationsList() {
+async function getInvitationsList() {
+    const response = await fetch("http://localhost:5001/api/professor/invitations", {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+    });
+    const invitations = await response.json();
+    if (!response.ok) {
+        alert(invitations.message);
+        throw new Error(`Error: ${invitations.message}`);
+    }
+
+    const rowsHTML = invitations.map(inv => `
+        <tr>
+            <td>${inv.title}</td>   
+            <td>${inv.student_name}</td>
+            <td>${inv.supervisor}</td>
+            <td>${formatDate(inv.invite_date)}</td>
+            <td>
+                <button class="btn btn-primary" onclick="respondToInvitation(${inv.id}, true)">Αποδοχή</button>
+                <button class="btn btn-danger" onclick="respondToInvitation(${inv.id}, false)">Απόρριψη</button>
+            </td>
+        </tr>
+    `).join('');
+
   return `
     <div class="content-header">
         <h1>Προσκλήσεις Τριμελούς Επιτροπής</h1>
@@ -1405,10 +1429,31 @@ function getInvitationsList() {
                     </tr>
                 </thead>
                 <tbody id="invitationsTableBody">
-                    <!-- Invitations will be dynamically inserted here -->
+                    ${rowsHTML}
                 </tbody>
             </table>
         </div>
     </div>
   `;
 }
+
+async function respondToInvitation(invitationId, accepted) {
+  const response = await fetch(`http://localhost:5001/api/professor/invitations/respond`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      invitationId,
+      response: accepted ? 'accepted' : 'rejected'
+    })
+  });
+
+  const result = await response.json();
+  if (response.ok) {
+    alert(result.message || 'Η απάντηση καταχωρήθηκε.');
+    loadInvitations(); // Refresh list
+  } else {
+    alert(result.message || 'Σφάλμα κατά την απάντηση.');
+  }
+}
+
