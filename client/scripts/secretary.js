@@ -123,7 +123,8 @@ function getDataImport() {
     `;
 }
 
-async function importJSON() {
+document.addEventListener('submit', async function (e) {
+  e.preventDefault();
         const fileInput = document.getElementById('dataFile');
         if (fileInput.files.length === 0) {
             alert('Παρακαλώ επιλέξτε αρχείο.');
@@ -133,7 +134,7 @@ async function importJSON() {
         const file = fileInput.files[0];
         const formData = new FormData();
         formData.append('file', file);
-
+        console.log("HEREEEE");
         try {
             const response = await fetch("http://localhost:5001/api/secretary/import-data", {
                 method: 'POST',
@@ -152,6 +153,7 @@ async function importJSON() {
             console.error('Upload failed:', error);
         }
     }
+  );
 
 function getSecretaryThesesManagement() {
     return `
