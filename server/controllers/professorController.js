@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const {sequelize, professor, thesis_topics, thesis, student , trimelis_requests} = require("../config/dbConnection");
 const deleteUploadedFile = require("../utils/fileDeleter");
-const { Op } = require('sequelize');
+const { Op, fn } = require('sequelize');
 
 //@desc Get current professor
 //@route Get /api/professor
@@ -308,7 +308,7 @@ const getCommitteeRequests = asyncHandler(async (req, res) => {
   res.status(200).json(committeeInfo);
 });
 
-//@desc Get committee professors for a thesis
+//@desc get all professor's invitations
 //@route GET /api/professor/invitations
 //@access Private 
 const getInvitationsList = asyncHandler(async (req, res) => {
@@ -334,7 +334,7 @@ const getInvitationsList = asyncHandler(async (req, res) => {
     }});
 
     return {
-      thesis_id: th.id,
+      id: r.id,
       title: topic.title,
       answer: r.answer,
       invite_date: r.invite_date,
@@ -348,9 +348,28 @@ const getInvitationsList = asyncHandler(async (req, res) => {
   res.status(200).json(invitations);
 });
 
+//@desc accept or decline an invitation
+//@route PUT /api/professor/invitations/respond
+//@access Private 
+const respondToInvitation = asyncHandler(async (req, res) => {
+  const invitation = await trimelis_requests.findOne({where: {
+    id: req.body.invitationId
+  }});
+  if (invitation.answer === 'accepted' || invitation.answer === 'declined') {
+    res.status(400);
+    throw new Error("Cant change already settled invitation");
+  }
+  await invitation.update({
+    answer: req.body.response,
+    answer_date: fn('CURDATE')
+  });
+
+  res.status(200).json({ message: `Invitation ${req.body.response}` });
+});
+
 module.exports = {
   getProfessorInfo, getTopics, createTopic, 
   editTopic, deleteTopic, getStats, getThesesList,
   searchStudent, assignTopicToStudent, getCommitteeRequests,
-  getInvitationsList
+  getInvitationsList, respondToInvitation
 };

@@ -1394,7 +1394,7 @@ async function getInvitationsList() {
         throw new Error(`Error: ${invitations.message}`);
     }
 
-    const rowsHTML = invitations.map(inv => `
+    const rowsHTML = invitations.filter(i => i.answer === 'pending').map(inv => `
         <tr>
             <td>${inv.title}</td>   
             <td>${inv.student_name}</td>
@@ -1439,19 +1439,19 @@ async function getInvitationsList() {
 
 async function respondToInvitation(invitationId, accepted) {
   const response = await fetch(`http://localhost:5001/api/professor/invitations/respond`, {
-    method: 'POST',
+    method: 'PUT',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      invitationId,
-      response: accepted ? 'accepted' : 'rejected'
+      invitationId: invitationId,
+      response: accepted ? 'accepted' : 'declined'
     })
   });
 
   const result = await response.json();
   if (response.ok) {
     alert(result.message || 'Η απάντηση καταχωρήθηκε.');
-    loadInvitations(); // Refresh list
+    loadContent("invitations"); // Refresh list
   } else {
     alert(result.message || 'Σφάλμα κατά την απάντηση.');
   }
