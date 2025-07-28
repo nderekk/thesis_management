@@ -286,7 +286,7 @@ const assignTopicToStudent = asyncHandler(async (req, res) => {
 });
 
 //@desc Get committee professors for a thesis
-//@route GET /api/professor/getCommitteeRequests
+//@route GET /api/professor/committeeRequests
 //@access Private 
 const getCommitteeRequests = asyncHandler(async (req, res) => {
   const committeeProfessors = await trimelis_requests.findAll();
@@ -308,8 +308,49 @@ const getCommitteeRequests = asyncHandler(async (req, res) => {
   res.status(200).json(committeeInfo);
 });
 
+//@desc Get committee professors for a thesis
+//@route GET /api/professor/invitations
+//@access Private 
+const getInvitationsList = asyncHandler(async (req, res) => {
+  const loggedProfessor = await professor.findOne({ where: {prof_userid: req.user.id} });
+  const requests = await trimelis_requests.findAll({
+    where: {
+      prof_am: loggedProfessor.am
+    }
+  });
+  console.log(requests);
+  const invitations = await Promise.all(requests.map(async r => {
+    const th = await thesis.findOne({where: {
+      id: r.thesis_id
+    }});
+    const topic = await thesis_topics.findOne({where: {
+      id: th.topic_id
+    }});
+    const stu = await student.findOne({ where: {
+      am: th.student_am
+    }});
+    const supervisor = await professor.findOne({where: {
+      am: th.supervisor_am
+    }});
+
+    return {
+      thesis_id: th.id,
+      title: topic.title,
+      answer: r.answer,
+      invite_date: r.invite_date,
+      answer_date: r.answer_date,
+      student_am: stu.am,
+      student_name: `${stu.first_name} ${stu.last_name}`,
+      supervisor: `${supervisor.first_name} ${supervisor.last_name}`
+    };
+  }));
+  
+  res.status(200).json(invitations);
+});
+
 module.exports = {
   getProfessorInfo, getTopics, createTopic, 
   editTopic, deleteTopic, getStats, getThesesList,
-  searchStudent, assignTopicToStudent, getCommitteeRequests
+  searchStudent, assignTopicToStudent, getCommitteeRequests,
+  getInvitationsList
 };

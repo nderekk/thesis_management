@@ -1383,12 +1383,32 @@ function copyAnnouncement() {
 }
 
 function getInvitationsList() {
-    return `
-        <div class="content-header">
-            <h1>Προσκλήσεις Τριμελούς Επιτροπής</h1>
+  return `
+    <div class="content-header">
+        <h1>Προσκλήσεις Τριμελούς Επιτροπής</h1>
+        <p>Δείτε και απαντήστε στις προσκλήσεις που έχετε λάβει για συμμετοχή σε τριμελείς επιτροπές.</p>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Ενεργές Προσκλήσεις</h3>
         </div>
-        <div class="card">
-            <p>Η λειτουργία προβολής και αποδοχής/απόρριψης προσκλήσεων δεν είναι ακόμα διαθέσιμη.</p>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Θέμα Διπλωματικής</th>
+                        <th>Φοιτητής</th>
+                        <th>Επιβλέπων</th>
+                        <th>Ημερομηνία Πρόσκλησης</th>
+                        <th>Ενέργειες</th>
+                    </tr>
+                </thead>
+                <tbody id="invitationsTableBody">
+                    <!-- Invitations will be dynamically inserted here -->
+                </tbody>
+            </table>
         </div>
-    `;
+    </div>
+  `;
 }

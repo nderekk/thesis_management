@@ -46,7 +46,7 @@ function initializeApp() {
         } else if (e.target.id === 'importForm') {
             e.preventDefault();
             if (typeof handleImportData === 'function') handleImportData();
-        }  
+        }
     });
 }
 
