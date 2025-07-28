@@ -15,6 +15,7 @@ DELIMITER ;
 
 DELIMITER $
 
+DROP TRIGGER update_committee$
 CREATE TRIGGER update_committee
 AFTER UPDATE ON trimelis_requests
 FOR EACH ROW
@@ -32,7 +33,7 @@ IF new.answer = "accepted" THEN
 		UPDATE thesis SET thesis.prof2_am = new.prof_am WHERE thesis.id = new.thesis_id;
 	ELSE
 		UPDATE thesis SET thesis.prof3_am = new.prof_am WHERE thesis.id = new.thesis_id;
-        UPDATE thesis SET thesis.thesis_status = 'Review' WHERE thesis.id = new.thesis_id;
+        UPDATE thesis SET thesis.thesis_status = 'Active' WHERE thesis.id = new.thesis_id;
 	END IF;
 END IF;
 END$
