@@ -117,12 +117,16 @@ const deleteTopic = asyncHandler(async (req, res) => {
 const getThesesList = asyncHandler(async (req, res) => {
   const loggedProfessor = await professor.findOne({ where: {prof_userid: req.user.id} });
   const professorThesesSupervisor = await thesis.findAll({
-    [Op.or]: [
-      { supervisor_am: loggedProfessor.am },
-      { prof2_am: loggedProfessor.am },
-      { prof3_am: loggedProfessor.am}
-    ]
-  })
+    where: {
+      [Op.or]: [
+        { supervisor_am: loggedProfessor.am },
+        { prof2_am: loggedProfessor.am },
+        { prof3_am: loggedProfessor.am }
+      ]
+    }
+  });
+
+  console.log(professorThesesSupervisor)
   const topicIDs = professorThesesSupervisor.map(thesis => thesis.topic_id);
   const professorThesesTopics = await thesis_topics.findAll({where: { id: topicIDs }});
 
