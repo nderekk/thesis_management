@@ -937,7 +937,6 @@ async function manageThesis(thesis) {
 
 // Actions for pending thesis
  async function getPendingThesisActions(thesis) {
-    console.log("Fetching pending thesis actions for:", thesis);
     const response = await fetch("http://localhost:5001/api/professor/committeeRequests", {
       method: 'GET',
       credentials: 'include',
@@ -1007,8 +1006,24 @@ async function manageThesis(thesis) {
     return content;
 }
 
-// Actions for active thesis
-async function getActiveThesisActions(thesis, isSupervisor) {
+
+async function getActiveThesisActions(thesis) {
+
+    const response = await fetch("http://localhost:5001/api/professor/thesisNotes", {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      }
+    });
+    const notes = await response.json();
+    if (!response.ok) {
+        alert(notes.message);
+        throw new Error(`Error: ${notes.message}`);
+    }
+
+    console.log(notes);
+
     let content = `
         <h4>Ενέργειες για Ενεργή Διπλωματική</h4>
         
@@ -1016,7 +1031,7 @@ async function getActiveThesisActions(thesis, isSupervisor) {
             <div class="card-header">
                 <h5>Σημειώσεις</h5>
             </div>
-            <form id="noteForm" onsubmit="addNote(${thesis.id}, event)">
+            <form id="noteForm" onsubmit="addNote(${thesis.thesis_id}, event)">
                 <div class="form-group">
                     <label for="noteText">Νέα Σημείωση (μέχρι 300 χαρακτήρες):</label>
                     <textarea id="noteText" maxlength="300" rows="3" required></textarea>
@@ -1026,19 +1041,19 @@ async function getActiveThesisActions(thesis, isSupervisor) {
             </form>
             
             <div class="notes-list">
-                <h6>Σημειώσεις σας:</h6>
-                ${thesis.notes ? thesis.notes.filter(note => note.professorId === currentUser.id).map(note => `
+                <h3>Σημειώσεις σας:</h3>
+                ${notes ? notes.map(note => `
                     <div class="note">
-                        <p>${note.text}</p>
-                        <small>${formatDate(note.date)}</small>
+                        <p>${note.comments}</p>
+                        <small>${formatDate(note.comment_date)}</small>
                     </div>
                 `).join('') : '<p>Δεν υπάρχουν σημειώσεις</p>'}
             </div>
         </div>
     `;
     
-    if (isSupervisor) {
-        const assignedDate = new Date(thesis.assignedDate);
+    if (thesis.professor_role === "Supervisor") {
+        const assignedDate = new Date(thesis.thesis_ass_date);
         const twoYearsAgo = new Date();
         twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
         
@@ -1051,8 +1066,8 @@ async function getActiveThesisActions(thesis, isSupervisor) {
         
         if (assignedDate < twoYearsAgo) {
             content += `
-                <button class="btn btn-warning" onclick="showCancelThesisForm(${thesis.id})">
-                    Ακύρωση Διπλωματικής (μετά από 2 έτη)
+                <button class="btn btn-warning" onclick="showCancelThesisForm(${thesis.thesis_id})">
+                    Ακύρωση Διπλωματικής
                 </button>
             `;
         } else {
@@ -1060,7 +1075,7 @@ async function getActiveThesisActions(thesis, isSupervisor) {
         }
         
         content += `
-                <button class="btn btn-success" onclick="changeStatusToReview(${thesis.id})">
+                <button class="btn btn-success" onclick="changeStatusToReview(${thesis.thesis_id})">
                     Αλλαγή σε "Υπό Εξέταση"
                 </button>
             </div>
@@ -1223,23 +1238,31 @@ function cancelThesisAssignment(thesisId) {
     }
 }
 
-function addNote(thesisId, event) {
+async function addNote(thesisID, event) {
     event.preventDefault();
-    const noteText = document.getElementById('noteText').value;
-    const thesis = theses.find(t => t.id === thesisId);
+    const newNotes = document.getElementById('noteText').value;
     
-    if (thesis && noteText.trim()) {
-        if (!thesis.notes) thesis.notes = [];
-        thesis.notes.push({
-            professorId: currentUser.id,
-            text: noteText,
-            date: new Date().toISOString()
-        });
-        
-        document.getElementById('noteText').value = '';
-        closeModal();
-        manageThesis(thesisId);
+    const response = await fetch("http://localhost:5001/api/professor/thesisNotes", {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      },
+      body: JSON.stringify({ thesisID , newNotes })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        alert(`Error: ${result.message}`);
+        return;
     }
+        
+    document.getElementById('noteText').value = '';
+    alert('Η προσθήκη νέας σημείωσης ήταν επιτυχής!');
+    closeModal();
+    loadContent('manageTheses');
+    
 }
 
 function showCancelThesisForm(thesisId) {
@@ -1265,27 +1288,52 @@ function showCancelThesisForm(thesisId) {
     showModal(modalContent);
 }
 
-function cancelThesisWithDetails(thesisId, event) {
+async function cancelThesisWithDetails(thesisID, event) {
     event.preventDefault();
     const assemblyNumber = document.getElementById('assemblyNumber').value;
     const assemblyYear = document.getElementById('assemblyYear').value;
     
-    const thesis = theses.find(t => t.id === thesisId);
-    if (thesis) {
-        thesis.status = 'cancelled';
-        thesis.cancellationReason = `Ακυρώθηκε από Διδάσκοντα - Γενική Συνέλευση ${assemblyNumber}/${assemblyYear}`;
-        closeModal();
-        loadContent('manageTheses');
+    const response = await fetch("http://localhost:5001/api/professor/cancelThesis", {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      },
+      body: JSON.stringify({ thesisID , assemblyNumber, assemblyYear})
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        alert(`Error: ${result.message}`);
+        return;
     }
+
+    alert('Η παρούσα διπλωματική μόλις ακυρώθηκε!');
+    closeModal();
+    loadContent('manageTheses');
 }
 
-function changeStatusToReview(thesisId) {
-    const thesis = theses.find(t => t.id === thesisId);
-    if (thesis) {
-        thesis.status = 'review';
-        closeModal();
-        loadContent('manageTheses');
+async function changeStatusToReview(thesisID) {
+   const response = await fetch("http://localhost:5001/api/professor/updateToReview", {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      },
+      body: JSON.stringify({ thesisID })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        alert(`Error: ${result.message}`);
+        return;
     }
+
+    alert('Αλλαγή Κατάστασης Επιτυχής : "Ενεργή" -> "Υπό Εξέταση"');
+    closeModal();
+    loadContent('manageTheses');
 }
 
 function generateAnnouncement(thesisId) {

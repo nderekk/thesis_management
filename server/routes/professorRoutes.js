@@ -14,6 +14,10 @@ const {
     searchStudent,
     assignTopicToStudent,
     getCommitteeRequests,
+    putThesisReview,
+    postCancelThesis,
+    getThesisNotes,
+    postThesisNotes,s
 } = require("../controllers/professorController");
 
 // public
@@ -25,11 +29,14 @@ router.get("/topics", getTopics);
 router.post("/topic", upload.single('file'), createTopic);
 router.delete("/topic", deleteTopic);
 router.put("/topic", upload.single('file'), editTopic);
-
 router.get("/stats", getStats)
 router.get("/thesesList", getThesesList);
 router.get("/searchStudent", searchStudent);
 router.put("/assignTopic", assignTopicToStudent);
 router.get("/committeeRequests", getCommitteeRequests);
+router.put("/updateToReview", putThesisReview);
+router.post("/cancelThesis", postCancelThesis);
+router.get("/thesisNotes", getThesisNotes);
+router.post("/thesisNotes", postThesisNotes);
 
 module.exports = router;

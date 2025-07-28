@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
-const {sequelize, professor, thesis_topics, thesis, student , trimelis_requests} = require("../config/dbConnection");
+const {sequelize, professor, thesis_topics, thesis, student , trimelis_requests, thesis_cancellation, thesis_comments} = require("../config/dbConnection");
 const deleteUploadedFile = require("../utils/fileDeleter");
-const { Op } = require('sequelize');
+const { Op , fn } = require('sequelize');
 
 //@desc Get current professor
 //@route Get /api/professor
@@ -306,8 +306,69 @@ const getCommitteeRequests = asyncHandler(async (req, res) => {
   res.status(200).json(committeeInfo);
 });
 
+//@desc Update thesis from Active to Review
+//@route PUT /api/professor/updateToReview
+//@access Private
+const putThesisReview = asyncHandler(async (req, res) => {
+  const { thesisID } = req.body;
+  if (!thesisID) return res.status(400).json({ message: 'Missing thesisID' });
+
+  const currentThesis = await thesis.findOne({ where : { id : thesisID } });
+
+  await currentThesis.update({ thesis_status: 'Review'});
+  res.status(200).json({ message: 'Status changed from Active to Review.' });
+
+});
+
+
+//@desc Cancel a thesis
+//@route POST /api/professor/cancelThesis
+//@access Private
+const postCancelThesis = asyncHandler(async (req, res) => {
+  const { thesisID , assemblyYear , assemblyNumber } = req.body;
+  if (!thesisID || !assemblyNumber || !assemblyYear) return res.status(400).json({ message: 'Missing thesisID , assembly year or assembly number.' });
+
+  const thesisCancellation = await thesis_cancellation.create({
+    thesis_id : thesisID,
+    reason : 'By Professor',
+    assembly_year : assemblyYear,
+    assembly_number : assemblyNumber
+  });
+  res.status(200).json(thesisCancellation);
+
+});
+
+//@desc Get notes from a thesis
+//@route GET /api/professor/thesisNotes
+//@access Private
+const getThesisNotes = asyncHandler(async (req, res) => {
+  
+  const thesisNotes = await thesis_comments.findAll({ where: {prof_am: req.user.id} });
+
+  res.status(200).json(thesisNotes);
+
+});
+
+//@desc Cancel a thesis
+//@route POST /api/professor/thesisNotes
+//@access Private
+const postThesisNotes = asyncHandler(async (req, res) => {
+  const { thesisID , newNotes } = req.body;
+  if (!thesisID || !newNotes) return res.status(400).json({ message: 'Missing thesisID or new notes' });
+
+  const postNewNote = await thesis_comments.create({
+    thesis_id : thesisID,
+    prof_am: req.user.id,
+    comments : newNotes,
+    comment_date : fn('CURDATE')
+  });
+  res.status(200).json(postNewNote);
+
+});
+
 module.exports = {
-  getProfessorInfo, getTopics, createTopic, 
-  editTopic, deleteTopic, getStats, getThesesList,
-  searchStudent, assignTopicToStudent, getCommitteeRequests
+  getProfessorInfo, getTopics, createTopic, getThesisNotes,
+  editTopic, deleteTopic, getStats, getThesesList,postCancelThesis,
+  searchStudent, assignTopicToStudent, getCommitteeRequests, putThesisReview,
+  postThesisNotes
 };
