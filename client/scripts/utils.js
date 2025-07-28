@@ -43,7 +43,10 @@ function initializeApp() {
         } else if (e.target.id === 'newTopicForm') {
             e.preventDefault();
             if (typeof createTopic === 'function') createTopic();
-        } 
+        } else if (e.target.id === 'importForm') {
+            e.preventDefault();
+            if (typeof importData === 'function') importData();
+        }  
     });
 }
 
