@@ -67,6 +67,7 @@ function initModels(sequelize) {
   professor.belongsTo(users, {as: "user", foreignKey: "prof_userid"});
   student.belongsTo(users, {as: "user", foreignKey: "student_userid"});
   secretary.belongsTo(users, {as: "user", foreignKey: "secretary_userid"});
+  thesis_comments.belongsTo(professor, {as: "professor", foreignKey: "prof_am"});
 
   return {
     announcements,
