@@ -126,8 +126,8 @@ drop table if exists thesis_cancellation;
 create table thesis_cancellation(
 	id int not null auto_increment,
     thesis_id int not null,
-    reason enum("By professor", "By Secretary") not null,
-    assembly_year year,
+    reason enum("By Professor", "By Secretary") not null,
+    assembly_year int,
     assembly_number int,
     primary key (id),
     foreign key (thesis_id) references thesis(id)
@@ -137,10 +137,14 @@ create table thesis_cancellation(
 drop table if exists thesis_comments;
 create table thesis_comments(
 	id int not null auto_increment,
+    prof_am int not null,
 	thesis_id int not null,
-    comments varchar(255) not null,
+    comments varchar(300) not null,
+    comment_date date not null,
     primary key (id),
     foreign key (thesis_id) references thesis(id)
+    on update cascade on delete cascade,
+    foreign key (prof_am) references professor(am)
     on update cascade on delete cascade
 );
 
