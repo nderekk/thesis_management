@@ -123,7 +123,7 @@ function getDataImport() {
     `;
 }
 
-async function importData() {
+async function handleImportData() {
         const fileInput = document.getElementById('dataFile');
         if (fileInput.files.length === 0) {
             alert('Παρακαλώ επιλέξτε αρχείο.');

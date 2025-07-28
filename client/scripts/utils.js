@@ -42,10 +42,10 @@ function initializeApp() {
             if (typeof handleExaminationForm === 'function') handleExaminationForm();
         } else if (e.target.id === 'newTopicForm') {
             e.preventDefault();
-            if (typeof createTopic === 'function') createTopic();
+            if (typeof handleCreateTopic === 'function') handleCreateTopic();
         } else if (e.target.id === 'importForm') {
             e.preventDefault();
-            if (typeof importData === 'function') importData();
+            if (typeof handleImportData === 'function') handleImportData();
         }  
     });
 }

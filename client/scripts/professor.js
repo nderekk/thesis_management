@@ -102,7 +102,7 @@ ${thesisTopics.data.map(topic => `
     `;
 }
 
-async function createTopic() {
+async function handleCreateTopic() {
   const topicFile = document.getElementById('topicFile').files[0];
   const topicTitle = document.getElementById('topicTitle').value;
   const topicDescription = document.getElementById('topicDescription').value;
