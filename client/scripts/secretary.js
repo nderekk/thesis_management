@@ -143,13 +143,12 @@ document.addEventListener('submit', async function (e) {
             });
 
             const r = await response.json();
-            if (!response.ok) {
-                alert(r.message);
-                throw new Error(`Error: ${r.message}`);
-            }
+            if (!response.ok)
+                throw new Error(`${r.message}`);
 
             alert(r.success);
         } catch (error) {
+            alert(error);
             console.error('Upload failed:', error);
         }
     }

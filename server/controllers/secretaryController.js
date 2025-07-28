@@ -155,9 +155,9 @@ const importData = asyncHandler(async (req, res) => {
         res.status(200).json({ success: `Imported ${stuCount} students and ${profCount} professors!`});
 
   } catch (err) {
-    // console.error(err);
+    // console.log(err.message);
     res.status(500);
-    throw new Error(err);
+    throw new Error(err.message);
   }
 });
 
