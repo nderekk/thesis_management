@@ -125,8 +125,6 @@ const getThesesList = asyncHandler(async (req, res) => {
       ]
     }
   });
-
-  console.log(professorThesesSupervisor)
   const topicIDs = professorThesesSupervisor.map(thesis => thesis.topic_id);
   const professorThesesTopics = await thesis_topics.findAll({where: { id: topicIDs }});
 
@@ -228,11 +226,11 @@ const getStats = asyncHandler(async (req, res) => {
   res.status(200).json({
     supervisorAvg: Number(supervisorResults.avg_days), 
     committeeAvg: Number(committeeResults.avg_days), 
-    totalAvg: Number(totalAvg),
+    totalAvg: totalAvg ? Number(totalAvg) : 0,
 
     supervisorGrade: Number(supervisorGrade.grade),
     committeeGrade: Number(committeeGrade.grade),
-    totalGrade: Number(totalGrade),
+    totalGrade: totalGrade ? Number(totalGrade) : 0,
 
     supervisorCount: Number(supervisorCount.n1),
     committeeCount: Number(committeeCount.n2),
