@@ -43,7 +43,7 @@ function initializeApp() {
         } else if (e.target.id === 'newTopicForm') {
             e.preventDefault();
             if (typeof createTopic === 'function') createTopic();
-        }
+        } 
     });
 }
 
@@ -71,6 +71,7 @@ async function handleLogin(e) {
     if ('userRole' in user) {
         currentUser = user;
         currentUserType = user.userRole;
+        console.log(currentUser);
         localStorage.setItem('currentUser', JSON.stringify(user));
         localStorage.setItem('currentUserType', currentUserType);
         showMainApp();
@@ -111,7 +112,7 @@ function showMainApp() {
 }
 
 async function updateUserInfo() {
-    const response = await fetch(`http://localhost:5001/api/${currentUser.userRole}`, {
+    const response = await fetch(`http://localhost:5001/api/${currentUserType}`, {
       method: 'GET',
       credentials: 'include',
       headers: {

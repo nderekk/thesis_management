@@ -18,6 +18,7 @@ const getThesisInfo = asyncHandler(async (req, res) => {
   } else {
     studentThesis = await thesis.findOne({ where: {id: req.query.id}});
   }
+  if (!studentThesis) return res.status(200).json('empty');
   const thesisTopic = await thesis_topics.findOne({ where: {id: studentThesis.topic_id}});
   const supervisor = await professor.findOne({ where: {am: studentThesis.supervisor_am}});
   const prof2 = await professor.findOne({ where: {am: studentThesis.prof2_am} });

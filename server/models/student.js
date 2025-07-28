@@ -21,7 +21,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     semester: {
       type: DataTypes.SMALLINT,
-      allowNull: false
+      allowNull: true
     },
     email: {
       type: DataTypes.STRING(50),
@@ -44,7 +44,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     },
     post_code: {
-      type: DataTypes.SMALLINT,
+      type: DataTypes.INTEGER,
       allowNull: false
     },
     student_userid: {

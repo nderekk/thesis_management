@@ -87,9 +87,6 @@ END$
 
 DELIMITER ;
 
-UPDATE thesis_topics SET topic_status="unassigned" WHERE id=25;
-
-
 --  SHOW TRIGGERS FROM diplomatiki_sys;
 -- select * from student;
 -- select * from users;
@@ -103,9 +100,12 @@ select * from thesis;
 select * from theses_presentation;
 select * from trimelis_requests;
 
-SELECT AVG(final_grade) FROM thesis_grade as grade INNER JOIN thesis 
-	on thesis_id = thesis.id 
-    AND (thesis.supervisor_am = 1);
+-- INSERT INTO professor (am, first_name, last_name, email, phone_number, field_of_expertise, prof_userid) VALUES 
+-- (10, 'kapoios', 'kurios', 'outos@ceid.upatras.gr', '2610960001', 'full expert', 10);
+
+-- SELECT AVG(final_grade) FROM thesis_grade as grade INNER JOIN thesis 
+-- 	on thesis_id = thesis.id 
+--     AND (thesis.supervisor_am = 1);
 
 
 

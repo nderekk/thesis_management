@@ -1,6 +1,5 @@
 async function refreshThesis(hard) {
-    if (hard) currentThesis = null;
-    if (!currentThesis){
+    if (!currentThesis || hard){
         const response = await fetch("http://localhost:5001/api/student/thesis", {
         method: 'GET',
         credentials: 'include',
@@ -9,12 +8,15 @@ async function refreshThesis(hard) {
         }
         });
         const studentThesis = await response.json();
+        console.log(studentThesis);
         if (!response.ok) {
             alert(studentThesis.message);
             throw new Error(`Error: ${studentThesis.message}`);
         }
-        localStorage.setItem('currentThesis', JSON.stringify(studentThesis));
-        currentThesis = JSON.parse(localStorage.getItem('currentThesis'));
+        if (studentThesis !== 'empty'){
+          localStorage.setItem('currentThesis', JSON.stringify(studentThesis));
+          currentThesis = JSON.parse(localStorage.getItem('currentThesis'));
+        }
     }
     console.log("THESIS", (hard) ? "FLUSHED" : "SAME");
 }
