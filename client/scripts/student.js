@@ -324,11 +324,15 @@ function getActiveThesisContent(thesis) {
             </div>
             <div class="form-group">
                 <label>Μέλη Τριμελούς:</label>
-                <ul>
-                    <li><strong>Επιβλέπων:</strong> ${thesis.supervisor}</li>
-                    ${thesis.committeeMembers
-                        .slice(1).map(member => `<li><strong>Μέλος:</strong> ${member}</li>`).join('')}
-                </ul>
+                <div class="inner">
+                    <div class="inner">
+                        <ul>
+                            <li><strong>Επιβλέπων:</strong> ${thesis.supervisor}</li>
+                            ${thesis.committeeMembers
+                                .slice(1).map(member => `<li><strong>Μέλος:</strong> ${member}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
             </div>
             <div class="form-group">
                 <label>Χρόνος από την Ανάθεση:</label>
