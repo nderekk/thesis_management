@@ -133,7 +133,7 @@ const professorList = asyncHandler(async (req, res) => {
 const inviteProfessor = asyncHandler(async (req, res) => {
   const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
   const studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
-  if (studentThesis.status !== 'Pending'){
+  if (studentThesis.thesis_status !== 'Pending'){
     res.status(400)
     throw new Error("Ur thesis isnt fit for new committee members");
   }
@@ -142,7 +142,6 @@ const inviteProfessor = asyncHandler(async (req, res) => {
     thesis_id: studentThesis.id,
     answer: { [Op.ne]: 'accepted' } 
   }});
-  console.log(existingInvitations);
   if(existingInvitations.length === 0){
     const invitedProfessor = await trimelis_requests.create({ 
       thesis_id : studentThesis.id,
