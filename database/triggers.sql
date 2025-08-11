@@ -22,10 +22,11 @@ FOR EACH ROW
 BEGIN
 
 DECLARE current_prof2_am VARCHAR(255);
+DECLARE topic INT;
  
 IF new.answer = "accepted" THEN 
 	 
-    SELECT prof2_am INTO current_prof2_am
+    SELECT prof2_am, topic_id INTO current_prof2_am, topic
     FROM thesis
     WHERE id = NEW.thesis_id;
     
@@ -34,6 +35,7 @@ IF new.answer = "accepted" THEN
 	ELSE
 		UPDATE thesis SET thesis.prof3_am = new.prof_am WHERE thesis.id = new.thesis_id;
         UPDATE thesis SET thesis.thesis_status = 'Active' WHERE thesis.id = new.thesis_id;
+        UPDATE thesis_topics SET thesis_topics.topic_status = 'assigned' WHERE thesis_topics.id = topic;
 	END IF;
 END IF;
 END$
