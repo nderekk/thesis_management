@@ -88,25 +88,47 @@ END$
 
 DELIMITER ;
 
+----------------------------------------------------------------------- 
+
+DELIMITER $
+
+CREATE TRIGGER cancelThesis
+AFTER INSERT ON thesis_cancellation
+FOR EACH ROW
+BEGIN
+	UPDATE thesis SET thesis.thesis_status = 'Cancelled' WHERE thesis.id = new.thesis_id;
+END$
+
+DELIMITER ;
+
+
+
+
 --  SHOW TRIGGERS FROM diplomatiki_sys;
 -- select * from student;
 -- select * from users;
 -- update student set email = 'andpet@upatras.gr' where am= 1;
--- drop trigger update_committee;
+-- drop trigger cancelThesis;
 -- select * from trimelis_requests;
 select * from professor;
 select * from users;
 select * from thesis_topics;
 select * from thesis;
-select * from theses_presentation;
+select * from thesis_comments;
 select * from trimelis_requests;
 
--- INSERT INTO professor (am, first_name, last_name, email, phone_number, field_of_expertise, prof_userid) VALUES 
+SELECT AVG(final_grade) FROM thesis_grade as grade INNER JOIN thesis 
+	on thesis_id = thesis.id 
+    AND (thesis.supervisor_am = 1);
+
+	-- INSERT INTO professor (am, first_name, last_name, email, phone_number, field_of_expertise, prof_userid) VALUES 
 -- (10, 'kapoios', 'kurios', 'outos@ceid.upatras.gr', '2610960001', 'full expert', 10);
 
 -- SELECT AVG(final_grade) FROM thesis_grade as grade INNER JOIN thesis 
 -- 	on thesis_id = thesis.id 
 --     AND (thesis.supervisor_am = 1);
+
+INSERT INTO thesis_comments  VALUES (DEFAULT,3,"Slatina Iremise",3 , '2025-12-11');
 
 
 

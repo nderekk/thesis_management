@@ -16,11 +16,11 @@ module.exports = function(sequelize, DataTypes) {
       }
     },
     reason: {
-      type: DataTypes.ENUM('By professor','By Secretary'),
+      type: DataTypes.ENUM('By Professor','By Secretary'),
       allowNull: false
     },
     assembly_year: {
-      type: DataTypes.DATE,
+      type: DataTypes.INTEGER,
       allowNull: true
     },
     assembly_number: {
