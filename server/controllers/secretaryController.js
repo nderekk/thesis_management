@@ -92,11 +92,11 @@ const importData = asyncHandler(async (req, res) => {
       const t = await sequelize.transaction();
 
       try{
-      let user = await users.create({
-        email: stu.email,
-        role: 'student',
-        password: 'password'
-      }, { transaction: t });
+        let user = await users.create({
+          email: stu.email,
+          role: 'student',
+          password: 'password'
+        }, { transaction: t });
 
        await student.create({
         first_name: stu.name,

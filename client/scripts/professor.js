@@ -1430,13 +1430,78 @@ function copyAnnouncement() {
     alert('Η ανακοίνωση αντιγράφηκε στο clipboard!');
 }
 
-function getInvitationsList() {
-    return `
-        <div class="content-header">
-            <h1>Προσκλήσεις Τριμελούς Επιτροπής</h1>
+async function getInvitationsList() {
+    const response = await fetch("http://localhost:5001/api/professor/invitations", {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+    });
+    const invitations = await response.json();
+    if (!response.ok) {
+        alert(invitations.message);
+        throw new Error(`Error: ${invitations.message}`);
+    }
+
+    const rowsHTML = invitations.filter(i => i.answer === 'pending').map(inv => `
+        <tr>
+            <td>${inv.title}</td>   
+            <td>${inv.student_name}</td>
+            <td>${inv.supervisor}</td>
+            <td>${formatDate(inv.invite_date)}</td>
+            <td>
+                <button class="btn btn-primary" onclick="respondToInvitation(${inv.id}, true)">Αποδοχή</button>
+                <button class="btn btn-danger" onclick="respondToInvitation(${inv.id}, false)">Απόρριψη</button>
+            </td>
+        </tr>
+    `).join('');
+
+  return `
+    <div class="content-header">
+        <h1>Προσκλήσεις Τριμελούς Επιτροπής</h1>
+        <p>Δείτε και απαντήστε στις προσκλήσεις που έχετε λάβει για συμμετοχή σε τριμελείς επιτροπές.</p>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Ενεργές Προσκλήσεις</h3>
         </div>
-        <div class="card">
-            <p>Η λειτουργία προβολής και αποδοχής/απόρριψης προσκλήσεων δεν είναι ακόμα διαθέσιμη.</p>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Θέμα Διπλωματικής</th>
+                        <th>Φοιτητής</th>
+                        <th>Επιβλέπων</th>
+                        <th>Ημερομηνία Πρόσκλησης</th>
+                        <th>Ενέργειες</th>
+                    </tr>
+                </thead>
+                <tbody id="invitationsTableBody">
+                    ${rowsHTML}
+                </tbody>
+            </table>
         </div>
-    `;
+    </div>
+  `;
 }
+
+async function respondToInvitation(invitationId, accepted) {
+  const response = await fetch(`http://localhost:5001/api/professor/invitations/respond`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      invitationId: invitationId,
+      response: accepted ? 'accepted' : 'declined'
+    })
+  });
+
+  const result = await response.json();
+  if (response.ok) {
+    alert(result.message || 'Η απάντηση καταχωρήθηκε.');
+    loadContent("invitations"); // Refresh list
+  } else {
+    alert(result.message || 'Σφάλμα κατά την απάντηση.');
+  }
+}
+

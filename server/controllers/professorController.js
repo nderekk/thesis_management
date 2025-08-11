@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const {sequelize, professor, thesis_topics, thesis, student , trimelis_requests, thesis_cancellation, thesis_comments} = require("../config/dbConnection");
 const deleteUploadedFile = require("../utils/fileDeleter");
-const { Op , fn } = require('sequelize');
+const { Op, fn } = require('sequelize');
 
 //@desc Get current professor
 //@route Get /api/professor
@@ -117,12 +117,14 @@ const deleteTopic = asyncHandler(async (req, res) => {
 const getThesesList = asyncHandler(async (req, res) => {
   const loggedProfessor = await professor.findOne({ where: {prof_userid: req.user.id} });
   const professorThesesSupervisor = await thesis.findAll({
-    [Op.or]: [
-      { supervisor_am: loggedProfessor.am },
-      { prof2_am: loggedProfessor.am },
-      { prof3_am: loggedProfessor.am}
-    ]
-  })
+    where: {
+      [Op.or]: [
+        { supervisor_am: loggedProfessor.am },
+        { prof2_am: loggedProfessor.am },
+        { prof3_am: loggedProfessor.am }
+      ]
+    }
+  });
   const topicIDs = professorThesesSupervisor.map(thesis => thesis.topic_id);
   const professorThesesTopics = await thesis_topics.findAll({where: { id: topicIDs }});
 
@@ -224,11 +226,11 @@ const getStats = asyncHandler(async (req, res) => {
   res.status(200).json({
     supervisorAvg: Number(supervisorResults.avg_days), 
     committeeAvg: Number(committeeResults.avg_days), 
-    totalAvg: Number(totalAvg),
+    totalAvg: totalAvg ? Number(totalAvg) : 0,
 
     supervisorGrade: Number(supervisorGrade.grade),
     committeeGrade: Number(committeeGrade.grade),
-    totalGrade: Number(totalGrade),
+    totalGrade: totalGrade ? Number(totalGrade) : 0,
 
     supervisorCount: Number(supervisorCount.n1),
     committeeCount: Number(committeeCount.n2),
@@ -284,7 +286,7 @@ const assignTopicToStudent = asyncHandler(async (req, res) => {
 });
 
 //@desc Get committee professors for a thesis
-//@route GET /api/professor/getCommitteeRequests
+//@route GET /api/professor/committeeRequests
 //@access Private 
 const getCommitteeRequests = asyncHandler(async (req, res) => {
   const committeeProfessors = await trimelis_requests.findAll();
@@ -366,9 +368,68 @@ const postThesisNotes = asyncHandler(async (req, res) => {
 
 });
 
+//@desc get all professor's invitations
+//@route GET /api/professor/invitations
+//@access Private 
+const getInvitationsList = asyncHandler(async (req, res) => {
+  const loggedProfessor = await professor.findOne({ where: {prof_userid: req.user.id} });
+  const requests = await trimelis_requests.findAll({
+    where: {
+      prof_am: loggedProfessor.am
+    }
+  });
+  console.log(requests);
+  const invitations = await Promise.all(requests.map(async r => {
+    const th = await thesis.findOne({where: {
+      id: r.thesis_id
+    }});
+    const topic = await thesis_topics.findOne({where: {
+      id: th.topic_id
+    }});
+    const stu = await student.findOne({ where: {
+      am: th.student_am
+    }});
+    const supervisor = await professor.findOne({where: {
+      am: th.supervisor_am
+    }});
+
+    return {
+      id: r.id,
+      title: topic.title,
+      answer: r.answer,
+      invite_date: r.invite_date,
+      answer_date: r.answer_date,
+      student_am: stu.am,
+      student_name: `${stu.first_name} ${stu.last_name}`,
+      supervisor: `${supervisor.first_name} ${supervisor.last_name}`
+    };
+  }));
+  
+  res.status(200).json(invitations);
+});
+
+//@desc accept or decline an invitation
+//@route PUT /api/professor/invitations/respond
+//@access Private 
+const respondToInvitation = asyncHandler(async (req, res) => {
+  const invitation = await trimelis_requests.findOne({where: {
+    id: req.body.invitationId
+  }});
+  if (invitation.answer === 'accepted' || invitation.answer === 'declined') {
+    res.status(400);
+    throw new Error("Cant change already settled invitation");
+  }
+  await invitation.update({
+    answer: req.body.response,
+    answer_date: fn('CURDATE')
+  });
+
+  res.status(200).json({ message: `Invitation ${req.body.response}` });
+});
+
 module.exports = {
   getProfessorInfo, getTopics, createTopic, getThesisNotes,
   editTopic, deleteTopic, getStats, getThesesList,postCancelThesis,
   searchStudent, assignTopicToStudent, getCommitteeRequests, putThesisReview,
-  postThesisNotes
+  postThesisNotes, getInvitationsList, respondToInvitation
 };

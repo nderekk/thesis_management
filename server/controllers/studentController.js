@@ -3,7 +3,7 @@ const {
   sequelize, student, thesis, thesis_topics, 
   professor, trimelis_requests, thesis_presentation, thesis_grade
 } = require("../config/dbConnection");
-const {fn} = require('sequelize');
+const {fn, Op} = require('sequelize');
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -133,13 +133,28 @@ const professorList = asyncHandler(async (req, res) => {
 const inviteProfessor = asyncHandler(async (req, res) => {
   const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
   const studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
-  const invitedProfessor = await trimelis_requests.create({ 
-    thesis_id : studentThesis.id,
-    prof_am : req.body.prof_am,
-    answer : 'pending',
-    invite_date : fn('NOW'),
-  });
-  res.status(200).json(invitedProfessor);
+  if (studentThesis.thesis_status !== 'Pending'){
+    res.status(400)
+    throw new Error("Ur thesis isnt fit for new committee members");
+  }
+  const existingInvitations = await trimelis_requests.findAll({ where: {
+    prof_am:req.body.prof_am,
+    thesis_id: studentThesis.id,
+    answer: { [Op.ne]: 'accepted' } 
+  }});
+  if(existingInvitations.length === 0){
+    const invitedProfessor = await trimelis_requests.create({ 
+      thesis_id : studentThesis.id,
+      prof_am : req.body.prof_am,
+      answer : 'pending',
+      invite_date : fn('NOW'),
+    });
+
+    res.status(200).json(invitedProfessor);
+  }
+  
+  res.status(400);
+  throw new Error( "Invite alr exists");
 });
 
 //@desc student uploads pdf

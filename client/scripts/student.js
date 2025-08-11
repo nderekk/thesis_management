@@ -257,8 +257,7 @@ async function  getPendingThesisContent(thesis) {
         alert(professors.message);
         throw new Error(`Error: ${professors.message}`);
     }
-    professors = professors.p.filter(p => p.name !== thesis.supervisor);
-    console.log(thesis.supervisor);
+    professors = professors.p.filter(p => !thesis.committeeMembers.includes(p.name));
     const invitedProfessors = thesis.invitedProfessors.filter(inv => inv.answer === 'pending') || [];
     const acceptedProfessors = thesis.invitedProfessors.filter(inv => inv.answer === 'accepted') || [];
     const acceptedInvitations = invitedProfessors.filter(inv => inv.answer === 'accepted').length;
@@ -275,7 +274,16 @@ async function  getPendingThesisContent(thesis) {
             <div class="form-group">
                 <label>Προσκληθέντες Διδάσκοντες:</label>
                 <div class="invited-members">
-                    ${invitedProfessors.length === 0 ? '<p>Δεν έχουν σταλεί προσκλήσεις.</p>' : invitedProfessors.map(inv => `
+                    ${invitedProfessors.length === 0 ? '<p>Δεν έχουν σταλεί προσκλήσεις.</p>' : 
+                        invitedProfessors.length === 0 ? '<p>-</p>' : thesis.committeeMembers.slice(1).map(member => `
+                            <div class="invited-member">
+                                <span>${member} </span>
+                                <!-- <span class="status-badge status-"accepted"}">${getInvitationStatusText("accepted")}</span> -->
+                                <span class="status-badge status-Completed">${getInvitationStatusText("accepted")}</span>
+
+                            </div>
+                        `).join('')}
+                        ${invitedProfessors.map(inv => `
                         <div class="invited-member">
                             <span>${inv.first_name} ${inv.last_name} </span>
                             <!-- <span class="status-badge status-${inv.answer}">${getInvitationStatusText(inv.answer)}</span> -->
@@ -316,11 +324,15 @@ function getActiveThesisContent(thesis) {
             </div>
             <div class="form-group">
                 <label>Μέλη Τριμελούς:</label>
-                <ul>
-                    <li><strong>Επιβλέπων:</strong> ${thesis.supervisor}</li>
-                    ${thesis.committeeMembers
-                        .slice(1).map(member => `<li><strong>Μέλος:</strong> ${member}</li>`).join('')}
-                </ul>
+                <div class="inner">
+                    <div class="inner">
+                        <ul>
+                            <li><strong>Επιβλέπων:</strong> ${thesis.supervisor}</li>
+                            ${thesis.committeeMembers
+                                .slice(1).map(member => `<li><strong>Μέλος:</strong> ${member}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
             </div>
             <div class="form-group">
                 <label>Χρόνος από την Ανάθεση:</label>

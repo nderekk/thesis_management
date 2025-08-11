@@ -17,7 +17,9 @@ const {
     putThesisReview,
     postCancelThesis,
     getThesisNotes,
-    postThesisNotes,s
+    postThesisNotes,
+    getInvitationsList,
+    respondToInvitation,
 } = require("../controllers/professorController");
 
 // public
@@ -38,5 +40,7 @@ router.put("/updateToReview", putThesisReview);
 router.post("/cancelThesis", postCancelThesis);
 router.get("/thesisNotes", getThesisNotes);
 router.post("/thesisNotes", postThesisNotes);
+router.get("/invitations", getInvitationsList);
+router.put("/invitations/respond", respondToInvitation);
 
 module.exports = router;
