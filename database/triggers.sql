@@ -15,7 +15,7 @@ DELIMITER ;
 
 DELIMITER $
 
-DROP TRIGGER update_committee$
+-- DROP TRIGGER update_committee$
 CREATE TRIGGER update_committee
 AFTER UPDATE ON trimelis_requests
 FOR EACH ROW
