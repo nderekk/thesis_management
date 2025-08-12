@@ -18,6 +18,8 @@ const {
     postCancelThesis,
     getThesisNotes,
     postThesisNotes,
+    putEnableGrading,
+    postGrade,
     getInvitationsList,
     respondToInvitation,
 } = require("../controllers/professorController");
@@ -40,6 +42,8 @@ router.put("/updateToReview", putThesisReview);
 router.post("/cancelThesis", postCancelThesis);
 router.get("/thesisNotes", getThesisNotes);
 router.post("/thesisNotes", postThesisNotes);
+router.put("/enableGrading", putEnableGrading);
+router.put("/postGrade", postGrade);
 router.get("/invitations", getInvitationsList);
 router.put("/invitations/respond", respondToInvitation);
 

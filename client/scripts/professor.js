@@ -1086,7 +1086,7 @@ async function getActiveThesisActions(thesis) {
 }
 
 // Actions for review thesis
-async function getReviewThesisActions(thesis, isSupervisor, isCommitteeMember) {
+async function getReviewThesisActions(thesis) {
     let content = `
         <h4>Ενέργειες για Διπλωματική Υπό Εξέταση</h4>
         
@@ -1103,7 +1103,7 @@ async function getReviewThesisActions(thesis, isSupervisor, isCommitteeMember) {
         </div>
     `;
     
-    if (isSupervisor) {
+    if (thesis.professor_role === "Supervisor") {
         content += `
             <div class="card">
                 <div class="card-header">
@@ -1115,44 +1115,42 @@ async function getReviewThesisActions(thesis, isSupervisor, isCommitteeMember) {
                     </button>
                 ` : '<p class="alert alert-warning">Η ανακοίνωση είναι διαθέσιμη μόνο μετά τη συμπλήρωση των λεπτομερειών παρουσίασης</p>'}
                 
-                <button class="btn btn-success" onclick="enableGrading(${thesis.id})">
+                ${!thesis.enableGrading ? `
+                <button class="btn btn-success" onclick="enableGrading(${thesis.thesis_id})">
                     Ενεργοποίηση Βαθμολόγησης
                 </button>
+                ` : '<p class="alert alert-info">Η βαθμολόγηση έχει ενεργοποιηθεί από τον επιβλέποντα</p>'}
             </div>
         `;
     }
     
-    if (isSupervisor || isCommitteeMember) {
+    if (thesis.professor_role === "Supervisor" || thesis.professor_role === "Committee Member") {
         content += `
             <div class="card">
                 <div class="card-header">
                     <h5>Βαθμολόγηση</h5>
                 </div>
-                ${thesis.gradingEnabled ? `
-                    <form id="gradeForm" onsubmit="submitGrade(${thesis.id}, event)">
+                ${thesis.enableGrading ? `
+                    <form id="gradeForm" onsubmit="submitGrade(${thesis.thesis_id}, event)">
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="contentGrade">Περιεχόμενο:</label>
+                                <label for="contentGrade">Ποιότητα Δ.Ε.</label>
                                 <input type="number" id="contentGrade" min="0" max="10" step="0.1" required>
                             </div>
                             <div class="form-group">
-                                <label for="methodologyGrade">Μεθοδολογία:</label>
+                                <label for="methodologyGrade">Χρονικό Διάστημα Εκπόνησης</label>
                                 <input type="number" id="methodologyGrade" min="0" max="10" step="0.1" required>
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="presentationGrade">Παρουσίαση:</label>
+                                <label for="presentationGrade">Πληρότητα Κειμένου</label>
                                 <input type="number" id="presentationGrade" min="0" max="10" step="0.1" required>
                             </div>
                             <div class="form-group">
-                                <label for="originalityGrade">Πρωτοτυπία:</label>
+                                <label for="originalityGrade">Συνολική Εικόνα Παρουσίασης</label>
                                 <input type="number" id="originalityGrade" min="0" max="10" step="0.1" required>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="gradeComments">Σχόλια:</label>
-                            <textarea id="gradeComments" rows="3"></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary">Υποβολή Βαθμού</button>
                     </form>
@@ -1367,62 +1365,54 @@ function generateAnnouncement(thesisId) {
     }
 }
 
-function enableGrading(thesisId) {
-    const thesis = theses.find(t => t.id === thesisId);
-    if (thesis) {
-        thesis.gradingEnabled = true;
-        closeModal();
-        manageThesis(thesisId);
+async function enableGrading(thesisID) {
+     const response = await fetch("http://localhost:5001/api/professor/enableGrading", {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      },
+      body: JSON.stringify({ thesisID })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        alert(`Error: ${result.message}`);
+        return;
     }
+
+    alert('Η βαθμολόγηση μόλις ενεργοποιήθηκε!');
+    closeModal();
+    loadContent('manageTheses');
 }
 
-function submitGrade(thesisId, event) {
+async function submitGrade(thesisID, event) {
     event.preventDefault();
-    const contentGrade = parseFloat(document.getElementById('contentGrade').value);
-    const methodologyGrade = parseFloat(document.getElementById('methodologyGrade').value);
-    const presentationGrade = parseFloat(document.getElementById('presentationGrade').value);
-    const originalityGrade = parseFloat(document.getElementById('originalityGrade').value);
-    const comments = document.getElementById('gradeComments').value;
+    const grade1 = parseFloat(document.getElementById('contentGrade').value);
+    const grade2 = parseFloat(document.getElementById('methodologyGrade').value);
+    const grade3 = parseFloat(document.getElementById('presentationGrade').value);
+    const grade4 = parseFloat(document.getElementById('originalityGrade').value);
     
-    const averageGrade = (contentGrade + methodologyGrade + presentationGrade + originalityGrade) / 4;
-    
-    const thesis = theses.find(t => t.id === thesisId);
-    if (thesis) {
-        if (!thesis.grades) thesis.grades = [];
-        
-        // Check if professor already graded
-        const existingGradeIndex = thesis.grades.findIndex(g => g.professorId === currentUser.id);
-        if (existingGradeIndex >= 0) {
-            thesis.grades[existingGradeIndex] = {
-                professorId: currentUser.id,
-                grade: averageGrade,
-                criteria: {
-                    content: contentGrade,
-                    methodology: methodologyGrade,
-                    presentation: presentationGrade,
-                    originality: originalityGrade
-                },
-                comments: comments,
-                date: new Date().toISOString()
-            };
-        } else {
-            thesis.grades.push({
-                professorId: currentUser.id,
-                grade: averageGrade,
-                criteria: {
-                    content: contentGrade,
-                    methodology: methodologyGrade,
-                    presentation: presentationGrade,
-                    originality: originalityGrade
-                },
-                comments: comments,
-                date: new Date().toISOString()
-            });
-        }
-        
-        closeModal();
-        manageThesis(thesisId);
+    const response = await fetch("http://localhost:5001/api/professor/postGrade", {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      },
+      body: JSON.stringify({ thesisID , grade1, grade2, grade3, grade4})
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        alert(`Error: ${result.message}`);
+        return;
     }
+    
+    alert('Η καταχώρηση βαθμού ήταν επιτυχής!');
+    closeModal();
+    manageThesis(thesisID);
 }
 
 function copyAnnouncement() {

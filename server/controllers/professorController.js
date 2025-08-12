@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const {sequelize, professor, thesis_topics, thesis, student , trimelis_requests, thesis_cancellation, thesis_comments} = require("../config/dbConnection");
+const {sequelize, professor, thesis_topics, thesis, student , trimelis_requests, thesis_cancellation, thesis_comments, thesis_grade} = require("../config/dbConnection");
 const deleteUploadedFile = require("../utils/fileDeleter");
 const { Op, fn } = require('sequelize');
 
@@ -147,7 +147,8 @@ const getThesesList = asyncHandler(async (req, res) => {
         professor_role: role,
         thesis_status: prof.thesis_status,
         thesis_ass_date: prof.assignment_date,
-        student_name: `${stud.first_name} ${stud.last_name}`
+        student_name: `${stud.first_name} ${stud.last_name}`,
+        enableGrading: prof.enableGrading
       };
     });
 
@@ -368,6 +369,44 @@ const postThesisNotes = asyncHandler(async (req, res) => {
 
 });
 
+//@desc Enabling the grading system
+//@route PUT /api/professor/enableGrading
+//@access Private
+const putEnableGrading = asyncHandler(async (req, res) => {
+  const { thesisID } = req.body;
+  if (!thesisID) return res.status(400).json({ message: 'Missing thesisID' });
+
+  const currentThesis = await thesis.findOne({ where : { id : thesisID } });
+
+  await currentThesis.update({ enableGrading: 1});
+  res.status(200).json({ message: 'Grading got enabled.' });
+
+});
+
+//@desc Each professor can post the grade
+//@route PUT /api/professor/postGrade
+//@access Private
+const postGrade = asyncHandler(async (req, res) => {
+  const { thesisID, grade1, grade2, grade3, grade4 } = req.body;
+  if (!thesisID || !grade1 || !grade2 || !grade3 || !grade4) return res.status(400).json({ message: 'Missing thesisID or grade' });
+
+  const currentThesis = await thesis_grade.findOne({ where : { thesis_id : thesisID } });
+
+  if(currentThesis.prof1am === req.user.id || currentThesis.prof2am === req.user.id  || currentThesis.prof3am === req.user.id )
+    return res.status(400).json({ message: 'You have already submitted a grade' });
+  else{
+    if(currentThesis.prof1am === null)
+      await currentThesis.update({ prof1am: req.user.id, prof1_grade1: grade1 , prof1_grade2: grade2, prof1_grade3: grade3, prof1_grade4: grade4});
+    else if(currentThesis.prof2am === null)
+      await currentThesis.update({ prof2am: req.user.id, prof2_grade1: grade1 , prof2_grade2: grade2, prof2_grade3: grade3, prof2_grade4: grade4});
+    else if(currentThesis.prof3am === null)
+      await currentThesis.update({ prof3am: req.user.id, prof3_grade1: grade1 , prof3_grade2: grade2, prof3_grade3: grade3, prof3_grade4: grade4});
+}
+
+  res.status(200).json({currentThesis});
+
+});
+
 //@desc get all professor's invitations
 //@route GET /api/professor/invitations
 //@access Private 
@@ -431,5 +470,5 @@ module.exports = {
   getProfessorInfo, getTopics, createTopic, getThesisNotes,
   editTopic, deleteTopic, getStats, getThesesList,postCancelThesis,
   searchStudent, assignTopicToStudent, getCommitteeRequests, putThesisReview,
-  postThesisNotes, getInvitationsList, respondToInvitation
+  postThesisNotes , putEnableGrading, postGrade, getInvitationsList, respondToInvitation
 };
