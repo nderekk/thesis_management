@@ -116,7 +116,7 @@ select * from professor;
 select * from users;
 select * from thesis_topics;
 select * from thesis;
-select * from thesis_comments;
+select * from thesis_grade;
 select * from trimelis_requests;
 
 SELECT AVG(final_grade) FROM thesis_grade as grade INNER JOIN thesis 

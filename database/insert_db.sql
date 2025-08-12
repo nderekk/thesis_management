@@ -12,7 +12,7 @@ INSERT INTO users (id, email, password, role) VALUES
 (5, 'elmakri@upatras.gr', 'hashed_password_5', 'student'),
 (6, 'nikchar@upatras.gr', 'hashed_password_6', 'student'),
 (9, 'mpampis@upatras.gr', 'hashed_password_9', 'student'),
-
+	
 -- Insert users (secretaries)
 (7, 'gspanou@ceid.upatras.gr', 'hashed_password_7', 'secretary'),
 (8, 'kvlachou@ceid.upatras.gr', 'hashed_password_8', 'secretary');
