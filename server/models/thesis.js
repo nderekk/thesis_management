@@ -71,6 +71,11 @@ module.exports = function(sequelize, DataTypes) {
     ap_from_gs: {
       type: DataTypes.INTEGER,
       allowNull: true
+    },
+    enableGrading: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false
     }
   }, {
     sequelize,

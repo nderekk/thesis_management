@@ -19,6 +19,14 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.DECIMAL(4,2),
       allowNull: true
     },
+     prof1am: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'professor',
+        key: 'am'
+      }
+    },
     prof1_grade1: {
       type: DataTypes.DECIMAL(4,2),
       allowNull: true
@@ -35,6 +43,14 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.DECIMAL(4,2),
       allowNull: true
     },
+    prof2am: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'professor',
+        key: 'am'
+      }
+    },
     prof2_grade1: {
       type: DataTypes.DECIMAL(4,2),
       allowNull: true
@@ -50,6 +66,14 @@ module.exports = function(sequelize, DataTypes) {
     prof2_grade4: {
       type: DataTypes.DECIMAL(4,2),
       allowNull: true
+    },
+    prof3am: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'professor',
+        key: 'am'
+      }
     },
     prof3_grade1: {
       type: DataTypes.DECIMAL(4,2),
