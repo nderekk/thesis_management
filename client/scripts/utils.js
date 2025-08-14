@@ -29,7 +29,12 @@ function initializeApp() {
         currentUserType = savedRole;
         showMainApp();
     }
-
+    else {
+      currentUser = null;
+      currentUserType = null;
+      showLoginScreen();
+    }
+      
     document.addEventListener('submit', function (e) {
         if (e.target.id === 'inviteProfessorForm') {
             e.preventDefault();
