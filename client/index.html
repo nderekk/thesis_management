@@ -36,7 +36,8 @@
         <!-- Header -->
         <header class="header">
             <div class="header-content">
-                <div class="header-left">
+                <div class="header-left" style="display: flex; align-items: center;">
+                    <button id="menuToggle" style="margin-right: 10px;">☰</button>
                     <h2 id="appTitle">Σύστημα Διαχείρισης Διπλωματικών</h2>
                 </div>
                 <div class="header-right">
@@ -82,5 +83,26 @@
     <script src="scripts/professor.js"></script>
     <script src="scripts/secretary.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Load navigation dynamically
+        function loadNavigation() {
+            const navMenu = document.getElementById('navMenu');
+            const menuItems = getMenuItems(); // your existing function
+            navMenu.innerHTML = menuItems.map(item => `
+                <div class="nav-item" onclick="loadContent('${item.id}', event)">
+                    <i class="${item.icon}"></i>
+                    <span>${item.title}</span>
+                </div>
+            `).join('');
+        }
+
+        // Toggle sidebar on mobile
+        document.getElementById('menuToggle').addEventListener('click', () => {
+            document.querySelector('.sidebar').classList.toggle('open');
+        });
+
+        // Load navigation when DOM is ready
+        document.addEventListener('DOMContentLoaded', loadNavigation);
+    </script>
 </body>
 </html>
