@@ -147,6 +147,5 @@ SELECT AVG(final_grade) FROM thesis_grade as grade INNER JOIN thesis
 -- 	on thesis_id = thesis.id 
 --     AND (thesis.supervisor_am = 1);
 
-INSERT INTO thesis_comments  VALUES (DEFAULT,3,"Slatina Iremise",3 , '2025-12-11');
 
 
