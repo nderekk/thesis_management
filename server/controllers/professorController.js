@@ -148,7 +148,8 @@ const getThesesList = asyncHandler(async (req, res) => {
         thesis_status: prof.thesis_status,
         thesis_ass_date: prof.assignment_date,
         student_name: `${stud.first_name} ${stud.last_name}`,
-        enableGrading: prof.enableGrading
+        enableGrading: prof.enableGrading,
+        draft_text : prof.thesis_content_file
       };
     });
 

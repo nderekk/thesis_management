@@ -1113,10 +1113,10 @@ async function getReviewThesisActions(thesis) {
             <div class="card-header">
                 <h5>Πρόχειρο Διπλωματικής</h5>
             </div>
-            ${thesis.draftText ? `
+            ${thesis.draft_text ? `
                 <div class="thesis-draft">
                     <p><strong>Πρόχειρο από τον φοιτητή:</strong></p>
-                    <div class="draft-content">${thesis.draftText}</div>
+                     <a href="/server/uploads/${thesis.draft_text}" download>📄 Λήψη Πρόχειρου</a>
                 </div>
             ` : '<p>Δεν έχει αναρτηθεί πρόχειρο ακόμα</p>'}
         </div>
