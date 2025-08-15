@@ -103,10 +103,26 @@ END$
 
 DELIMITER ;
 
+----------------------------------------------------------------------- 
+
+DELIMITER $
+
+CREATE TRIGGER createThesisGrade
+AFTER UPDATE ON thesis
+FOR EACH ROW
+BEGIN
+	IF old.enableGrading = 0 AND new.enableGrading = 1 THEN
+		INSERT INTO thesis_grade(thesis_id, prof1am , prof2am , prof3am) VALUES (new.id, new.supervisor_am, new.prof2_am, new.prof3_am);
+	END IF;
+END$
+
+DELIMITER ;
 
 
 
---  SHOW TRIGGERS FROM diplomatiki_sys;
+
+
+SHOW TRIGGERS FROM diplomatiki_sys;
 -- select * from student;
 -- select * from users;
 -- update student set email = 'andpet@upatras.gr' where am= 1;
@@ -118,6 +134,7 @@ select * from thesis_topics;
 select * from thesis;
 select * from thesis_grade;
 select * from trimelis_requests;
+DROP TRIGGER createGradingRow;
 
 SELECT AVG(final_grade) FROM thesis_grade as grade INNER JOIN thesis 
 	on thesis_id = thesis.id 
@@ -131,6 +148,5 @@ SELECT AVG(final_grade) FROM thesis_grade as grade INNER JOIN thesis
 --     AND (thesis.supervisor_am = 1);
 
 INSERT INTO thesis_comments  VALUES (DEFAULT,3,"Slatina Iremise",3 , '2025-12-11');
-
 
 
