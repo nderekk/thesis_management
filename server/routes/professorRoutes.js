@@ -22,6 +22,7 @@ const {
     postGrade,
     getInvitationsList,
     respondToInvitation,
+    getGradeList,
 } = require("../controllers/professorController");
 
 // public
@@ -46,5 +47,6 @@ router.put("/enableGrading", putEnableGrading);
 router.put("/postGrade", postGrade);
 router.get("/invitations", getInvitationsList);
 router.put("/invitations/respond", respondToInvitation);
+router.post("/getGradeList", getGradeList);
 
 module.exports = router;

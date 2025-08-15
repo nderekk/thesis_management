@@ -1087,6 +1087,25 @@ async function getActiveThesisActions(thesis) {
 
 // Actions for review thesis
 async function getReviewThesisActions(thesis) {
+
+    const thesisID = thesis.thesis_id;
+
+     const response = await fetch("http://localhost:5001/api/professor/getGradeList", {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      },
+      body: JSON.stringify({ thesisID })
+    });
+    const grades = await response.json();
+    if (!response.ok) {
+        alert(grades.message);
+        throw new Error(`Error: ${grades.message}`);
+    }
+
+    console.log(grades);
+
     let content = `
         <h4>Ενέργειες για Διπλωματική Υπό Εξέταση</h4>
         
@@ -1157,11 +1176,16 @@ async function getReviewThesisActions(thesis) {
                     
                     <div class="grades-summary">
                         <h6>Βαθμοί Τριμελούς:</h6>
-                        ${thesis.grades ? thesis.grades.map(grade => {
-                            const professor = users.find(u => u.id === grade.professorId);
+                        ${grades ? grades
+                            .filter(grade => !(grade.grade1 == null && grade.grade2 == null && grade.grade3 == null && grade.grade4 == null))
+                            .map(grade => {
                             return `
                                 <div class="grade-item">
-                                    <span>${professor ? professor.name : 'Άγνωστος'}: ${grade.grade.toFixed(1)}</span>
+                                    <span>Καθηγητής: ${grade.prof_name}</span>
+                                    <span>Grade 1: ${grade.grade1}</span>
+                                    <span>Grade 2: ${grade.grade2}</span>
+                                    <span>Grade 3: ${grade.grade3}</span>
+                                    <span>Grade 4: ${grade.grade4}</span>
                                 </div>
                             `;
                         }).join('') : '<p>Δεν υπάρχουν βαθμοί ακόμα</p>'}
