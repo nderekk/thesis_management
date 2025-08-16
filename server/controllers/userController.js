@@ -101,7 +101,6 @@ const getAnnouncements = asyncHandler(async (req, res) => {
       `${prof2.first_name} ${prof2.last_name}` ,
       `${prof3.first_name} ${prof3.last_name}` , 
     ];
-    console.log({ann, presentation_details, committeeMembers, stu, topic})
     return {ann, presentation_details, committeeMembers, stu, topic};
   }));
   if (announcementsInfo)
