@@ -87,6 +87,7 @@ create table thesis(
     nemertes_link varchar(255),
     ap_from_gs int,
     enableGrading BOOLEAN DEFAULT FALSE,
+    enableAnnounce BOOLEAN DEFAULT FALSE,
     -- praktiko
     primary key(id),
     constraint topic_link foreign key (topic_id) references thesis_topics(id)

@@ -118,6 +118,18 @@ END$
 
 DELIMITER ;
 
+----------------------------------------------------------------------- 
+
+DELIMITER $
+
+CREATE TRIGGER enableAnnouncements
+AFTER INSERT ON thesis_presentation
+FOR EACH ROW
+BEGIN
+	UPDATE thesis SET enableAnnounce = 1 WHERE new.thesis_id = id;
+END$
+
+DELIMITER ;
 
 
 
@@ -132,7 +144,7 @@ select * from student;
 select * from users;
 select * from thesis_topics;
 select * from thesis;
-select * from thesis_grade;
+select * from thesis_presentation;
 select * from announcements;
 
 SELECT AVG(final_grade) FROM thesis_grade as grade INNER JOIN thesis 
