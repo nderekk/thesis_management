@@ -471,48 +471,50 @@ const respondToInvitation = asyncHandler(async (req, res) => {
 const getGradeList = asyncHandler(async (req, res) => {
   
   const grades = await thesis_grade.findOne({ where: {thesis_id: req.body.thesisID} });
-  const prof1 = await professor.findOne({ where: {am: grades.prof1am} });
-  const prof2 = await professor.findOne({ where: {am: grades.prof2am} });
-  const prof3 = await professor.findOne({ where: {am: grades.prof3am} });
 
-  const profID = req.user.id;
+  if(grades){
+    const prof1 = await professor.findOne({ where: {am: grades.prof1am} });
+    const prof2 = await professor.findOne({ where: {am: grades.prof2am} });
+    const prof3 = await professor.findOne({ where: {am: grades.prof3am} });
 
-  const prof1grades = 
-      {prof_name: `${prof1.first_name} ${prof1.last_name}`,
-      grade1: grades.prof1_grade1,
-      grade2: grades.prof1_grade2,
-      grade3: grades.prof1_grade3,
-      grade4: grades.prof1_grade4
-    };
-  
-  const prof2grades = 
-      {prof_name: `${prof2.first_name} ${prof2.last_name}`,
-      grade1: grades.prof2_grade1,
-      grade2: grades.prof2_grade2,
-      grade3: grades.prof2_grade3,
-      grade4: grades.prof2_grade4
-    };
-  
-  const prof3grades = 
-      {prof_name: `${prof3.first_name} ${prof3.last_name}`,
-      grade1: grades.prof3_grade1,
-      grade2: grades.prof3_grade2,
-      grade3: grades.prof3_grade3,
-      grade4: grades.prof3_grade4
-    };
-  
-  
-  if(profID === grades.prof1am){
-    res.status(200).json([prof2grades,prof3grades]);
-  }else if(profID === grades.prof2am){
-    res.status(200).json([prof1grades,prof3grades]);
-  }else if(profID === grades.prof3am){
-    res.status(200).json([prof1grades,prof2grades]);
-  }else
-    res.status(200).json({});
+    const profID = req.user.id;
 
+    const prof1grades = 
+        {prof_name: `${prof1.first_name} ${prof1.last_name}`,
+        grade1: grades.prof1_grade1,
+        grade2: grades.prof1_grade2,
+        grade3: grades.prof1_grade3,
+        grade4: grades.prof1_grade4
+      };
+    
+    const prof2grades = 
+        {prof_name: `${prof2.first_name} ${prof2.last_name}`,
+        grade1: grades.prof2_grade1,
+        grade2: grades.prof2_grade2,
+        grade3: grades.prof2_grade3,
+        grade4: grades.prof2_grade4
+      };
+    
+    const prof3grades = 
+        {prof_name: `${prof3.first_name} ${prof3.last_name}`,
+        grade1: grades.prof3_grade1,
+        grade2: grades.prof3_grade2,
+        grade3: grades.prof3_grade3,
+        grade4: grades.prof3_grade4
+      };
+    
+    
+    if(profID === grades.prof1am){
+      res.status(200).json([prof2grades,prof3grades]);
+    }else if(profID === grades.prof2am){
+      res.status(200).json([prof1grades,prof3grades]);
+    }else if(profID === grades.prof3am){
+      res.status(200).json([prof1grades,prof2grades]);
+    }else
+      res.status(200).json({});
 
-  
+}else
+   res.status(200).json({});
 
 });
 
