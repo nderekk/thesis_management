@@ -1,5 +1,7 @@
 const asyncHandler = require("express-async-handler");
-const {sequelize, users, blacklist} = require("../config/dbConnection");
+const {sequelize, users, blacklist, announcements, thesis_presentation,
+  thesis, professor, student, thesis_topics
+} = require("../config/dbConnection");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -61,5 +63,51 @@ const getUser = asyncHandler(async (req, res) => {
   res.status(200).json(req.user);
 });
 
+//@desc Get announcements
+//@route Get /api/user/announcements
+//@access Public
+const getAnnouncements = asyncHandler(async (req, res) => {
+  const anns = await announcements.findAll();
 
-module.exports = { loginUser, logoutUser, getUser };
+  const announcementsInfo = await Promise.all(anns.map(async ann => {
+    const presentation_details = await thesis_presentation.findOne({
+      attributes: ['date_time', 'presentation_type', 'venue'],
+      where: { thesis_id: ann.thesis_id }
+    });
+    const studentThesis = await thesis.findOne({where: {id: ann.thesis_id}});
+    const topic = await thesis_topics.findOne({
+      attributes: ['title'],
+      where: {id: studentThesis.topic_id}
+    });
+    const stu = await student.findOne({
+      attributes: ['first_name', 'last_name', 'am'], 
+      where: {am: studentThesis.student_am}
+    });
+    // committee
+    const supervisor = await professor.findOne({
+      attributes: ["first_name" , "last_name", "am"],
+      where: {am: studentThesis.supervisor_am}
+    });
+    const prof2 = await professor.findOne({
+      attributes: ["first_name" , "last_name", "am"], 
+      where: {am: studentThesis.prof2_am} 
+    });
+    const prof3 = await professor.findOne({
+      attributes: ["first_name" , "last_name", "am"], 
+      where: {am: studentThesis.prof3_am} 
+    });
+    const committeeMembers= [
+      `${supervisor.first_name} ${supervisor.last_name}`,
+      `${prof2.first_name} ${prof2.last_name}` ,
+      `${prof3.first_name} ${prof3.last_name}` , 
+    ];
+    console.log({ann, presentation_details, committeeMembers, stu, topic})
+    return {ann, presentation_details, committeeMembers, stu, topic};
+  }));
+  if (announcementsInfo)
+    res.status(200).json(announcementsInfo);
+  else res.status(200).json({});
+});
+
+
+module.exports = { loginUser, logoutUser, getUser, getAnnouncements };
