@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const {sequelize, professor, thesis_topics, thesis, student , trimelis_requests, thesis_cancellation, thesis_comments, thesis_grade} = require("../config/dbConnection");
+const {sequelize, professor, thesis_topics, thesis, student , trimelis_requests, thesis_cancellation, thesis_comments, thesis_grade, announcements} = require("../config/dbConnection");
 const deleteUploadedFile = require("../utils/fileDeleter");
 const { Op, fn } = require('sequelize');
 
@@ -149,7 +149,8 @@ const getThesesList = asyncHandler(async (req, res) => {
         thesis_ass_date: prof.assignment_date,
         student_name: `${stud.first_name} ${stud.last_name}`,
         enableGrading: prof.enableGrading,
-        draft_text : prof.thesis_content_file
+        draft_text : prof.thesis_content_file,
+        enableAnnouncement : prof.enableAnnounce,
       };
     });
 
@@ -518,10 +519,26 @@ const getGradeList = asyncHandler(async (req, res) => {
 
 });
 
+//@desc accept or decline an invitation
+//@route POST /api/professor/newAnnouncement
+//@access Private 
+const postAnnouncement = asyncHandler(async (req, res) => {
+  const { thesisID , announcementText} = req.body;
+  if (!thesisID || !announcementText) return res.status(400).json({ message: 'Missing thesisID or announcement text.' });
+  
+  const createAnnouncement = await announcements.create({
+    thesis_id : thesisID,
+    announcement_datetime : fn('NOW'),
+    announcement_content : announcementText
+  });
+
+  res.status(200).json({ createAnnouncement });
+});
+
 module.exports = {
   getProfessorInfo, getTopics, createTopic, getThesisNotes,
   editTopic, deleteTopic, getStats, getThesesList,postCancelThesis,
   searchStudent, assignTopicToStudent, getCommitteeRequests, putThesisReview,
   postThesisNotes , putEnableGrading, postGrade, getInvitationsList, respondToInvitation,
-  getGradeList
+  getGradeList, postAnnouncement
 };

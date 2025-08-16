@@ -1128,11 +1128,22 @@ async function getReviewThesisActions(thesis) {
                 <div class="card-header">
                     <h5>Ενέργειες Επιβλέποντος</h5>
                 </div>
-                ${thesis.presentationDetails ? `
-                    <button class="btn btn-primary" onclick="generateAnnouncement(${thesis.id})">
-                        Δημιουργία Ανακοίνωσης Παρουσίασης
-                    </button>
-                ` : '<p class="alert alert-warning">Η ανακοίνωση είναι διαθέσιμη μόνο μετά τη συμπλήρωση των λεπτομερειών παρουσίασης</p>'}
+                ${thesis.enableAnnouncement ? `
+                    <div class="announcement-section">
+                        <label for="announcementText" class="form-control w-100 mb-2">
+                        </label>
+                        <textarea id="announcementText" rows="3" required></textarea>
+
+                        <button class="btn btn-primary" 
+                                onclick="generateAnnouncement(${thesis.thesis_id} , event)">
+                            Δημιουργία Ανακοίνωσης Παρουσίασης
+                        </button>
+                    </div>
+                ` : `
+                    <p class="alert alert-warning">
+                        Η ανακοίνωση είναι διαθέσιμη μόνο μετά τη συμπλήρωση των λεπτομερειών παρουσίασης
+                    </p>
+                `}
                 
                 ${!thesis.enableGrading ? `
                 <button class="btn btn-success" onclick="enableGrading(${thesis.thesis_id})">
@@ -1358,35 +1369,31 @@ async function changeStatusToReview(thesisID) {
     loadContent('manageTheses');
 }
 
-function generateAnnouncement(thesisId) {
-    const thesis = theses.find(t => t.id === thesisId);
-    if (thesis && thesis.presentationDetails) {
-        const announcement = `
-            ΑΝΑΚΟΙΝΩΣΗ ΠΑΡΟΥΣΙΑΣΗΣ ΔΙΠΛΩΜΑΤΙΚΗΣ ΕΡΓΑΣΙΑΣ
-            
-            Τίτλος: ${thesis.title}
-            Φοιτητής: ${getUserName(thesis.studentId)}
-            Ημερομηνία: ${formatDate(thesis.presentationDetails.date)}
-            Ώρα: ${thesis.presentationDetails.time}
-            Τύπος: ${thesis.presentationDetails.type === 'online' ? 'Διαδικτυακά' : 'Προσωπικά'}
-            ${thesis.presentationDetails.type === 'online' ? 
-                `Σύνδεσμος: ${thesis.presentationDetails.link}` : 
-                `Αίθουσα: ${thesis.presentationDetails.room}`
-            }
-        `;
-        
-        const modalContent = `
-            <div class="modal-header">
-                <h2>Ανακοίνωση Παρουσίασης</h2>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <pre style="white-space: pre-wrap; font-family: inherit;">${announcement}</pre>
-                <button class="btn btn-primary" onclick="copyAnnouncement()">Αντιγραφή</button>
-            </div>
-        `;
-        showModal(modalContent);
+async function generateAnnouncement(thesisID, event) {
+    event.preventDefault();
+    const announcementText = document.getElementById('announcementText').value;
+    
+    const response = await fetch("http://localhost:5001/api/professor/newAnnouncement", {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      },
+      body: JSON.stringify({ thesisID , announcementText })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        alert(`Error: ${result.message}`);
+        return;
     }
+        
+    document.getElementById('announcementText').value = '';
+    alert('Η ανάρτηση της ανακοίνωσης για την παρουσίση της διπλωματικής ήταν επιτυχής!');
+    closeModal();
+    loadContent('manageTheses');
+    
 }
 
 async function enableGrading(thesisID) {
