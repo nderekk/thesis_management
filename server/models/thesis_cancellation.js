@@ -13,7 +13,9 @@ module.exports = function(sequelize, DataTypes) {
       references: {
         model: 'thesis',
         key: 'id'
-      }
+      },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
     },
     reason: {
       type: DataTypes.ENUM('By Professor','By Secretary'),

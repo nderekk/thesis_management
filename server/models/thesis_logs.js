@@ -13,7 +13,9 @@ module.exports = function(sequelize, DataTypes) {
       references: {
         model: 'thesis',
         key: 'id'
-      }
+      },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
     },
     timedate: {
       type: DataTypes.DATE,

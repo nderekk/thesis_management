@@ -13,7 +13,9 @@ module.exports = function(sequelize, DataTypes) {
       references: {
         model: 'thesis',
         key: 'id'
-      }
+      },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
     },
     prof_am: {
       type: DataTypes.INTEGER,
@@ -21,7 +23,9 @@ module.exports = function(sequelize, DataTypes) {
       references: {
         model: 'professor',
         key: 'am'
-      }
+      },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
     },
     answer: {
       type: DataTypes.ENUM('pending','accepted','declined'),

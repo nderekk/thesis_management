@@ -13,7 +13,9 @@ module.exports = function(sequelize, DataTypes) {
       references: {
         model: 'thesis',
         key: 'id'
-      }
+      },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
     },
     final_grade: {
       type: DataTypes.DECIMAL(4,2),
@@ -25,7 +27,9 @@ module.exports = function(sequelize, DataTypes) {
       references: {
         model: 'professor',
         key: 'am'
-      }
+      },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
     },
     prof1_grade1: {
       type: DataTypes.DECIMAL(4,2),
@@ -49,7 +53,9 @@ module.exports = function(sequelize, DataTypes) {
       references: {
         model: 'professor',
         key: 'am'
-      }
+      },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
     },
     prof2_grade1: {
       type: DataTypes.DECIMAL(4,2),
@@ -73,7 +79,9 @@ module.exports = function(sequelize, DataTypes) {
       references: {
         model: 'professor',
         key: 'am'
-      }
+      },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
     },
     prof3_grade1: {
       type: DataTypes.DECIMAL(4,2),
