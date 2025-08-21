@@ -348,7 +348,8 @@ const postCancelThesis = asyncHandler(async (req, res) => {
 //@access Private
 const getThesisNotes = asyncHandler(async (req, res) => {
   
-  const thesisNotes = await thesis_comments.findAll({ where: {prof_am: req.user.id} });
+  const prof = await professor.findOne({ where : { prof_userid : req.user.id}})
+  const thesisNotes = await thesis_comments.findAll({ where: {prof_am: prof.am} });
 
   res.status(200).json(thesisNotes);
 
@@ -361,9 +362,11 @@ const postThesisNotes = asyncHandler(async (req, res) => {
   const { thesisID , newNotes } = req.body;
   if (!thesisID || !newNotes) return res.status(400).json({ message: 'Missing thesisID or new notes' });
 
+  const prof = await professor.findOne({ where : { prof_userid : req.user.id}})
+
   const postNewNote = await thesis_comments.create({
     thesis_id : thesisID,
-    prof_am: req.user.id,
+    prof_am: prof.am,
     comments : newNotes,
     comment_date : fn('CURDATE')
   });
@@ -394,11 +397,14 @@ const postGrade = asyncHandler(async (req, res) => {
 
   const currentThesis = await thesis_grade.findOne({ where : { thesis_id : thesisID } });
 
-  if((currentThesis.prof1am === req.user.id) && (currentThesis.prof1_grade1 === null))
+  const prof = await professor.findOne({where: {prof_userid : req.user.id}});
+  const profID = prof.am; 
+
+  if((currentThesis.prof1am === profID) && (currentThesis.prof1_grade1 === null))
     await currentThesis.update({prof1_grade1: grade1 , prof1_grade2: grade2, prof1_grade3: grade3, prof1_grade4: grade4});
-  else if((currentThesis.prof2am === req.user.id) && (currentThesis.prof2_grade1 === null))
+  else if((currentThesis.prof2am === profID) && (currentThesis.prof2_grade1 === null))
     await currentThesis.update({prof2_grade1: grade1 , prof2_grade2: grade2, prof2_grade3: grade3, prof2_grade4: grade4});
-  else if((currentThesis.prof3am === req.user.id) && (currentThesis.prof3_grade1 === null))
+  else if((currentThesis.prof3am === profID) && (currentThesis.prof3_grade1 === null))
     await currentThesis.update({prof3_grade1: grade1 , prof3_grade2: grade2, prof3_grade3: grade3, prof3_grade4: grade4});
   else
     return res.status(400).json({ message: 'You have already submitted a grade' });
@@ -478,7 +484,8 @@ const getGradeList = asyncHandler(async (req, res) => {
     const prof2 = await professor.findOne({ where: {am: grades.prof2am} });
     const prof3 = await professor.findOne({ where: {am: grades.prof3am} });
 
-    const profID = req.user.id;
+    const prof = await professor.findOne({where: {prof_userid : req.user.id}});
+    const profID = prof.am; 
 
     const prof1grades = 
         {prof_name: `${prof1.first_name} ${prof1.last_name}`,
