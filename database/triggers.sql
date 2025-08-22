@@ -140,12 +140,13 @@ SHOW TRIGGERS FROM diplomatiki_sys;
 -- update student set email = 'andpet@upatras.gr' where am= 1;
 -- drop trigger cancelThesis;
 -- select * from trimelis_requests;
-select * from student;
+select * from professor;
 select * from users;
 select * from thesis_topics;
 select * from thesis;
 select * from thesis_presentation;
 select * from announcements;
+select * from thesis_grade;
 
 SELECT AVG(final_grade) FROM thesis_grade as grade INNER JOIN thesis 
 	on thesis_id = thesis.id 
@@ -158,5 +159,5 @@ SELECT AVG(final_grade) FROM thesis_grade as grade INNER JOIN thesis
 -- 	on thesis_id = thesis.id 
 --     AND (thesis.supervisor_am = 1);
 
-
+select * from thesis_presentation;
 

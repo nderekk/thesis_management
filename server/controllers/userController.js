@@ -4,6 +4,8 @@ const {sequelize, users, blacklist, announcements, thesis_presentation,
 } = require("../config/dbConnection");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { Op, fn, col, where } = require('sequelize');
+const xmlparser = require("js2xmlparser");
 
 //@desc Login User
 //@route Post /api/user/login
@@ -64,16 +66,27 @@ const getUser = asyncHandler(async (req, res) => {
 });
 
 //@desc Get announcements
-//@route Get /api/user/announcements
+//@route Get /api/user/announcements?from=yyyymmdd&to=yyyymmdd&format=type
 //@access Public
 const getAnnouncements = asyncHandler(async (req, res) => {
+  const { from, to, format } = req.query;
+
   const anns = await announcements.findAll();
 
   const announcementsInfo = await Promise.all(anns.map(async ann => {
     const presentation_details = await thesis_presentation.findOne({
       attributes: ['date_time', 'presentation_type', 'venue'],
-      where: { thesis_id: ann.thesis_id }
+      where: { thesis_id: ann.thesis_id,
+        [Op.and]: [
+        where(fn('DATE', col('date_time')), {
+          [Op.between]: [from, to]
+      })
+    ]
+       }
     });
+
+    if (!presentation_details) return null;
+    
     const studentThesis = await thesis.findOne({where: {id: ann.thesis_id}});
     const topic = await thesis_topics.findOne({
       attributes: ['title'],
@@ -101,10 +114,36 @@ const getAnnouncements = asyncHandler(async (req, res) => {
       `${prof2.first_name} ${prof2.last_name}` ,
       `${prof3.first_name} ${prof3.last_name}` , 
     ];
-    return {ann, presentation_details, committeeMembers, stu, topic};
+    return {
+      id: ann.id,
+      announcementDate: ann.announcement_datetime,
+      announcementContent: ann.announcement_content,
+      presentation: {
+        date: presentation_details.date_time.toISOString().split("T")[0],
+        type: presentation_details.presentation_type,
+        venue: presentation_details.venue,
+      },
+      student: {
+        firstName: stu.first_name,
+        lastName: stu.last_name,
+        am: stu.am,
+      },
+      topic: {
+        title: topic.title,
+      },
+      committee: committeeMembers,
+    };
   }));
-  if (announcementsInfo)
-    res.status(200).json(announcementsInfo);
+
+  const announcementList = announcementsInfo.filter(Boolean);
+
+
+  if (announcementList && format === "json")
+    res.status(200).json(announcementList);
+  else if (announcementList && format === "xml"){
+    const xml = xmlparser.parse("announcements",announcementList);
+    res.set("Content-Type", "application/xml").send(xml);
+  }
   else res.status(200).json({});
 });
 
