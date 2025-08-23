@@ -22,11 +22,11 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     },
     prev_status: {
-      type: DataTypes.ENUM('Pending','Active','Completed','Cancelled'),
+      type: DataTypes.ENUM('Pending','Review','Active','Completed','Cancelled'),
       allowNull: false
     },
     new_status: {
-      type: DataTypes.ENUM('Pending','Active','Completed','Cancelled'),
+      type: DataTypes.ENUM('Pending','Review','Active','Completed','Cancelled'),
       allowNull: false
     }
   }, {

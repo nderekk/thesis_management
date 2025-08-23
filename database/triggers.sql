@@ -131,6 +131,27 @@ END$
 
 DELIMITER ;
 
+----------------------------------------------------------------------- 
+
+DELIMITER $
+
+CREATE TRIGGER thesisLogs
+AFTER UPDATE ON thesis
+FOR EACH ROW
+BEGIN
+	IF new.thesis_status = 'Active' AND old.thesis_status = 'Pending' THEN
+		INSERT INTO thesis_logs VALUES (null, new.id, NOW(), old.thesis_status, new.thesis_status);
+    ELSEIF new.thesis_status = 'Review' AND old.thesis_status = 'Active' THEN
+		INSERT INTO thesis_logs VALUES (null, new.id, NOW(), old.thesis_status, new.thesis_status);
+	ELSEIF new.thesis_status = 'Completed' AND old.thesis_status = 'Review' THEN
+		INSERT INTO thesis_logs VALUES (null, new.id, NOW(), old.thesis_status, new.thesis_status);
+	ELSEIF new.thesis_status = 'Cancelled' AND (old.thesis_status = 'Pending' OR old.thesis_status = 'Active') THEN
+		INSERT INTO thesis_logs VALUES (null, new.id, NOW(), old.thesis_status, new.thesis_status);
+	END IF;
+END$
+
+DELIMITER ;
+
 
 
 
@@ -138,7 +159,7 @@ SHOW TRIGGERS FROM diplomatiki_sys;
 -- select * from student;
 -- select * from users;
 -- update student set email = 'andpet@upatras.gr' where am= 1;
--- drop trigger cancelThesis;
+-- drop trigger thesisLogs;
 -- select * from trimelis_requests;
 select * from professor;
 select * from users;
@@ -159,5 +180,5 @@ SELECT AVG(final_grade) FROM thesis_grade as grade INNER JOIN thesis
 -- 	on thesis_id = thesis.id 
 --     AND (thesis.supervisor_am = 1);
 
-select * from thesis_presentation;
+select * from thesis_logs;
 

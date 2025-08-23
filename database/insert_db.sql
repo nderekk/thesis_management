@@ -34,7 +34,7 @@ INSERT INTO student (am, first_name, last_name, father_name, semester, email, ph
 (2, 'Eleni', 'Makri', 'Nikos', 7, 'elmakri@upatras.gr', '2610991102', '6944222222', 'Οδός Καποδιστρίου 25', 'Patras', 26224, 5),
 (4, 'Mpampis', 'Kuriakos', 'Nikos', 7, 'mpampis@upatras.gr', '2610991102', '6944222222', 'Οδός poutsas 25', 'Patras', 26224, 9),
 (3, 'Nikos', 'Charalampous', 'Dimitris', 9, 'nikchar@upatras.gr', '2610991103', '6944333333', 'Οδός Ερμού 88', 'Patras', 26225, 6),
-(5, 'Kostis', 'Lamrpou', 'Iosif', 9, 'klamprou@upatras.gr', '2610992202', '6944222222', 'Οδός Ηρακλείτου 18', 'Patras', 26223, 10);
+(5, 'Kostis', 'Lamprou', 'Iosif', 9, 'klamprou@upatras.gr', '2610992202', '6944222222', 'Οδός Ηρακλείτου 18', 'Patras', 26223, 10);
 
 -- Insert secretaries
 INSERT INTO secretary (am, first_name, last_name, phone_number, address, email, secretary_userid) VALUES 

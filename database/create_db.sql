@@ -155,8 +155,8 @@ CREATE TABLE thesis_logs (
     id INT NOT NULL AUTO_INCREMENT,
     thesis_id INT NOT NULL,
     timedate DATETIME NOT NULL,
-    prev_status ENUM('Pending', 'Active', 'Completed', 'Cancelled') NOT NULL,
-    new_status ENUM('Pending', 'Active', 'Completed', 'Cancelled') NOT NULL,
+    prev_status ENUM('Pending', 'Review', 'Active', 'Completed', 'Cancelled') NOT NULL,
+    new_status ENUM('Pending', 'Review', 'Active', 'Completed', 'Cancelled') NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (thesis_id) REFERENCES thesis(id)
     ON DELETE CASCADE ON UPDATE CASCADE
