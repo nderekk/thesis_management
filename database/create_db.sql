@@ -38,7 +38,7 @@ create table student(
     mobile_number varchar(50) not null,
     address varchar(255) not null,
     city varchar(30) not null,
-    post_code smallint not null,
+    post_code int not null,
 	student_userid integer not null,
     primary key(am)
 );
@@ -86,6 +86,8 @@ create table thesis(
     thesis_content_file varchar(255),
     nemertes_link varchar(255),
     ap_from_gs int,
+    enableGrading BOOLEAN DEFAULT FALSE,
+    enableAnnounce BOOLEAN DEFAULT FALSE,
     -- praktiko
     primary key(id),
     constraint topic_link foreign key (topic_id) references thesis_topics(id)
@@ -126,8 +128,8 @@ drop table if exists thesis_cancellation;
 create table thesis_cancellation(
 	id int not null auto_increment,
     thesis_id int not null,
-    reason enum("By professor", "By Secretary") not null,
-    assembly_year year,
+    reason enum("By Professor", "By Secretary") not null,
+    assembly_year int,
     assembly_number int,
     primary key (id),
     foreign key (thesis_id) references thesis(id)
@@ -137,10 +139,14 @@ create table thesis_cancellation(
 drop table if exists thesis_comments;
 create table thesis_comments(
 	id int not null auto_increment,
+    prof_am int not null,
 	thesis_id int not null,
-    comments varchar(255) not null,
+    comments varchar(300) not null,
+    comment_date date not null,
     primary key (id),
     foreign key (thesis_id) references thesis(id)
+    on update cascade on delete cascade,
+    foreign key (prof_am) references professor(am)
     on update cascade on delete cascade
 );
 
@@ -149,8 +155,8 @@ CREATE TABLE thesis_logs (
     id INT NOT NULL AUTO_INCREMENT,
     thesis_id INT NOT NULL,
     timedate DATETIME NOT NULL,
-    prev_status ENUM('Pending', 'Active', 'Completed', 'Cancelled') NOT NULL,
-    new_status ENUM('Pending', 'Active', 'Completed', 'Cancelled') NOT NULL,
+    prev_status ENUM('Pending', 'Review', 'Active', 'Completed', 'Cancelled') NOT NULL,
+    new_status ENUM('Pending', 'Review', 'Active', 'Completed', 'Cancelled') NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (thesis_id) REFERENCES thesis(id)
     ON DELETE CASCADE ON UPDATE CASCADE

@@ -1,5 +1,17 @@
-function getSecretaryThesesView() {
-    const visibleTheses = theses; // Σε επόμενο βήμα μπορεί να φιλτραριστούν
+async function getSecretaryThesesView() {
+    const response = await fetch("http://localhost:5001/api/secretary/theses/active", {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'  // important for JSON data
+        }
+        });
+        const activeTheses = await response.json();
+        if (!response.ok) {
+            alert(activeTheses.message);
+            throw new Error(`Error: ${activeTheses.message}`);
+    }
+    console.log(activeTheses);
     return `
         <div class="content-header">
             <h1>Προβολή Διπλωματικών</h1>
@@ -17,14 +29,19 @@ function getSecretaryThesesView() {
                             <th>Ημερομηνία Ανάθεσης</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        ${visibleTheses.map(t => `
-                            <tr>
+                    <tbody id="thesisTableBody">
+                        ${activeTheses.map(t => `
+                            <tr class="clickable-row" data-id="${t.id}" on-click>
                                 <td>${t.title}</td>
-                                <td>${getUserName(t.studentId)}</td>
-                                <td>${getUserName(t.supervisorId)}</td>
-                                <td>${getStatusText(t.status)}</td>
-                                <td>${formatDate(t.assignedDate)}</td>
+                                <td>${t.student_name}</td>
+                                <td>${t.supervisor_name}</td>
+                                <td>${t.status}</td>
+                                <td>${t.assignment_date}</td>
+                            </tr>
+                            <tr class="thesis-details-row" id="details-${t.id}" style="display: none;">
+                                <td colspan="5" id="details-content-${t.id}">
+                                    <em>Φόρτωση Λεπτομερειών...</em>
+                                </td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -32,6 +49,60 @@ function getSecretaryThesesView() {
             </div>
         </div>
     `;
+}
+
+async function attachEventListener(){ 
+    document.querySelectorAll('.clickable-row').forEach(row => {
+        row.addEventListener('click', async () => {
+            const thesisId = row.dataset.id;
+            const detailsRow = document.getElementById(`details-${thesisId}`);
+            const detailContent = document.getElementById(`details-content-${thesisId}`);
+
+            // Collapse others (optional)
+            document.querySelectorAll('.thesis-details-row').forEach(r => {
+                if (r.id !== `details-${thesisId}`) r.style.display = 'none';
+            });
+
+            try { const response = await fetch(`http://localhost:5001/api/student/thesis?id=${thesisId}`, {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'  // important for JSON data
+                }
+            });
+            const studentThesis = await response.json();
+            console.log(studentThesis);
+            if (!response.ok) {
+                alert(studentThesis.message);
+                throw new Error(`Error: ${studentThesis.message}`);
+            }
+
+            detailContent.innerHTML = `
+                <div class="thesis-details">
+                    <strong>Θέμα:</strong> ${studentThesis.title}<br>
+                    <strong>Περιγραφή:</strong> ${studentThesis.description || '—'}<br>
+                    <strong>Κατάσταση:</strong> ${getStatusText(studentThesis.status)}<br>
+                    <strong>Επιτροπή:</strong><br>
+                    <div class="inner">
+                        <div class="inner">
+                            <ul>
+                                ${studentThesis.committeeMembers.map(member => `<li>${member}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                    <strong>Χρόνος από ανάθεση:</strong> ${calculateTimeSince(studentThesis.assignedDate)}
+                </div>
+                `;
+                detailContent.dataset.loaded = "true";
+            } catch (err) {
+                detailContent.innerHTML = `<span style="color:red">Αποτυχία φόρτωσης.</span>`;
+                console.error(err);
+            }
+
+            // Toggle current
+            detailsRow.style.display = detailsRow.style.display === 'none' ? 'table-row' : 'none';
+        });
+    });
 }
 
 function getDataImport() {
@@ -52,27 +123,34 @@ function getDataImport() {
     `;
 }
 
-document.addEventListener('submit', function(e) {
-    if (e.target.id === 'importForm') {
-        e.preventDefault();
+async function handleImportData() {
         const fileInput = document.getElementById('dataFile');
-        if (fileInput.files.length === 0) return alert('Παρακαλώ επιλέξτε αρχείο.');
+        if (fileInput.files.length === 0) {
+            alert('Παρακαλώ επιλέξτε αρχείο.');
+            return;
+        }
+
         const file = fileInput.files[0];
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-            try {
-                const data = JSON.parse(evt.target.result);
-                if (data.users) users = data.users;
-                if (data.topics) topics = data.topics;
-                if (data.theses) theses = data.theses;
-                alert('Τα δεδομένα εισήχθησαν επιτυχώς.');
-            } catch (err) {
-                alert('Σφάλμα κατά την εισαγωγή: μη έγκυρο αρχείο JSON.');
-            }
-        };
-        reader.readAsText(file);
+        const formData = new FormData();
+        formData.append('file', file);
+        console.log("HEREEEE");
+        try {
+            const response = await fetch("http://localhost:5001/api/secretary/import-data", {
+                method: 'POST',
+                credentials: 'include',
+                body: formData
+            });
+
+            const r = await response.json();
+            if (!response.ok)
+                throw new Error(`${r.message}`);
+
+            alert(r.success);
+        } catch (error) {
+            alert(error);
+            console.error('Upload failed:', error);
+        }
     }
-});
 
 async function getSecretaryThesesManagement() {
     try {

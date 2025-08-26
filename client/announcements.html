@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ανακοινώσεις Διπλωματικών</title>
+  <link rel="stylesheet" href="styles/styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f7f7f7;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #333;
+    }
+
+    .announcements-container {
+      display: grid;
+      gap: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      color: #2c3e50;
+    }
+
+    .card .meta {
+      font-size: 14px;
+      color: #777;
+      margin-bottom: 15px;
+    }
+
+    .card .content {
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+
+    .committee {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .committee strong {
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Ανακοινώσεις Διπλωματικών</h1>
+  <div id="announcementsContainer" class="announcements-container"></div>
+
+  <script>
+    async function loadAnnouncements() {
+      try {
+      const res = await fetch("http://localhost:5001/api/user/announcements", {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'  // important for JSON data
+        }
+        });
+        const data = await res.json();
+
+        const container = document.getElementById("announcementsContainer");
+
+        if (!data.length) {
+          container.innerHTML = "<p>Δεν υπάρχουν ανακοινώσεις αυτή τη στιγμή.</p>";
+          return;
+        }
+
+        container.innerHTML = data.map(item => {
+          const annDate = new Date(item.ann.announcement_datetime).toLocaleDateString("el-GR");
+          const presDate = item.presentation_details 
+            ? new Date(item.presentation_details.date_time).toLocaleString("el-GR")
+            : "Δεν έχει οριστεί";
+
+          return `
+            <div class="card">
+              <h2>${item.topic.title}</h2>
+              <div class="meta">
+                <i class="fas fa-calendar-alt"></i> Ανακοίνωση: ${annDate} <br>
+                <i class="fas fa-user-graduate"></i> Φοιτητής: ${item.stu.first_name} ${item.stu.last_name} (AM: ${item.stu.am})
+              </div>
+              <div class="content">${item.ann.announcement_content}</div>
+              <div>
+                <strong>Παρουσίαση:</strong><br>
+                Ημερομηνία/Ώρα: ${presDate}<br>
+                Τύπος: ${item.presentation_details?.presentation_type || "—"}<br>
+                Αίθουσα: ${item.presentation_details?.venue || "—"}
+              </div>
+              <div class="committee">
+                <strong>Επιτροπή:</strong> ${item.committeeMembers.join(", ")}
+              </div>
+            </div>
+          `;
+        }).join("");
+
+      } catch (err) {
+        console.error("Error fetching announcements:", err);
+        document.getElementById("announcementsContainer").innerHTML = "<p>Σφάλμα κατά τη φόρτωση των ανακοινώσεων.</p>";
+      }
+    }
+
+    loadAnnouncements();
+  </script>
+</body>
+</html>

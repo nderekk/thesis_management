@@ -1,7 +1,7 @@
 const express = require("express");
 const validateToken = require("../middleware/validateTokenHandler");
-const upload = require('../middleware/uploadHandler');
-const {authStudent} = require('../middleware/authHandler');
+const {upload} = require('../middleware/uploadHandler');
+const {authStudent, authStudentSecretary} = require('../middleware/authHandler');
 const router = express.Router();
 const {
     getThesisInfo,
@@ -19,8 +19,8 @@ const {
 // public
 // private
 router.use(validateToken);
+router.get("/thesis", authStudentSecretary, getThesisInfo);
 router.use(authStudent);
-router.get("/thesis", getThesisInfo);
 router.get("/", getStudentInfo);
 router.put("/", modifyStudentInfo);
 router.get("/professorList", professorList);

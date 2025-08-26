@@ -13,7 +13,9 @@ module.exports = function(sequelize, DataTypes) {
       references: {
         model: 'professor',
         key: 'am'
-      }
+      },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
     },
     title: {
       type: DataTypes.STRING(255),
@@ -41,7 +43,9 @@ module.exports = function(sequelize, DataTypes) {
       references: {
         model: 'student',
         key: 'am'
-      }
+      },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
     }
   }, {
     sequelize,

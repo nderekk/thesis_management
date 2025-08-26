@@ -13,10 +13,12 @@ module.exports = function(sequelize, DataTypes) {
       references: {
         model: 'thesis',
         key: 'id'
-      }
+      },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
     },
     reason: {
-      type: DataTypes.ENUM('By professor','By Secretary'),
+      type: DataTypes.ENUM('By Professor','By Secretary'),
       allowNull: false
     },
     reason_text: {
@@ -24,7 +26,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     assembly_year: {
-      type: DataTypes.DATE,
+      type: DataTypes.INTEGER,
       allowNull: true
     },
     assembly_number: {

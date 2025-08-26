@@ -12,7 +12,7 @@ var _thesis_logs = require("./thesis_logs");
 var _thesis_presentation = require("./thesis_presentation");
 var _thesis_topics = require("./thesis_topics");
 var _trimelis_requests = require("./trimelis_requests");
-var _user = require("./user");
+var _users = require("./user");
 var _blacklist = require("./blacklist");
 
 function initModels(sequelize) {
@@ -29,7 +29,7 @@ function initModels(sequelize) {
   var thesis_presentation = _thesis_presentation(sequelize, DataTypes);
   var thesis_topics = _thesis_topics(sequelize, DataTypes);
   var trimelis_requests = _trimelis_requests(sequelize, DataTypes);
-  var user = _user(sequelize, DataTypes);
+  var users = _users(sequelize, DataTypes);
   var blacklist = _blacklist(sequelize, DataTypes);
 
   thesis.belongsTo(professor, { as: "prof2_am_professor", foreignKey: "prof2_am"});
@@ -64,9 +64,13 @@ function initModels(sequelize) {
   thesis.hasMany(trimelis_requests, { as: "trimelis_requests", foreignKey: "thesis_id"});
   thesis.belongsTo(thesis_topics, { as: "topic", foreignKey: "topic_id"});
   thesis_topics.hasMany(thesis, { as: "theses", foreignKey: "topic_id"});
-  professor.belongsTo(user, {as: "user", foreignKey: "prof_userid"});
-  student.belongsTo(user, {as: "user", foreignKey: "student_userid"});
-  secretary.belongsTo(user, {as: "user", foreignKey: "secretary_userid"});
+  professor.belongsTo(users, {as: "user", foreignKey: "prof_userid"});
+  student.belongsTo(users, {as: "user", foreignKey: "student_userid"});
+  secretary.belongsTo(users, {as: "user", foreignKey: "secretary_userid"});
+  thesis_comments.belongsTo(professor, {as: "professor", foreignKey: "prof_am"});
+  thesis_grade.hasMany(professor, {as: "professor1", foreignKey: "prof1am"})
+  thesis_grade.hasMany(professor, {as: "professor2", foreignKey: "prof2am"})
+  thesis_grade.hasMany(professor, {as: "professor3", foreignKey: "prof3am"})
 
   return {
     announcements,
@@ -82,7 +86,7 @@ function initModels(sequelize) {
     thesis_presentation,
     thesis_topics,
     trimelis_requests,
-    user,
+    users,
     blacklist,
   };
 }

@@ -6,13 +6,16 @@ INSERT INTO users (id, email, password, role) VALUES
 (1, 'dkollias@ceid.upatras.gr', 'hashed_password_1', 'professor'),
 (2, 'mpapado@ceid.upatras.gr', 'hashed_password_2', 'professor'),
 (3, 'inikolaou@ceid.upatras.gr', 'hashed_password_3', 'professor'),
+(11, 'smasko@ceid.upatras.gr', 'hashed_password_11', 'professor'),
+(12, 'pkats@ceid.upatras.gr', 'hashed_password_12', 'professor'),
 
 -- Insert users (students)
 (4, 'andpet@upatras.gr', 'hashed_password_4', 'student'),
 (5, 'elmakri@upatras.gr', 'hashed_password_5', 'student'),
 (6, 'nikchar@upatras.gr', 'hashed_password_6', 'student'),
 (9, 'mpampis@upatras.gr', 'hashed_password_9', 'student'),
-
+(10, 'klamprou@upatras.gr', 'hashed_password_10', 'student'),
+	
 -- Insert users (secretaries)
 (7, 'gspanou@ceid.upatras.gr', 'hashed_password_7', 'secretary'),
 (8, 'kvlachou@ceid.upatras.gr', 'hashed_password_8', 'secretary');
@@ -21,14 +24,17 @@ INSERT INTO users (id, email, password, role) VALUES
 INSERT INTO professor (am, first_name, last_name, email, phone_number, field_of_expertise, prof_userid) VALUES 
 (1, 'Dimitris', 'Kollias', 'dkollias@ceid.upatras.gr', '2610960001', 'Computer Architecture', 1),
 (2, 'Maria', 'Papadopoulou', 'mpapado@ceid.upatras.gr', '2610960002', 'Machine Learning', 2),
-(3, 'Ilias', 'Nikolaou', 'inikolaou@ceid.upatras.gr', '2610960003', 'Cybersecurity', 3);
+(3, 'Ilias', 'Nikolaou', 'inikolaou@ceid.upatras.gr', '2610960003', 'Cybersecurity', 3),
+(4, 'Spiros', 'Maskoulis', 'smasko@ceid.upatras.gr', '2650960001', 'Theoritical Computer Science', 11),
+(5, 'Prodromos', 'Katsikis', 'pkats@ceid.upatras.gr', '2660960001', 'Artificial Intelligence', 12);
 
 -- Insert students
 INSERT INTO student (am, first_name, last_name, father_name, semester, email, phone_number, mobile_number, address, city, post_code, student_userid) VALUES 
 (1, 'Andreas', 'Petrou', 'Giorgos', 8, 'andpet@upatras.gr', '2610991101', '6944111111', 'Οδός Παπαδιαμάντη 12', 'Patras', 26223, 4),
 (2, 'Eleni', 'Makri', 'Nikos', 7, 'elmakri@upatras.gr', '2610991102', '6944222222', 'Οδός Καποδιστρίου 25', 'Patras', 26224, 5),
 (4, 'Mpampis', 'Kuriakos', 'Nikos', 7, 'mpampis@upatras.gr', '2610991102', '6944222222', 'Οδός poutsas 25', 'Patras', 26224, 9),
-(3, 'Nikos', 'Charalampous', 'Dimitris', 9, 'nikchar@upatras.gr', '2610991103', '6944333333', 'Οδός Ερμού 88', 'Patras', 26225, 6);
+(3, 'Nikos', 'Charalampous', 'Dimitris', 9, 'nikchar@upatras.gr', '2610991103', '6944333333', 'Οδός Ερμού 88', 'Patras', 26225, 6),
+(5, 'Kostis', 'Lamprou', 'Iosif', 9, 'klamprou@upatras.gr', '2610992202', '6944222222', 'Οδός Ηρακλείτου 18', 'Patras', 26223, 10);
 
 -- Insert secretaries
 INSERT INTO secretary (am, first_name, last_name, phone_number, address, email, secretary_userid) VALUES 

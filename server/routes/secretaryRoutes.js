@@ -1,8 +1,12 @@
 const express = require("express");
 const validateToken = require("../middleware/validateTokenHandler");
+const { authSecretary } = require("../middleware/authHandler");
+const {uploadJSON} = require('../middleware/uploadHandler');
 const router = express.Router();
 const {
-    getSecretaryInfo, 
+    getSecretaryInfo,
+    getActiveTheses,
+    importData, 
     getAllTheses, 
     updateThesisApNumber, 
     cancelThesis, 
@@ -13,7 +17,10 @@ const {
 // public
 // private
 router.use(validateToken);
+router.use(authSecretary);
 router.get("/", getSecretaryInfo);
+router.get("/theses/active", getActiveTheses);
+router.post("/import-data", uploadJSON.single('file'), importData)
 router.get("/theses", getAllTheses);
 router.get("/theses/:id", getThesisDetails);
 router.put("/theses/:id/ap", updateThesisApNumber);

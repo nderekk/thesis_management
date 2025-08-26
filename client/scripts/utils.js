@@ -6,9 +6,9 @@ let theses = [];
 let users = [];
 let topics = [];
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
+    console.log("REFRESH PAGE");
     initializeApp();
-    localStorage.removeItem('currentThesis');
 });
 
 function initializeApp() {
@@ -24,15 +24,17 @@ function initializeApp() {
 
     const savedUser = localStorage.getItem('currentUser');
     const savedRole = localStorage.getItem('currentUserType');
-    const savedThesis = localStorage.getItem("currentThesis");
     if (savedUser) {
-        if (savedRole === 'student')
-            currentThesis = JSON.parse(savedThesis);
         currentUser = JSON.parse(savedUser);
         currentUserType = savedRole;
         showMainApp();
     }
-
+    else {
+      currentUser = null;
+      currentUserType = null;
+      showLoginScreen();
+    }
+      
     document.addEventListener('submit', function (e) {
         if (e.target.id === 'inviteProfessorForm') {
             e.preventDefault();
@@ -45,7 +47,10 @@ function initializeApp() {
             if (typeof handleExaminationForm === 'function') handleExaminationForm();
         } else if (e.target.id === 'newTopicForm') {
             e.preventDefault();
-            if (typeof createTopic === 'function') createTopic();
+            if (typeof handleCreateTopic === 'function') handleCreateTopic();
+        } else if (e.target.id === 'importForm') {
+            e.preventDefault();
+            if (typeof handleImportData === 'function') handleImportData();
         }
     });
 }
@@ -74,6 +79,7 @@ async function handleLogin(e) {
     if ('userRole' in user) {
         currentUser = user;
         currentUserType = user.userRole;
+        console.log(currentUser);
         localStorage.setItem('currentUser', JSON.stringify(user));
         localStorage.setItem('currentUserType', currentUserType);
         showMainApp();
@@ -114,22 +120,25 @@ function showMainApp() {
 }
 
 async function updateUserInfo() {
-    const response = await fetch(`http://localhost:5001/api/${currentUser.userRole}`, {
+    const response = await fetch(`http://localhost:5001/api/${currentUserType}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json'  // important for JSON data
       },
     });
-    currentUser = await response.json();
+    person = await response.json();
     if (!response.ok) {
       currentUser = null;
       currentUserType = null;
       localStorage.removeItem('currentUser');
       localStorage.removeItem('currentUserType');
       showLoginScreen();
-      throw new Error(`Error: ${currentUser.message}`);
+      throw new Error(`Error: ${person.message}`);
     }
+    currentUser = person;
+    localStorage.setItem('currentUser', JSON.stringify(person));
+    if (currentUserType === 'student') await refreshThesis(true);
     console.log(currentUser);
     console.log(currentThesis);
     const userInfo = document.getElementById('userInfo');
@@ -212,6 +221,7 @@ async function loadContent(pageId, event) {
 
     contentArea.innerHTML = await contentMap[pageId]();
     if (pageId === 'statistics') await renderGraphs();
+    if (pageId === 'viewTheses') await attachEventListener();
 }
 
 
@@ -281,6 +291,6 @@ function getStatusText(status) {
         completed: 'Περατωμένη',
         cancelled: 'Ακυρωμένη'
     };
-    return statuses[status] || status;
+    return statuses[status.toLowerCase()] || status;
 }
 

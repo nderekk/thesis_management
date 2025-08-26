@@ -7,16 +7,32 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       primaryKey: true
     },
+    prof_am: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'professor',
+        key: 'am'
+      },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+    },
     thesis_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: 'thesis',
         key: 'id'
-      }
+      },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
     },
     comments: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.STRING(300),
+      allowNull: false
+    },
+    comment_date: {
+      type: DataTypes.DATEONLY,
       allowNull: false
     }
   }, {

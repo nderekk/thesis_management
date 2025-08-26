@@ -1,5 +1,5 @@
-async function getStudentThesisView() {
-    if (!currentThesis){
+async function refreshThesis(hard) {
+    if (!currentThesis || hard){
         const response = await fetch("http://localhost:5001/api/student/thesis", {
         method: 'GET',
         credentials: 'include',
@@ -8,13 +8,21 @@ async function getStudentThesisView() {
         }
         });
         const studentThesis = await response.json();
+        console.log(studentThesis);
         if (!response.ok) {
             alert(studentThesis.message);
             throw new Error(`Error: ${studentThesis.message}`);
         }
-        currentThesis = studentThesis;
-        localStorage.setItem('currentThesis', JSON.stringify(currentThesis));
+        if (studentThesis !== 'empty'){
+          localStorage.setItem('currentThesis', JSON.stringify(studentThesis));
+          currentThesis = JSON.parse(localStorage.getItem('currentThesis'));
+        }
     }
+    console.log("THESIS", (hard) ? "FLUSHED" : "SAME");
+}
+
+async function getStudentThesisView() {
+    await refreshThesis()
     // console.log(currentThesis);
     if (!currentThesis) {
         return `<div class="content-header">
@@ -53,9 +61,13 @@ async function getStudentThesisView() {
             ${currentThesis.committeeMembers.length > 0 ? `
                 <div class="form-group">
                     <label>Μέλη Τριμελούς:</label>
-                    <ul>
-                        ${currentThesis.committeeMembers.map(member => `<li>${member}</li>`).join('')}
-                    </ul>
+                    <div class="inner">
+                        <div class="inner">
+                            <ul>
+                                ${currentThesis.committeeMembers.map(member => `<li>${member}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             ` : ''}
             
@@ -175,27 +187,8 @@ document.addEventListener('submit', async function (e) {
 });
 
 // Additional functions for other pages will be implemented as needed
-async function getThesisManagement() {
-    console.log("getThesisManagement called");
-    // console.log("currentUser:", currentUser);
-    
-    if (!currentThesis){
-        const response = await fetch("http://localhost:5001/api/student/thesis", {
-            method: 'GET',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json'  // important for JSON data
-            },
-        });
-        studentThesis = await response.json();
-        if (!response.ok) {
-            alert(studentThesis.message);
-            throw new Error(`Error: ${studentThesis.message}`);
-        }
-        currentThesis = studentThesis;
-        localStorage.setItem('currentThesis', JSON.stringify(currentThesis));
-    }
-    // console.log("studentThesis found:", currentThesis);
+async function getThesisManagement() {   
+    await refreshThesis();
     
     if (!currentThesis) {
         console.log("No thesis found for student");
@@ -264,8 +257,7 @@ async function  getPendingThesisContent(thesis) {
         alert(professors.message);
         throw new Error(`Error: ${professors.message}`);
     }
-    professors = professors.p.filter(p => p.name !== thesis.supervisor);
-    console.log(thesis.supervisor);
+    professors = professors.p.filter(p => !thesis.committeeMembers.includes(p.name));
     const invitedProfessors = thesis.invitedProfessors.filter(inv => inv.answer === 'pending') || [];
     const acceptedProfessors = thesis.invitedProfessors.filter(inv => inv.answer === 'accepted') || [];
     const acceptedInvitations = invitedProfessors.filter(inv => inv.answer === 'accepted').length;
@@ -282,7 +274,16 @@ async function  getPendingThesisContent(thesis) {
             <div class="form-group">
                 <label>Προσκληθέντες Διδάσκοντες:</label>
                 <div class="invited-members">
-                    ${invitedProfessors.length === 0 ? '<p>Δεν έχουν σταλεί προσκλήσεις.</p>' : invitedProfessors.map(inv => `
+                    ${invitedProfessors.length === 0 ? '<p>Δεν έχουν σταλεί προσκλήσεις.</p>' : 
+                        invitedProfessors.length === 0 ? '<p>-</p>' : thesis.committeeMembers.slice(1).map(member => `
+                            <div class="invited-member">
+                                <span>${member} </span>
+                                <!-- <span class="status-badge status-"accepted"}">${getInvitationStatusText("accepted")}</span> -->
+                                <span class="status-badge status-Completed">${getInvitationStatusText("accepted")}</span>
+
+                            </div>
+                        `).join('')}
+                        ${invitedProfessors.map(inv => `
                         <div class="invited-member">
                             <span>${inv.first_name} ${inv.last_name} </span>
                             <!-- <span class="status-badge status-${inv.answer}">${getInvitationStatusText(inv.answer)}</span> -->
@@ -323,11 +324,15 @@ function getActiveThesisContent(thesis) {
             </div>
             <div class="form-group">
                 <label>Μέλη Τριμελούς:</label>
-                <ul>
-                    <li><strong>Επιβλέπων:</strong> ${thesis.supervisor}</li>
-                    ${thesis.committeeMembers
-                        .slice(1).map(member => `<li><strong>Μέλος:</strong> ${member}</li>`).join('')}
-                </ul>
+                <div class="inner">
+                    <div class="inner">
+                        <ul>
+                            <li><strong>Επιβλέπων:</strong> ${thesis.supervisor}</li>
+                            ${thesis.committeeMembers
+                                .slice(1).map(member => `<li><strong>Μέλος:</strong> ${member}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
             </div>
             <div class="form-group">
                 <label>Χρόνος από την Ανάθεση:</label>
@@ -517,16 +522,16 @@ function viewExaminationReport() {
             <div class="report-section">
                 <h3>Στοιχεία Διπλωματικής</h3>
                 <p><strong>Τίτλος:</strong> ${currentThesis.title}</p>
-                <p><strong>Φοιτητής:</strong> ${currentUser.name}</p>
+                <p><strong>Φοιτητής:</strong> ${currentUser.first_name} ${currentUser.last_name} </p>
                 <p><strong>Αριθμός Μητρώου:</strong> ${currentUser.am}</p>
             </div>
             
             <div class="report-section">
                 <h3>Τριμελής Επιτροπή</h3>
-                <p><strong>Επιβλέπων:</strong> ${getUserName(currentThesis.supervisorId)}</p>
-                <ul>
-                    ${currentThesis.committeeMembers.map(memberId => 
-                        `<li><strong>Μέλος:</strong> ${getUserName(memberId)}</li>`
+                <p><strong>Επιβλέπων:</strong> ${currentThesis.supervisor}</p>
+                <ul style="list-style-type: none;" >
+                    ${currentThesis.committeeMembers.slice(1).map(member => 
+                        `<li><strong>Μέλος:</strong> ${member}</li>`
                     ).join('')}
                 </ul>
             </div>
@@ -577,6 +582,8 @@ async function handleInviteProfessor() {
             throw new Error(`Error: ${r.message}`);
         }
         alert('Η πρόσκληση στάλθηκε.');
+
+        await refreshThesis(true);
     
     if (!professorId ) {
         alert('Παρακαλώ επιλέξτε έναν διδάσκοντα.');

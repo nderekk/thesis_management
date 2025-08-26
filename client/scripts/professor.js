@@ -102,7 +102,7 @@ ${thesisTopics.data.map(topic => `
     `;
 }
 
-async function createTopic() {
+async function handleCreateTopic() {
   const topicFile = document.getElementById('topicFile').files[0];
   const topicTitle = document.getElementById('topicTitle').value;
   const topicDescription = document.getElementById('topicDescription').value;
@@ -832,11 +832,19 @@ function generateGradeChart(theses) {
     return chartHTML;
 }
 
-function getThesesManagement() {
-    const userTheses = theses.filter(t => 
-        t.supervisorId === currentUser.id || 
-        t.committeeMembers.includes(currentUser.id)
-    );
+async function getThesesManagement() {
+    const response = await fetch("http://localhost:5001/api/professor/thesesList", {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      }
+    });
+    const thesesList = await response.json();
+    if (!response.ok) {
+        alert(thesesList.message);
+        throw new Error(`Error: ${thesesList.message}`);
+    }
     
     return `
         <div class="content-header">
@@ -844,33 +852,6 @@ function getThesesManagement() {
             <p>Διαχείριση διπλωματικών ανάλογα με την κατάστασή τους</p>
         </div>
         
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Φίλτρα</h3>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="statusFilter">Κατάσταση:</label>
-                    <select id="statusFilter" onchange="filterManageTheses()">
-                        <option value="">Όλες</option>
-                        <option value="pending">Υπό Ανάθεση</option>
-                        <option value="active">Ενεργή</option>
-                        <option value="review">Υπό Εξέταση</option>
-                        <option value="completed">Περατωμένη</option>
-                        <option value="cancelled">Ακυρωμένη</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="roleFilter">Ρόλος:</label>
-                    <select id="roleFilter" onchange="filterManageTheses()">
-                        <option value="">Όλοι</option>
-                        <option value="supervisor">Επιβλέπων</option>
-                        <option value="committee">Μέλος Τριμελούς</option>
-                    </select>
-                </div>
-            </div>
-        </div>
         
         <div class="card">
             <div class="card-header">
@@ -890,16 +871,16 @@ function getThesesManagement() {
                         </tr>
                     </thead>
                     <tbody>
-                        ${userTheses.map(thesis => `
+                        ${thesesList.map(thesis => `
                             <tr>
-                                <td>${thesis.title}</td>
-                                <td>${getUserName(thesis.studentId)}</td>
-                                <td><span class="status-badge status-${thesis.status}">${getStatusText(thesis.status)}</span></td>
-                                <td>${thesis.supervisorId === currentUser.id ? 'Επιβλέπων' : 'Μέλος Τριμελούς'}</td>
-                                <td>${formatDate(thesis.assignedDate)}</td>
+                                <td>${thesis.thesis_title}</td>
+                                <td>${thesis.student_name}</td>
+                                <td><span class="status-badge status-${thesis.thesis_status}">${getStatusText(thesis.thesis_status)}</span></td>
+                                <td>${thesis.professor_role}</td>
+                                <td>${formatDate(thesis.thesis_ass_date)}</td>
                                 <td>
-                                    <button class="btn btn-secondary" onclick="viewThesisDetails(${thesis.id})">Προβολή</button>
-                                    <button class="btn btn-primary" onclick="manageThesis(${thesis.id})">Διαχείριση</button>
+                                    <button class="btn btn-secondary" onclick='viewThesisDetails(${JSON.stringify(thesis)})'>Προβολή</button>
+                                    <button class="btn btn-primary" onclick='manageThesis(${JSON.stringify(thesis)})'>Διαχείριση</button>
                                 </td>
                             </tr>
                         `).join('')}
@@ -911,12 +892,7 @@ function getThesesManagement() {
 }
 
 // Function to manage individual thesis based on status
-function manageThesis(thesisId) {
-    const thesis = theses.find(t => t.id === thesisId);
-    if (!thesis) return;
-    
-    const isSupervisor = thesis.supervisorId === currentUser.id;
-    const isCommitteeMember = thesis.committeeMembers.includes(currentUser.id);
+async function manageThesis(thesis) {
     
     let modalContent = `
         <div class="modal-header">
@@ -924,29 +900,31 @@ function manageThesis(thesisId) {
             <button class="modal-close" onclick="closeModal()">&times;</button>
         </div>
         <div class="modal-body">
-            <h3>${thesis.title}</h3>
-            <p><strong>Φοιτητής:</strong> ${getUserName(thesis.studentId)}</p>
-            <p><strong>Κατάσταση:</strong> <span class="status-badge status-${thesis.status}">${getStatusText(thesis.status)}</span></p>
-            <p><strong>Ρόλος:</strong> ${isSupervisor ? 'Επιβλέπων' : 'Μέλος Τριμελούς'}</p>
+            <h3>${thesis.thesis_title}</h3>
+            <p><strong>Φοιτητής:</strong> ${thesis.student_name}</p>
+            <p><strong>Κατάσταση:</strong> <span class="status-badge status-${thesis.thesis_status}">${getStatusText(thesis.thesis_status)}</span></p>
+            <p><strong>Ρόλος:</strong>${thesis.professor_role}</p>
             <hr>
     `;
+
+    console.log(thesis.thesis_status.toLowerCase());
     
     // Actions based on status
-    switch(thesis.status) {
+    switch(thesis.thesis_status.toLowerCase()) {
         case 'pending':
-            modalContent += getPendingThesisActions(thesis, isSupervisor);
+            modalContent +=  await getPendingThesisActions(thesis);
             break;
         case 'active':
-            modalContent += getActiveThesisActions(thesis, isSupervisor);
+            modalContent += await getActiveThesisActions(thesis);
             break;
         case 'review':
-            modalContent += getReviewThesisActions(thesis, isSupervisor, isCommitteeMember);
+            modalContent += await getReviewThesisActions(thesis);
             break;
         case 'completed':
-            modalContent += getCompletedThesisActions(thesis, isSupervisor, isCommitteeMember);
+            modalContent += await getCompletedThesisActions(thesis);
             break;
         case 'cancelled':
-            modalContent += getCancelledThesisActions(thesis);
+            modalContent += await getCancelledThesisActions(thesis);
             break;
     }
     
@@ -954,11 +932,26 @@ function manageThesis(thesisId) {
         </div>
     `;
     
-    showModal(modalContent);
+    showModal(modalContent);    
 }
 
 // Actions for pending thesis
-function getPendingThesisActions(thesis, isSupervisor) {
+ async function getPendingThesisActions(thesis) {
+    const response = await fetch("http://localhost:5001/api/professor/committeeRequests", {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      }
+    });
+    const committeeRequests = await response.json();
+    if (!response.ok) {
+        alert(committeeRequests.message);
+        throw new Error(`Error: ${committeeRequests.message}`);
+    }
+
+    const invitations = committeeRequests.filter(inv => inv.thesis_id === thesis.thesis_id) || [];
+
     let content = `
         <h4>Ενέργειες για Διπλωματική Υπό Ανάθεση</h4>
         
@@ -969,32 +962,41 @@ function getPendingThesisActions(thesis, isSupervisor) {
             <div class="invited-members">
     `;
     
-    if (thesis.invitedProfessors && thesis.invitedProfessors.length > 0) {
-        thesis.invitedProfessors.forEach(invitation => {
-            const professor = users.find(u => u.id === invitation.professorId);
+    if (invitations && invitations.length > 0) {
+        content += `
+            <div class="invited-member header">
+                <span><strong>Όνομα Καθηγητή</strong></span>
+                <span><strong>Ημ/νία Πρόσκλησης</strong></span>
+                <span><strong>Ημ/νία Απάντησης</strong></span>
+                <span><strong>Κατάσταση</strong></span>
+            </div>
+        `;
+
+        invitations.forEach(invitation => {
+            
             content += `
                 <div class="invited-member">
-                    <span>${professor ? professor.name : 'Άγνωστος'}</span>
-                    <span class="status-badge status-${invitation.status}">${getInvitationStatusText(invitation.status)}</span>
+                    <span>${invitation.professor_name}</span>
+                    <span>${invitation.invite_date}</span>
+                    <span>${invitation.answer_date ? invitation.answer_date : '-'}</span>
+                    <span class="status-badge status-${invitation.answer}">
+                        ${getInvitationStatusText(invitation.answer)}
+                    </span>
                 </div>
             `;
         });
     } else {
         content += '<p>Δεν υπάρχουν προσκλήσεις</p>';
     }
+
     
-    content += `
-            </div>
-        </div>
-    `;
-    
-    if (isSupervisor) {
+    if (thesis.professor_role === "Supervisor") {
         content += `
             <div class="card">
                 <div class="card-header">
                     <h5>Ενέργειες Επιβλέποντος</h5>
                 </div>
-                <button class="btn btn-danger" onclick="cancelThesisAssignment(${thesis.id})">
+                <button class="btn btn-danger" onclick="cancelThesisAssignment(${thesis.thesis_id})">
                     Ακύρωση Ανάθεσης Θέματος
                 </button>
             </div>
@@ -1004,8 +1006,24 @@ function getPendingThesisActions(thesis, isSupervisor) {
     return content;
 }
 
-// Actions for active thesis
-function getActiveThesisActions(thesis, isSupervisor) {
+
+async function getActiveThesisActions(thesis) {
+
+    const response = await fetch("http://localhost:5001/api/professor/thesisNotes", {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      }
+    });
+    const notes = await response.json();
+    if (!response.ok) {
+        alert(notes.message);
+        throw new Error(`Error: ${notes.message}`);
+    }
+
+    console.log(notes);
+
     let content = `
         <h4>Ενέργειες για Ενεργή Διπλωματική</h4>
         
@@ -1013,7 +1031,7 @@ function getActiveThesisActions(thesis, isSupervisor) {
             <div class="card-header">
                 <h5>Σημειώσεις</h5>
             </div>
-            <form id="noteForm" onsubmit="addNote(${thesis.id}, event)">
+            <form id="noteForm" onsubmit="addNote(${thesis.thesis_id}, event)">
                 <div class="form-group">
                     <label for="noteText">Νέα Σημείωση (μέχρι 300 χαρακτήρες):</label>
                     <textarea id="noteText" maxlength="300" rows="3" required></textarea>
@@ -1023,19 +1041,19 @@ function getActiveThesisActions(thesis, isSupervisor) {
             </form>
             
             <div class="notes-list">
-                <h6>Σημειώσεις σας:</h6>
-                ${thesis.notes ? thesis.notes.filter(note => note.professorId === currentUser.id).map(note => `
+                <h3>Σημειώσεις σας:</h3>
+                ${notes ? notes.map(note => `
                     <div class="note">
-                        <p>${note.text}</p>
-                        <small>${formatDate(note.date)}</small>
+                        <p>${note.comments}</p>
+                        <small>${formatDate(note.comment_date)}</small>
                     </div>
                 `).join('') : '<p>Δεν υπάρχουν σημειώσεις</p>'}
             </div>
         </div>
     `;
     
-    if (isSupervisor) {
-        const assignedDate = new Date(thesis.assignedDate);
+    if (thesis.professor_role === "Supervisor") {
+        const assignedDate = new Date(thesis.thesis_ass_date);
         const twoYearsAgo = new Date();
         twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
         
@@ -1048,8 +1066,8 @@ function getActiveThesisActions(thesis, isSupervisor) {
         
         if (assignedDate < twoYearsAgo) {
             content += `
-                <button class="btn btn-warning" onclick="showCancelThesisForm(${thesis.id})">
-                    Ακύρωση Διπλωματικής (μετά από 2 έτη)
+                <button class="btn btn-warning" onclick="showCancelThesisForm(${thesis.thesis_id})">
+                    Ακύρωση Διπλωματικής
                 </button>
             `;
         } else {
@@ -1057,7 +1075,7 @@ function getActiveThesisActions(thesis, isSupervisor) {
         }
         
         content += `
-                <button class="btn btn-success" onclick="changeStatusToReview(${thesis.id})">
+                <button class="btn btn-success" onclick="changeStatusToReview(${thesis.thesis_id})">
                     Αλλαγή σε "Υπό Εξέταση"
                 </button>
             </div>
@@ -1068,7 +1086,26 @@ function getActiveThesisActions(thesis, isSupervisor) {
 }
 
 // Actions for review thesis
-function getReviewThesisActions(thesis, isSupervisor, isCommitteeMember) {
+async function getReviewThesisActions(thesis) {
+
+    const thesisID = thesis.thesis_id;
+
+     const response = await fetch("http://localhost:5001/api/professor/getGradeList", {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      },
+      body: JSON.stringify({ thesisID })
+    });
+    const grades = await response.json();
+    if (!response.ok) {
+        alert(grades.message);
+        throw new Error(`Error: ${grades.message}`);
+    }
+
+    console.log(grades);
+
     let content = `
         <h4>Ενέργειες για Διπλωματική Υπό Εξέταση</h4>
         
@@ -1076,76 +1113,90 @@ function getReviewThesisActions(thesis, isSupervisor, isCommitteeMember) {
             <div class="card-header">
                 <h5>Πρόχειρο Διπλωματικής</h5>
             </div>
-            ${thesis.draftText ? `
+            ${thesis.draft_text ? `
                 <div class="thesis-draft">
                     <p><strong>Πρόχειρο από τον φοιτητή:</strong></p>
-                    <div class="draft-content">${thesis.draftText}</div>
+                     <a href="/server/uploads/${thesis.draft_text}" download>📄 Λήψη Πρόχειρου</a>
                 </div>
             ` : '<p>Δεν έχει αναρτηθεί πρόχειρο ακόμα</p>'}
         </div>
     `;
     
-    if (isSupervisor) {
+    if (thesis.professor_role === "Supervisor") {
         content += `
             <div class="card">
                 <div class="card-header">
                     <h5>Ενέργειες Επιβλέποντος</h5>
                 </div>
-                ${thesis.presentationDetails ? `
-                    <button class="btn btn-primary" onclick="generateAnnouncement(${thesis.id})">
-                        Δημιουργία Ανακοίνωσης Παρουσίασης
-                    </button>
-                ` : '<p class="alert alert-warning">Η ανακοίνωση είναι διαθέσιμη μόνο μετά τη συμπλήρωση των λεπτομερειών παρουσίασης</p>'}
+                ${thesis.enableAnnouncement ? `
+                    <div class="announcement-section">
+                        <label for="announcementText" class="form-control w-100 mb-2">
+                        </label>
+                        <textarea id="announcementText" rows="3" required></textarea>
+
+                        <button class="btn btn-primary" 
+                                onclick="generateAnnouncement(${thesis.thesis_id} , event)">
+                            Δημιουργία Ανακοίνωσης Παρουσίασης
+                        </button>
+                    </div>
+                ` : `
+                    <p class="alert alert-warning">
+                        Η ανακοίνωση είναι διαθέσιμη μόνο μετά τη συμπλήρωση των λεπτομερειών παρουσίασης
+                    </p>
+                `}
                 
-                <button class="btn btn-success" onclick="enableGrading(${thesis.id})">
+                ${!thesis.enableGrading ? `
+                <button class="btn btn-success" onclick="enableGrading(${thesis.thesis_id})">
                     Ενεργοποίηση Βαθμολόγησης
                 </button>
+                ` : '<p class="alert alert-info">Η βαθμολόγηση έχει ενεργοποιηθεί από τον επιβλέποντα</p>'}
             </div>
         `;
     }
     
-    if (isSupervisor || isCommitteeMember) {
+    if (thesis.professor_role === "Supervisor" || thesis.professor_role === "Committee Member") {
         content += `
             <div class="card">
                 <div class="card-header">
                     <h5>Βαθμολόγηση</h5>
                 </div>
-                ${thesis.gradingEnabled ? `
-                    <form id="gradeForm" onsubmit="submitGrade(${thesis.id}, event)">
+                ${thesis.enableGrading ? `
+                    <form id="gradeForm" onsubmit="submitGrade(${thesis.thesis_id}, event)">
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="contentGrade">Περιεχόμενο:</label>
+                                <label for="contentGrade">Ποιότητα Δ.Ε.</label>
                                 <input type="number" id="contentGrade" min="0" max="10" step="0.1" required>
                             </div>
                             <div class="form-group">
-                                <label for="methodologyGrade">Μεθοδολογία:</label>
+                                <label for="methodologyGrade">Χρονικό Διάστημα Εκπόνησης</label>
                                 <input type="number" id="methodologyGrade" min="0" max="10" step="0.1" required>
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="presentationGrade">Παρουσίαση:</label>
+                                <label for="presentationGrade">Πληρότητα Κειμένου</label>
                                 <input type="number" id="presentationGrade" min="0" max="10" step="0.1" required>
                             </div>
                             <div class="form-group">
-                                <label for="originalityGrade">Πρωτοτυπία:</label>
+                                <label for="originalityGrade">Συνολική Εικόνα Παρουσίασης</label>
                                 <input type="number" id="originalityGrade" min="0" max="10" step="0.1" required>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="gradeComments">Σχόλια:</label>
-                            <textarea id="gradeComments" rows="3"></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary">Υποβολή Βαθμού</button>
                     </form>
                     
                     <div class="grades-summary">
                         <h6>Βαθμοί Τριμελούς:</h6>
-                        ${thesis.grades ? thesis.grades.map(grade => {
-                            const professor = users.find(u => u.id === grade.professorId);
+                        ${grades ? grades
+                            .filter(grade => !(grade.grade1 == null && grade.grade2 == null && grade.grade3 == null && grade.grade4 == null))
+                            .map(grade => {
                             return `
                                 <div class="grade-item">
-                                    <span>${professor ? professor.name : 'Άγνωστος'}: ${grade.grade.toFixed(1)}</span>
+                                    <span>Καθηγητής: ${grade.prof_name}</span>
+                                    <span>Grade 1: ${grade.grade1}</span>
+                                    <span>Grade 2: ${grade.grade2}</span>
+                                    <span>Grade 3: ${grade.grade3}</span>
+                                    <span>Grade 4: ${grade.grade4}</span>
                                 </div>
                             `;
                         }).join('') : '<p>Δεν υπάρχουν βαθμοί ακόμα</p>'}
@@ -1159,7 +1210,7 @@ function getReviewThesisActions(thesis, isSupervisor, isCommitteeMember) {
 }
 
 // Actions for completed thesis
-function getCompletedThesisActions(thesis, isSupervisor, isCommitteeMember) {
+async function getCompletedThesisActions(thesis, isSupervisor, isCommitteeMember) {
     return `
         <h4>Διπλωματική Περατωμένη</h4>
         <p>Η διπλωματική έχει ολοκληρωθεί με επιτυχία.</p>
@@ -1176,7 +1227,7 @@ function getCompletedThesisActions(thesis, isSupervisor, isCommitteeMember) {
 }
 
 // Actions for cancelled thesis
-function getCancelledThesisActions(thesis) {
+async function getCancelledThesisActions(thesis) {
     return `
         <h4>Διπλωματική Ακυρωμένη</h4>
         <p>Η διπλωματική έχει ακυρωθεί.</p>
@@ -1220,23 +1271,31 @@ function cancelThesisAssignment(thesisId) {
     }
 }
 
-function addNote(thesisId, event) {
+async function addNote(thesisID, event) {
     event.preventDefault();
-    const noteText = document.getElementById('noteText').value;
-    const thesis = theses.find(t => t.id === thesisId);
+    const newNotes = document.getElementById('noteText').value;
     
-    if (thesis && noteText.trim()) {
-        if (!thesis.notes) thesis.notes = [];
-        thesis.notes.push({
-            professorId: currentUser.id,
-            text: noteText,
-            date: new Date().toISOString()
-        });
-        
-        document.getElementById('noteText').value = '';
-        closeModal();
-        manageThesis(thesisId);
+    const response = await fetch("http://localhost:5001/api/professor/thesisNotes", {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      },
+      body: JSON.stringify({ thesisID , newNotes })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        alert(`Error: ${result.message}`);
+        return;
     }
+        
+    document.getElementById('noteText').value = '';
+    alert('Η προσθήκη νέας σημείωσης ήταν επιτυχής!');
+    closeModal();
+    loadContent('manageTheses');
+    
 }
 
 function showCancelThesisForm(thesisId) {
@@ -1262,116 +1321,129 @@ function showCancelThesisForm(thesisId) {
     showModal(modalContent);
 }
 
-function cancelThesisWithDetails(thesisId, event) {
+async function cancelThesisWithDetails(thesisID, event) {
     event.preventDefault();
     const assemblyNumber = document.getElementById('assemblyNumber').value;
     const assemblyYear = document.getElementById('assemblyYear').value;
     
-    const thesis = theses.find(t => t.id === thesisId);
-    if (thesis) {
-        thesis.status = 'cancelled';
-        thesis.cancellationReason = `Ακυρώθηκε από Διδάσκοντα - Γενική Συνέλευση ${assemblyNumber}/${assemblyYear}`;
-        closeModal();
-        loadContent('manageTheses');
+    const response = await fetch("http://localhost:5001/api/professor/cancelThesis", {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      },
+      body: JSON.stringify({ thesisID , assemblyNumber, assemblyYear})
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        alert(`Error: ${result.message}`);
+        return;
     }
+
+    alert('Η παρούσα διπλωματική μόλις ακυρώθηκε!');
+    closeModal();
+    loadContent('manageTheses');
 }
 
-function changeStatusToReview(thesisId) {
-    const thesis = theses.find(t => t.id === thesisId);
-    if (thesis) {
-        thesis.status = 'review';
-        closeModal();
-        loadContent('manageTheses');
+async function changeStatusToReview(thesisID) {
+   const response = await fetch("http://localhost:5001/api/professor/updateToReview", {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      },
+      body: JSON.stringify({ thesisID })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        alert(`Error: ${result.message}`);
+        return;
     }
+
+    alert('Αλλαγή Κατάστασης Επιτυχής : "Ενεργή" -> "Υπό Εξέταση"');
+    closeModal();
+    loadContent('manageTheses');
 }
 
-function generateAnnouncement(thesisId) {
-    const thesis = theses.find(t => t.id === thesisId);
-    if (thesis && thesis.presentationDetails) {
-        const announcement = `
-            ΑΝΑΚΟΙΝΩΣΗ ΠΑΡΟΥΣΙΑΣΗΣ ΔΙΠΛΩΜΑΤΙΚΗΣ ΕΡΓΑΣΙΑΣ
-            
-            Τίτλος: ${thesis.title}
-            Φοιτητής: ${getUserName(thesis.studentId)}
-            Ημερομηνία: ${formatDate(thesis.presentationDetails.date)}
-            Ώρα: ${thesis.presentationDetails.time}
-            Τύπος: ${thesis.presentationDetails.type === 'online' ? 'Διαδικτυακά' : 'Προσωπικά'}
-            ${thesis.presentationDetails.type === 'online' ? 
-                `Σύνδεσμος: ${thesis.presentationDetails.link}` : 
-                `Αίθουσα: ${thesis.presentationDetails.room}`
-            }
-        `;
-        
-        const modalContent = `
-            <div class="modal-header">
-                <h2>Ανακοίνωση Παρουσίασης</h2>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <pre style="white-space: pre-wrap; font-family: inherit;">${announcement}</pre>
-                <button class="btn btn-primary" onclick="copyAnnouncement()">Αντιγραφή</button>
-            </div>
-        `;
-        showModal(modalContent);
-    }
-}
-
-function enableGrading(thesisId) {
-    const thesis = theses.find(t => t.id === thesisId);
-    if (thesis) {
-        thesis.gradingEnabled = true;
-        closeModal();
-        manageThesis(thesisId);
-    }
-}
-
-function submitGrade(thesisId, event) {
+async function generateAnnouncement(thesisID, event) {
     event.preventDefault();
-    const contentGrade = parseFloat(document.getElementById('contentGrade').value);
-    const methodologyGrade = parseFloat(document.getElementById('methodologyGrade').value);
-    const presentationGrade = parseFloat(document.getElementById('presentationGrade').value);
-    const originalityGrade = parseFloat(document.getElementById('originalityGrade').value);
-    const comments = document.getElementById('gradeComments').value;
+    const announcementText = document.getElementById('announcementText').value;
     
-    const averageGrade = (contentGrade + methodologyGrade + presentationGrade + originalityGrade) / 4;
-    
-    const thesis = theses.find(t => t.id === thesisId);
-    if (thesis) {
-        if (!thesis.grades) thesis.grades = [];
-        
-        // Check if professor already graded
-        const existingGradeIndex = thesis.grades.findIndex(g => g.professorId === currentUser.id);
-        if (existingGradeIndex >= 0) {
-            thesis.grades[existingGradeIndex] = {
-                professorId: currentUser.id,
-                grade: averageGrade,
-                criteria: {
-                    content: contentGrade,
-                    methodology: methodologyGrade,
-                    presentation: presentationGrade,
-                    originality: originalityGrade
-                },
-                comments: comments,
-                date: new Date().toISOString()
-            };
-        } else {
-            thesis.grades.push({
-                professorId: currentUser.id,
-                grade: averageGrade,
-                criteria: {
-                    content: contentGrade,
-                    methodology: methodologyGrade,
-                    presentation: presentationGrade,
-                    originality: originalityGrade
-                },
-                comments: comments,
-                date: new Date().toISOString()
-            });
-        }
-        
-        closeModal();
-        manageThesis(thesisId);
+    const response = await fetch("http://localhost:5001/api/professor/newAnnouncement", {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      },
+      body: JSON.stringify({ thesisID , announcementText })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        alert(`Error: ${result.message}`);
+        return;
     }
+        
+    document.getElementById('announcementText').value = '';
+    alert('Η ανάρτηση της ανακοίνωσης για την παρουσίση της διπλωματικής ήταν επιτυχής!');
+    closeModal();
+    loadContent('manageTheses');
+    
+}
+
+async function enableGrading(thesisID) {
+     const response = await fetch("http://localhost:5001/api/professor/enableGrading", {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      },
+      body: JSON.stringify({ thesisID })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        alert(`Error: ${result.message}`);
+        return;
+    }
+
+    alert('Η βαθμολόγηση μόλις ενεργοποιήθηκε!');
+    closeModal();
+    loadContent('manageTheses');
+}
+
+async function submitGrade(thesisID, event) {
+    event.preventDefault();
+    const grade1 = parseFloat(document.getElementById('contentGrade').value);
+    const grade2 = parseFloat(document.getElementById('methodologyGrade').value);
+    const grade3 = parseFloat(document.getElementById('presentationGrade').value);
+    const grade4 = parseFloat(document.getElementById('originalityGrade').value);
+    
+    const response = await fetch("http://localhost:5001/api/professor/postGrade", {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      },
+      body: JSON.stringify({ thesisID , grade1, grade2, grade3, grade4})
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        alert(`Error: ${result.message}`);
+        return;
+    }
+    
+    alert('Η καταχώρηση βαθμού ήταν επιτυχής!');
+    closeModal();
+    manageThesis(thesisID);
 }
 
 function copyAnnouncement() {
@@ -1379,13 +1451,78 @@ function copyAnnouncement() {
     alert('Η ανακοίνωση αντιγράφηκε στο clipboard!');
 }
 
-function getInvitationsList() {
-    return `
-        <div class="content-header">
-            <h1>Προσκλήσεις Τριμελούς Επιτροπής</h1>
+async function getInvitationsList() {
+    const response = await fetch("http://localhost:5001/api/professor/invitations", {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+    });
+    const invitations = await response.json();
+    if (!response.ok) {
+        alert(invitations.message);
+        throw new Error(`Error: ${invitations.message}`);
+    }
+
+    const rowsHTML = invitations.filter(i => i.answer === 'pending').map(inv => `
+        <tr>
+            <td>${inv.title}</td>   
+            <td>${inv.student_name}</td>
+            <td>${inv.supervisor}</td>
+            <td>${formatDate(inv.invite_date)}</td>
+            <td>
+                <button class="btn btn-primary" onclick="respondToInvitation(${inv.id}, true)">Αποδοχή</button>
+                <button class="btn btn-danger" onclick="respondToInvitation(${inv.id}, false)">Απόρριψη</button>
+            </td>
+        </tr>
+    `).join('');
+
+  return `
+    <div class="content-header">
+        <h1>Προσκλήσεις Τριμελούς Επιτροπής</h1>
+        <p>Δείτε και απαντήστε στις προσκλήσεις που έχετε λάβει για συμμετοχή σε τριμελείς επιτροπές.</p>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Ενεργές Προσκλήσεις</h3>
         </div>
-        <div class="card">
-            <p>Η λειτουργία προβολής και αποδοχής/απόρριψης προσκλήσεων δεν είναι ακόμα διαθέσιμη.</p>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Θέμα Διπλωματικής</th>
+                        <th>Φοιτητής</th>
+                        <th>Επιβλέπων</th>
+                        <th>Ημερομηνία Πρόσκλησης</th>
+                        <th>Ενέργειες</th>
+                    </tr>
+                </thead>
+                <tbody id="invitationsTableBody">
+                    ${rowsHTML}
+                </tbody>
+            </table>
         </div>
-    `;
+    </div>
+  `;
 }
+
+async function respondToInvitation(invitationId, accepted) {
+  const response = await fetch(`http://localhost:5001/api/professor/invitations/respond`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      invitationId: invitationId,
+      response: accepted ? 'accepted' : 'declined'
+    })
+  });
+
+  const result = await response.json();
+  if (response.ok) {
+    alert(result.message || 'Η απάντηση καταχωρήθηκε.');
+    loadContent("invitations"); // Refresh list
+  } else {
+    alert(result.message || 'Σφάλμα κατά την απάντηση.');
+  }
+}
+

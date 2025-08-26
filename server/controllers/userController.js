@@ -1,7 +1,11 @@
 const asyncHandler = require("express-async-handler");
-const {sequelize, user, blacklist} = require("../config/dbConnection");
+const {sequelize, users, blacklist, announcements, thesis_presentation,
+  thesis, professor, student, thesis_topics
+} = require("../config/dbConnection");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { Op, fn, col, where } = require('sequelize');
+const xmlparser = require("js2xmlparser");
 
 //@desc Login User
 //@route Post /api/user/login
@@ -12,7 +16,7 @@ const loginUser = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("All fields are mandatory");
   }
-  const loggedUser = await user.findOne({ where: {email: email} });
+  const loggedUser = await users.findOne({ where: {email: email} });
   // if (user && await bcrypt.compare(password, user.password)){
   if (loggedUser && password === loggedUser.password){
     const accessToken = jwt.sign({
@@ -61,5 +65,87 @@ const getUser = asyncHandler(async (req, res) => {
   res.status(200).json(req.user);
 });
 
+//@desc Get announcements
+//@route Get /api/user/announcements?from=yyyymmdd&to=yyyymmdd&format=type
+//@access Public
+const getAnnouncements = asyncHandler(async (req, res) => {
+  const { from, to, format } = req.query;
 
-module.exports = { loginUser, logoutUser, getUser };
+  const anns = await announcements.findAll();
+
+  const announcementsInfo = await Promise.all(anns.map(async ann => {
+    const presentation_details = await thesis_presentation.findOne({
+      attributes: ['date_time', 'presentation_type', 'venue'],
+      where: { thesis_id: ann.thesis_id,
+        [Op.and]: [
+        where(fn('DATE', col('date_time')), {
+          [Op.between]: [from, to]
+      })
+    ]
+       }
+    });
+
+    if (!presentation_details) return null;
+    
+    const studentThesis = await thesis.findOne({where: {id: ann.thesis_id}});
+    const topic = await thesis_topics.findOne({
+      attributes: ['title'],
+      where: {id: studentThesis.topic_id}
+    });
+    const stu = await student.findOne({
+      attributes: ['first_name', 'last_name', 'am'], 
+      where: {am: studentThesis.student_am}
+    });
+    // committee
+    const supervisor = await professor.findOne({
+      attributes: ["first_name" , "last_name", "am"],
+      where: {am: studentThesis.supervisor_am}
+    });
+    const prof2 = await professor.findOne({
+      attributes: ["first_name" , "last_name", "am"], 
+      where: {am: studentThesis.prof2_am} 
+    });
+    const prof3 = await professor.findOne({
+      attributes: ["first_name" , "last_name", "am"], 
+      where: {am: studentThesis.prof3_am} 
+    });
+    const committeeMembers= [
+      `${supervisor.first_name} ${supervisor.last_name}`,
+      `${prof2.first_name} ${prof2.last_name}` ,
+      `${prof3.first_name} ${prof3.last_name}` , 
+    ];
+    return {
+      id: ann.id,
+      announcementDate: ann.announcement_datetime,
+      announcementContent: ann.announcement_content,
+      presentation: {
+        date: presentation_details.date_time.toISOString().split("T")[0],
+        type: presentation_details.presentation_type,
+        venue: presentation_details.venue,
+      },
+      student: {
+        firstName: stu.first_name,
+        lastName: stu.last_name,
+        am: stu.am,
+      },
+      topic: {
+        title: topic.title,
+      },
+      committee: committeeMembers,
+    };
+  }));
+
+  const announcementList = announcementsInfo.filter(Boolean);
+
+
+  if (announcementList && format === "json")
+    res.status(200).json(announcementList);
+  else if (announcementList && format === "xml"){
+    const xml = xmlparser.parse("announcements",announcementList);
+    res.set("Content-Type", "application/xml").send(xml);
+  }
+  else res.status(200).json({});
+});
+
+
+module.exports = { loginUser, logoutUser, getUser, getAnnouncements };

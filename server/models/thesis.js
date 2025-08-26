@@ -10,10 +10,13 @@ module.exports = function(sequelize, DataTypes) {
     topic_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      unique: true,
       references: {
         model: 'thesis_topics',
         key: 'id'
-      }
+      },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
     },
     student_am: {
       type: DataTypes.INTEGER,
@@ -21,7 +24,9 @@ module.exports = function(sequelize, DataTypes) {
       references: {
         model: 'student',
         key: 'am'
-      }
+      },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
     },
     supervisor_am: {
       type: DataTypes.INTEGER,
@@ -29,7 +34,9 @@ module.exports = function(sequelize, DataTypes) {
       references: {
         model: 'professor',
         key: 'am'
-      }
+      },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
     },
     prof2_am: {
       type: DataTypes.INTEGER,
@@ -37,7 +44,9 @@ module.exports = function(sequelize, DataTypes) {
       references: {
         model: 'professor',
         key: 'am'
-      }
+      },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
     },
     prof3_am: {
       type: DataTypes.INTEGER,
@@ -45,11 +54,13 @@ module.exports = function(sequelize, DataTypes) {
       references: {
         model: 'professor',
         key: 'am'
-      }
+      },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
     },
     thesis_status: {
       type: DataTypes.ENUM('Pending','Active','Completed','Cancelled','Review'), 
-      allowNull: true
+      allowNull: false,
     },
     assignment_date: {
       type: DataTypes.DATEONLY,
@@ -70,6 +81,16 @@ module.exports = function(sequelize, DataTypes) {
     ap_from_gs: {
       type: DataTypes.INTEGER,
       allowNull: true
+    },
+    enableGrading: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false
+    },
+    enableAnnounce: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false
     }
   }, {
     sequelize,

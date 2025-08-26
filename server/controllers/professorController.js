@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
-const {sequelize, professor, thesis_topics, thesis, student} = require("../config/dbConnection");
+const {sequelize, professor, thesis_topics, thesis, student , trimelis_requests, thesis_cancellation, thesis_comments, thesis_grade, announcements} = require("../config/dbConnection");
 const deleteUploadedFile = require("../utils/fileDeleter");
-const { Op } = require('sequelize');
+const { Op, fn } = require('sequelize');
 
 //@desc Get current professor
 //@route Get /api/professor
@@ -117,12 +117,14 @@ const deleteTopic = asyncHandler(async (req, res) => {
 const getThesesList = asyncHandler(async (req, res) => {
   const loggedProfessor = await professor.findOne({ where: {prof_userid: req.user.id} });
   const professorThesesSupervisor = await thesis.findAll({
-    [Op.or]: [
-      { supervisor_am: loggedProfessor.am },
-      { prof2_am: loggedProfessor.am },
-      { prof3_am: loggedProfessor.am}
-    ]
-  })
+    where: {
+      [Op.or]: [
+        { supervisor_am: loggedProfessor.am },
+        { prof2_am: loggedProfessor.am },
+        { prof3_am: loggedProfessor.am }
+      ]
+    }
+  });
   const topicIDs = professorThesesSupervisor.map(thesis => thesis.topic_id);
   const professorThesesTopics = await thesis_topics.findAll({where: { id: topicIDs }});
 
@@ -139,15 +141,17 @@ const getThesesList = asyncHandler(async (req, res) => {
     }else {
       role = 'Committee Member';
     }
-
-        return {
-          thesis_id: prof.id,
-          thesis_title: req.title,
-          professor_role: role,
-          thesis_status: prof.thesis_status,
-          thesis_ass_date: prof.assignment_date,
-          student_name: `${stud.first_name} ${stud.last_name}`
-        };
+      return {
+        thesis_id: prof.id,
+        thesis_title: req.title,
+        professor_role: role,
+        thesis_status: prof.thesis_status,
+        thesis_ass_date: prof.assignment_date,
+        student_name: `${stud.first_name} ${stud.last_name}`,
+        enableGrading: prof.enableGrading,
+        draft_text : prof.thesis_content_file,
+        enableAnnouncement : prof.enableAnnounce,
+      };
     });
 
   res.status(200).json(professorThesesInfo);
@@ -225,11 +229,11 @@ const getStats = asyncHandler(async (req, res) => {
   res.status(200).json({
     supervisorAvg: Number(supervisorResults.avg_days), 
     committeeAvg: Number(committeeResults.avg_days), 
-    totalAvg: Number(totalAvg),
+    totalAvg: totalAvg ? Number(totalAvg) : 0,
 
     supervisorGrade: Number(supervisorGrade.grade),
     committeeGrade: Number(committeeGrade.grade),
-    totalGrade: Number(totalGrade),
+    totalGrade: totalGrade ? Number(totalGrade) : 0,
 
     supervisorCount: Number(supervisorCount.n1),
     committeeCount: Number(committeeCount.n2),
@@ -269,20 +273,279 @@ const assignTopicToStudent = asyncHandler(async (req, res) => {
   const existingThesis = await thesis.findOne({ where: { student_am: studentAm } });
   if (existingThesis) return res.status(400).json({ message: 'Student already has a thesis' });
   // Set topic as temp_assigned
-  await topic.update({ topic_status: 'temp_assigned', student_am: studentAm });
-  // Create thesis row with Pending status
-  const newThesis = await thesis.create({
-    topic_id: topicId,
-    student_am: studentAm,
-    supervisor_am: topic.prof_am,
-    thesis_status: 'Pending',
-    assignment_date: new Date()
+  await sequelize.transaction(async (t) => {
+    await topic.update({ topic_status: 'temp_assigned', student_am: studentAm });
+    // Create thesis row with Pending status
+    /* @MHPWS NA TO KNAOUME TRIGGER??????? */
+    // await thesis.create({
+    //   topic_id: topicId,
+    //   student_am: studentAm,
+    //   supervisor_am: topic.prof_am,
+    //   thesis_status: 'Pending',
+    //   assignment_date: new Date()
+    // });
   });
-  res.status(200).json({ message: 'Topic temporarily assigned', thesis: newThesis });
+  res.status(200).json({ message: 'Topic temporarily assigned' });
+});
+
+//@desc Get committee professors for a thesis
+//@route GET /api/professor/committeeRequests
+//@access Private 
+const getCommitteeRequests = asyncHandler(async (req, res) => {
+  const committeeProfessors = await trimelis_requests.findAll();
+  const profIDs = committeeProfessors.map(prof => prof.prof_am);
+  const professorNames = await professor.findAll({where: { am: profIDs}});
+
+  const committeeInfo = committeeProfessors.map(prof => {
+    const names = professorNames.find(r => r.am === prof.prof_am);
+
+    return {
+      thesis_id: prof.thesis_id,
+      answer: prof.answer,
+      invite_date: prof.invite_date,
+      answer_date: prof.answer_date,
+      professor_name: `${names.first_name} ${names.last_name}`
+    };
+  });
+  
+  res.status(200).json(committeeInfo);
+});
+
+//@desc Update thesis from Active to Review
+//@route PUT /api/professor/updateToReview
+//@access Private
+const putThesisReview = asyncHandler(async (req, res) => {
+  const { thesisID } = req.body;
+  if (!thesisID) return res.status(400).json({ message: 'Missing thesisID' });
+
+  const currentThesis = await thesis.findOne({ where : { id : thesisID } });
+
+  await currentThesis.update({ thesis_status: 'Review'});
+  res.status(200).json({ message: 'Status changed from Active to Review.' });
+
+});
+
+
+//@desc Cancel a thesis
+//@route POST /api/professor/cancelThesis
+//@access Private
+const postCancelThesis = asyncHandler(async (req, res) => {
+  const { thesisID , assemblyYear , assemblyNumber } = req.body;
+  if (!thesisID || !assemblyNumber || !assemblyYear) return res.status(400).json({ message: 'Missing thesisID , assembly year or assembly number.' });
+
+  const thesisCancellation = await thesis_cancellation.create({
+    thesis_id : thesisID,
+    reason : 'By Professor',
+    assembly_year : assemblyYear,
+    assembly_number : assemblyNumber
+  });
+  res.status(200).json(thesisCancellation);
+
+});
+
+//@desc Get notes from a thesis
+//@route GET /api/professor/thesisNotes
+//@access Private
+const getThesisNotes = asyncHandler(async (req, res) => {
+  
+  const prof = await professor.findOne({ where : { prof_userid : req.user.id}})
+  const thesisNotes = await thesis_comments.findAll({ where: {prof_am: prof.am} });
+
+  res.status(200).json(thesisNotes);
+
+});
+
+//@desc Cancel a thesis
+//@route POST /api/professor/thesisNotes
+//@access Private
+const postThesisNotes = asyncHandler(async (req, res) => {
+  const { thesisID , newNotes } = req.body;
+  if (!thesisID || !newNotes) return res.status(400).json({ message: 'Missing thesisID or new notes' });
+
+  const prof = await professor.findOne({ where : { prof_userid : req.user.id}})
+
+  const postNewNote = await thesis_comments.create({
+    thesis_id : thesisID,
+    prof_am: prof.am,
+    comments : newNotes,
+    comment_date : fn('CURDATE')
+  });
+  res.status(200).json(postNewNote);
+
+});
+
+//@desc Enabling the grading system
+//@route PUT /api/professor/enableGrading
+//@access Private
+const putEnableGrading = asyncHandler(async (req, res) => {
+  const { thesisID } = req.body;
+  if (!thesisID) return res.status(400).json({ message: 'Missing thesisID' });
+
+  const currentThesis = await thesis.findOne({ where : { id : thesisID } });
+
+  await currentThesis.update({ enableGrading: 1});
+  res.status(200).json({ message: 'Grading got enabled.' });
+
+});
+
+//@desc Each professor can post the grade
+//@route PUT /api/professor/postGrade
+//@access Private
+const postGrade = asyncHandler(async (req, res) => {
+  const { thesisID, grade1, grade2, grade3, grade4 } = req.body;
+  if (!thesisID || !grade1 || !grade2 || !grade3 || !grade4) return res.status(400).json({ message: 'Missing thesisID or grade' });
+
+  const currentThesis = await thesis_grade.findOne({ where : { thesis_id : thesisID } });
+
+  const prof = await professor.findOne({where: {prof_userid : req.user.id}});
+  const profID = prof.am; 
+
+  if((currentThesis.prof1am === profID) && (currentThesis.prof1_grade1 === null))
+    await currentThesis.update({prof1_grade1: grade1 , prof1_grade2: grade2, prof1_grade3: grade3, prof1_grade4: grade4});
+  else if((currentThesis.prof2am === profID) && (currentThesis.prof2_grade1 === null))
+    await currentThesis.update({prof2_grade1: grade1 , prof2_grade2: grade2, prof2_grade3: grade3, prof2_grade4: grade4});
+  else if((currentThesis.prof3am === profID) && (currentThesis.prof3_grade1 === null))
+    await currentThesis.update({prof3_grade1: grade1 , prof3_grade2: grade2, prof3_grade3: grade3, prof3_grade4: grade4});
+  else
+    return res.status(400).json({ message: 'You have already submitted a grade' });
+
+  res.status(200).json({currentThesis});
+
+});
+
+//@desc get all professor's invitations
+//@route GET /api/professor/invitations
+//@access Private 
+const getInvitationsList = asyncHandler(async (req, res) => {
+  const loggedProfessor = await professor.findOne({ where: {prof_userid: req.user.id} });
+  const requests = await trimelis_requests.findAll({
+    where: {
+      prof_am: loggedProfessor.am
+    }
+  });
+  console.log(requests);
+  const invitations = await Promise.all(requests.map(async r => {
+    const th = await thesis.findOne({where: {
+      id: r.thesis_id
+    }});
+    const topic = await thesis_topics.findOne({where: {
+      id: th.topic_id
+    }});
+    const stu = await student.findOne({ where: {
+      am: th.student_am
+    }});
+    const supervisor = await professor.findOne({where: {
+      am: th.supervisor_am
+    }});
+
+    return {
+      id: r.id,
+      title: topic.title,
+      answer: r.answer,
+      invite_date: r.invite_date,
+      answer_date: r.answer_date,
+      student_am: stu.am,
+      student_name: `${stu.first_name} ${stu.last_name}`,
+      supervisor: `${supervisor.first_name} ${supervisor.last_name}`
+    };
+  }));
+  
+  res.status(200).json(invitations);
+});
+
+//@desc accept or decline an invitation
+//@route PUT /api/professor/invitations/respond
+//@access Private 
+const respondToInvitation = asyncHandler(async (req, res) => {
+  const invitation = await trimelis_requests.findOne({where: {
+    id: req.body.invitationId
+  }});
+  if (invitation.answer === 'accepted' || invitation.answer === 'declined') {
+    res.status(400);
+    throw new Error("Cant change already settled invitation");
+  }
+  await invitation.update({
+    answer: req.body.response,
+    answer_date: fn('CURDATE')
+  });
+
+  res.status(200).json({ message: `Invitation ${req.body.response}` });
+});
+
+//@desc Get grades of a thesis
+//@route POST /api/professor/getGradeList
+//@access Private
+const getGradeList = asyncHandler(async (req, res) => {
+  
+  const grades = await thesis_grade.findOne({ where: {thesis_id: req.body.thesisID} });
+
+  if(grades){
+    const prof1 = await professor.findOne({ where: {am: grades.prof1am} });
+    const prof2 = await professor.findOne({ where: {am: grades.prof2am} });
+    const prof3 = await professor.findOne({ where: {am: grades.prof3am} });
+
+    const prof = await professor.findOne({where: {prof_userid : req.user.id}});
+    const profID = prof.am; 
+
+    const prof1grades = 
+        {prof_name: `${prof1.first_name} ${prof1.last_name}`,
+        grade1: grades.prof1_grade1,
+        grade2: grades.prof1_grade2,
+        grade3: grades.prof1_grade3,
+        grade4: grades.prof1_grade4
+      };
+    
+    const prof2grades = 
+        {prof_name: `${prof2.first_name} ${prof2.last_name}`,
+        grade1: grades.prof2_grade1,
+        grade2: grades.prof2_grade2,
+        grade3: grades.prof2_grade3,
+        grade4: grades.prof2_grade4
+      };
+    
+    const prof3grades = 
+        {prof_name: `${prof3.first_name} ${prof3.last_name}`,
+        grade1: grades.prof3_grade1,
+        grade2: grades.prof3_grade2,
+        grade3: grades.prof3_grade3,
+        grade4: grades.prof3_grade4
+      };
+    
+    
+    if(profID === grades.prof1am){
+      res.status(200).json([prof2grades,prof3grades]);
+    }else if(profID === grades.prof2am){
+      res.status(200).json([prof1grades,prof3grades]);
+    }else if(profID === grades.prof3am){
+      res.status(200).json([prof1grades,prof2grades]);
+    }else
+      res.status(200).json({});
+
+}else
+   res.status(200).json({});
+
+});
+
+//@desc accept or decline an invitation
+//@route POST /api/professor/newAnnouncement
+//@access Private 
+const postAnnouncement = asyncHandler(async (req, res) => {
+  const { thesisID , announcementText} = req.body;
+  if (!thesisID || !announcementText) return res.status(400).json({ message: 'Missing thesisID or announcement text.' });
+  
+  const createAnnouncement = await announcements.create({
+    thesis_id : thesisID,
+    announcement_datetime : fn('NOW'),
+    announcement_content : announcementText
+  });
+
+  res.status(200).json({ createAnnouncement });
 });
 
 module.exports = {
-  getProfessorInfo, getTopics, createTopic, 
-  editTopic, deleteTopic, getStats, getThesesList,
-  searchStudent, assignTopicToStudent
+  getProfessorInfo, getTopics, createTopic, getThesisNotes,
+  editTopic, deleteTopic, getStats, getThesesList,postCancelThesis,
+  searchStudent, assignTopicToStudent, getCommitteeRequests, putThesisReview,
+  postThesisNotes , putEnableGrading, postGrade, getInvitationsList, respondToInvitation,
+  getGradeList, postAnnouncement
 };
