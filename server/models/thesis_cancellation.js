@@ -21,6 +21,10 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.ENUM('By Professor','By Secretary'),
       allowNull: false
     },
+    reason_text: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
     assembly_year: {
       type: DataTypes.INTEGER,
       allowNull: true
