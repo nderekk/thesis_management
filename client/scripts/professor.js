@@ -401,7 +401,7 @@ async function getThesesList() {
                                 <td>${thesis.professor_role}</td>
                                 <td>${thesis.thesis_ass_date}</td>
                                 <td>
-                                    <button class="btn btn-secondary" onclick="viewThesisDetails(${thesis.thesis_id})">Προβολή</button>
+                                    <button class="btn btn-secondary" onclick='viewThesisDetails(${JSON.stringify(thesis)})'>Προβολή</button>
                                     <button class="btn btn-primary" onclick='manageThesis(${JSON.stringify(thesis)})'>Διαχείριση</button>
                                 </td>
                             </tr>
@@ -1526,3 +1526,282 @@ async function respondToInvitation(invitationId, accepted) {
   }
 }
 
+// Function to view comprehensive thesis details
+async function viewThesisDetails(thesis) {
+    try {
+        // If thesis is passed as JSON string, parse it
+        const thesisData = typeof thesis === 'string' ? JSON.parse(thesis) : thesis;
+        
+        const response = await fetch(`http://localhost:5001/api/professor/thesis/${thesisData.thesis_id}`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            alert(`Σφάλμα: ${error.message || 'Δεν ήταν δυνατή η φόρτωση των λεπτομερειών της διπλωματικής'}`);
+            return;
+        }
+
+        const thesisDetails = await response.json();
+        
+        // Create modal content
+        let modalContent = `
+            <div class="modal-header">
+                <h2>Λεπτομέρειες Διπλωματικής</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body thesis-details-modal">
+                <div class="thesis-basic-info">
+                    <h3>${thesisDetails.thesis.title}</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>Κατάσταση:</strong>
+                            <span class="status-badge status-${thesisDetails.thesis.status.toLowerCase()}">${getStatusText(thesisDetails.thesis.status)}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Ρόλος σας:</strong>
+                            <span>${thesisDetails.professorRole}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Ημ/νία Ανάθεσης:</strong>
+                            <span>${formatDate(thesisDetails.thesis.assignment_date)}</span>
+                        </div>
+                        ${thesisDetails.thesis.completion_date ? `
+                        <div class="info-item">
+                            <strong>Ημ/νία Ολοκλήρωσης:</strong>
+                            <span>${formatDate(thesisDetails.thesis.completion_date)}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+
+                <div class="thesis-description">
+                    <h4>Περιγραφή</h4>
+                    <p>${thesisDetails.thesis.description}</p>
+                </div>
+
+                <div class="student-info">
+                    <h4>Πληροφορίες Φοιτητή</h4>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>Όνομα:</strong>
+                            <span>${thesisDetails.student.name}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>ΑΜ:</strong>
+                            <span>${thesisDetails.student.am}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Email:</strong>
+                            <span>${thesisDetails.student.email}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Εξάμηνο:</strong>
+                            <span>${thesisDetails.student.semester}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="committee-info">
+                    <h4>Τριμελής Επιτροπή</h4>
+                    <div class="committee-members">
+                        <div class="committee-member supervisor">
+                            <h5>Επιβλέπων</h5>
+                            <p><strong>${thesisDetails.committee.supervisor.name}</strong></p>
+                            <p>${thesisDetails.committee.supervisor.field}</p>
+                            <p>${thesisDetails.committee.supervisor.email}</p>
+                        </div>
+                        ${thesisDetails.committee.prof2 ? `
+                        <div class="committee-member">
+                            <h5>Μέλος Τριμελούς</h5>
+                            <p><strong>${thesisDetails.committee.prof2.name}</strong></p>
+                            <p>${thesisDetails.committee.prof2.field}</p>
+                            <p>${thesisDetails.committee.prof2.email}</p>
+                        </div>
+                        ` : ''}
+                        ${thesisDetails.committee.prof3 ? `
+                        <div class="committee-member">
+                            <h5>Μέλος Τριμελούς</h5>
+                            <p><strong>${thesisDetails.committee.prof3.name}</strong></p>
+                            <p>${thesisDetails.committee.prof3.field}</p>
+                            <p>${thesisDetails.committee.prof3.email}</p>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+
+                <div class="action-timeline">
+                    <h4>Χρονολόγιο Ενεργειών</h4>
+                    ${thesisDetails.actionTimeline.length > 0 ? `
+                    <div class="timeline">
+                        ${thesisDetails.actionTimeline.map((log, index) => `
+                            <div class="timeline-item">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <div class="timeline-status">
+                                        <span class="status-badge status-${log.prev_status.toLowerCase()}">${getStatusText(log.prev_status)}</span>
+                                        <span class="timeline-arrow">→</span>
+                                        <span class="status-badge status-${log.new_status.toLowerCase()}">${getStatusText(log.new_status)}</span>
+                                    </div>
+                                    <div class="timeline-date">${formatDateTime(log.timedate)}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    ` : '<p>Δεν υπάρχουν καταγεγραμμένες ενέργειες.</p>'}
+                </div>
+
+                ${thesisDetails.grades ? `
+                <div class="grades-section">
+                    <h4>Βαθμολογία</h4>
+                    <div class="final-grade">
+                        <strong>Τελικός Βαθμός: </strong>
+                        <span class="grade-display">${thesisDetails.grades.final_grade ? thesisDetails.grades.final_grade : 'Δεν έχει υπολογιστεί'}</span>
+                    </div>
+                    <div class="detailed-grades">
+                        <h5>Λεπτομερής Βαθμολογία</h5>
+                        <div class="grades-grid">
+                            <div class="grade-category">
+                                <h6>Επιβλέπων (${thesisDetails.committee.supervisor.name})</h6>
+                                <div class="grade-item">
+                                    <span>Ποιότητα Δ.Ε.:</span>
+                                    <span>${thesisDetails.grades.prof1_grades.grade1 || '-'}</span>
+                                </div>
+                                <div class="grade-item">
+                                    <span>Χρονικό Διάστημα Εκπόνησης Δ.Ε.:</span>
+                                    <span>${thesisDetails.grades.prof1_grades.grade2 || '-'}</span>
+                                </div>
+                                <div class="grade-item">
+                                    <span>Ποιότητα και Πληρότητα Κειμένου Δ.Ε.:</span>
+                                    <span>${thesisDetails.grades.prof1_grades.grade3 || '-'}</span>
+                                </div>
+                                <div class="grade-item">
+                                    <span>Παρουσίαση Δ.Ε.:</span>
+                                    <span>${thesisDetails.grades.prof1_grades.grade4 || '-'}</span>
+                                </div>
+                            </div>
+                            ${thesisDetails.committee.prof2 ? `
+                            <div class="grade-category">
+                                <h6>Μέλος Τριμελούς (${thesisDetails.committee.prof2.name})</h6>
+                                <div class="grade-item">
+                                    <span>Ποιότητα Δ.Ε.:</span>
+                                    <span>${thesisDetails.grades.prof2_grades.grade1 || '-'}</span>
+                                </div>
+                                <div class="grade-item">
+                                    <span>Χρονικό Διάστημα Εκπόνησης Δ.Ε.:</span>
+                                    <span>${thesisDetails.grades.prof2_grades.grade2 || '-'}</span>
+                                </div>
+                                <div class="grade-item">
+                                    <span>Ποιότητα και Πληρότητα Κειμένου Δ.Ε.:</span>
+                                    <span>${thesisDetails.grades.prof2_grades.grade3 || '-'}</span>
+                                </div>
+                                <div class="grade-item">
+                                    <span>Παρουσίαση Δ.Ε.:</span>
+                                    <span>${thesisDetails.grades.prof2_grades.grade4 || '-'}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                            ${thesisDetails.committee.prof3 ? `
+                            <div class="grade-category">
+                                <h6>Μέλος Τριμελούς (${thesisDetails.committee.prof3.name})</h6>
+                                <div class="grade-item">
+                                    <span>Ποιότητα Δ.Ε.:</span>
+                                    <span>${thesisDetails.grades.prof3_grades.grade1 || '-'}</span>
+                                </div>
+                                <div class="grade-item">
+                                    <span>Χρονικό Διάστημα Εκπόνησης Δ.Ε.:</span>
+                                    <span>${thesisDetails.grades.prof3_grades.grade2 || '-'}</span>
+                                </div>
+                                <div class="grade-item">
+                                    <span>Ποιότητα και Πληρότητα Κειμένου Δ.Ε.:</span>
+                                    <span>${thesisDetails.grades.prof3_grades.grade3 || '-'}</span>
+                                </div>
+                                <div class="grade-item">
+                                    <span>Παρουσίαση Δ.Ε.:</span>
+                                    <span>${thesisDetails.grades.prof3_grades.grade4 || '-'}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+
+                ${thesisDetails.presentation ? `
+                <div class="presentation-info">
+                    <h4>Πληροφορίες Παρουσίασης</h4>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>Ημ/νία & Ώρα:</strong>
+                            <span>${formatDateTime(thesisDetails.presentation.date_time)}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Τύπος:</strong>
+                            <span>${thesisDetails.presentation.presentation_type}</span>
+                        </div>
+                        ${thesisDetails.presentation.venue ? `
+                        <div class="info-item">
+                            <strong>Χώρος:</strong>
+                            <span>${thesisDetails.presentation.venue}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+                ` : ''}
+
+                <div class="files-links">
+                    <h4>Αρχεία & Σύνδεσμοι</h4>
+                    <div class="files-grid">
+                        ${thesisDetails.thesis.thesis_content_file ? `
+                        <div class="file-item">
+                            <strong>Τελικό Κείμενο:</strong>
+                            <a href="/uploads/${thesisDetails.thesis.thesis_content_file}" target="_blank" class="file-link">
+                                <i class="fas fa-file-pdf"></i> Προβολή PDF
+                            </a>
+                        </div>
+                        ` : ''}
+                        ${thesisDetails.thesis.nemertes_link ? `
+                        <div class="file-item">
+                            <strong>Σύνδεσμος Νημερτή:</strong>
+                            <a href="${thesisDetails.thesis.nemertes_link}" target="_blank" class="file-link">
+                                <i class="fas fa-external-link-alt"></i> Άνοιγμα Σύνδεσμου
+                            </a>
+                        </div>
+                        ` : ''}
+                        ${thesisDetails.links.length > 0 ? thesisDetails.links.map((link, index) => `
+                        <div class="file-item">
+                            <strong>Σύνδεσμος ${index + 1}:</strong>
+                            <a href="${link}" target="_blank" class="file-link">
+                                <i class="fas fa-external-link-alt"></i> Άνοιγμα Σύνδεσμου
+                            </a>
+                        </div>
+                        `).join('') : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        showModal(modalContent);
+        
+    } catch (error) {
+        console.error('Error viewing thesis details:', error);
+        alert('Σφάλμα κατά την προβολή των λεπτομερειών της διπλωματικής');
+    }
+}
+
+// Helper function to format date and time
+function formatDateTime(dateTimeString) {
+    if (!dateTimeString) return '-';
+    const date = new Date(dateTimeString);
+    return date.toLocaleString('el-GR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}

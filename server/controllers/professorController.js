@@ -585,11 +585,191 @@ const getThesisInfo = asyncHandler(async (req, res) => {
   res.status(200).json(info);
 });
 
+//@desc Get comprehensive thesis details including logs, grades, and committee
+//@route GET /api/professor/thesis/:id
+//@access Private
+const getThesisDetails = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  
+  // Get current professor
+  const currentProfessor = await professor.findOne({ where: { prof_userid: req.user.id } });
+  if (!currentProfessor) {
+    res.status(404);
+    throw new Error("Professor not found");
+  }
+
+  // Get thesis with related data
+  const thesisData = await thesis.findOne({
+    where: { id: id },
+    include: [
+      {
+        model: thesis_topics,
+        as: 'topic',
+        attributes: ['title', 'description', 'attached_discription_file', 'original_file_name']
+      },
+      {
+        model: student,
+        as: 'student_am_student',
+        attributes: ['first_name', 'last_name', 'am', 'email', 'semester']
+      },
+      {
+        model: professor,
+        as: 'supervisor_am_professor',
+        attributes: ['first_name', 'last_name', 'am', 'email', 'field_of_expertise']
+      },
+      {
+        model: professor,
+        as: 'prof2_am_professor',
+        attributes: ['first_name', 'last_name', 'am', 'email', 'field_of_expertise']
+      },
+      {
+        model: professor,
+        as: 'prof3_am_professor',
+        attributes: ['first_name', 'last_name', 'am', 'email', 'field_of_expertise']
+      }
+    ]
+  });
+
+  if (!thesisData) {
+    res.status(404);
+    throw new Error("Thesis not found");
+  }
+
+  // Check if professor is involved in this thesis
+  const isInvolved = 
+    thesisData.supervisor_am === currentProfessor.am ||
+    thesisData.prof2_am === currentProfessor.am ||
+    thesisData.prof3_am === currentProfessor.am;
+
+  if (!isInvolved) {
+    res.status(403);
+    throw new Error("Not authorized to view this thesis");
+  }
+
+  // Get thesis logs (action timeline)
+  const thesisLogs = await sequelize.query(`
+    SELECT 
+      timedate,
+      prev_status,
+      new_status
+    FROM thesis_logs 
+    WHERE thesis_id = :thesisId 
+    ORDER BY timedate ASC
+  `, {
+    replacements: { thesisId: id },
+    type: sequelize.QueryTypes.SELECT
+  });
+
+  // Get thesis grade
+  const thesisGrade = await thesis_grade.findOne({ where: { thesis_id: id } });
+
+  // Get thesis presentation info
+  const thesisPresentation = await sequelize.query(`
+    SELECT 
+      date_time,
+      presentation_type,
+      venue
+    FROM thesis_presentation 
+    WHERE thesis_id = :thesisId
+  `, {
+    replacements: { thesisId: id },
+    type: sequelize.QueryTypes.SELECT
+  });
+
+  // Get links (nemertis, etc.)
+  const thesisLinks = await sequelize.query(`
+    SELECT url 
+    FROM links 
+    WHERE thesis_id = :thesisId
+  `, {
+    replacements: { thesisId: id },
+    type: sequelize.QueryTypes.SELECT
+  });
+
+  // Determine professor's role in this thesis
+  let professorRole = '';
+  if (thesisData.supervisor_am === currentProfessor.am) {
+    professorRole = 'Επιβλέπων';
+  } else if (thesisData.prof2_am === currentProfessor.am) {
+    professorRole = 'Μέλος Τριμελούς';
+  } else if (thesisData.prof3_am === currentProfessor.am) {
+    professorRole = 'Μέλος Τριμελούς';
+  }
+
+  // Prepare response
+  const response = {
+    thesis: {
+      id: thesisData.id,
+      title: thesisData.topic.title,
+      description: thesisData.topic.description,
+      status: thesisData.thesis_status,
+      assignment_date: thesisData.assignment_date,
+      completion_date: thesisData.completion_date,
+      thesis_content_file: thesisData.thesis_content_file,
+      nemertes_link: thesisData.nemertes_link,
+      enableGrading: thesisData.enableGrading,
+      enableAnnounce: thesisData.enableAnnounce
+    },
+    student: {
+      am: thesisData.student_am_student.am,
+      name: `${thesisData.student_am_student.first_name} ${thesisData.student_am_student.last_name}`,
+      email: thesisData.student_am_student.email,
+      semester: thesisData.student_am_student.semester
+    },
+    committee: {
+      supervisor: {
+        am: thesisData.supervisor_am_professor.am,
+        name: `${thesisData.supervisor_am_professor.first_name} ${thesisData.supervisor_am_professor.last_name}`,
+        email: thesisData.supervisor_am_professor.email,
+        field: thesisData.supervisor_am_professor.field_of_expertise
+      },
+      prof2: thesisData.prof2_am_professor ? {
+        am: thesisData.prof2_am_professor.am,
+        name: `${thesisData.prof2_am_professor.first_name} ${thesisData.prof2_am_professor.last_name}`,
+        email: thesisData.prof2_am_professor.email,
+        field: thesisData.prof2_am_professor.field_of_expertise
+      } : null,
+      prof3: thesisData.prof3_am_professor ? {
+        am: thesisData.prof3_am_professor.am,
+        name: `${thesisData.prof3_am_professor.first_name} ${thesisData.prof3_am_professor.last_name}`,
+        email: thesisData.prof3_am_professor.email,
+        field: thesisData.prof3_am_professor.field_of_expertise
+      } : null
+    },
+    professorRole: professorRole,
+    actionTimeline: thesisLogs,
+    grades: thesisGrade ? {
+      final_grade: thesisGrade.final_grade,
+      prof1_grades: {
+        grade1: thesisGrade.prof1_grade1,
+        grade2: thesisGrade.prof1_grade2,
+        grade3: thesisGrade.prof1_grade3,
+        grade4: thesisGrade.prof1_grade4
+      },
+      prof2_grades: {
+        grade1: thesisGrade.prof2_grade1,
+        grade2: thesisGrade.prof2_grade2,
+        grade3: thesisGrade.prof2_grade3,
+        grade4: thesisGrade.prof2_grade4
+      },
+      prof3_grades: {
+        grade1: thesisGrade.prof3_grade1,
+        grade2: thesisGrade.prof3_grade2,
+        grade3: thesisGrade.prof3_grade3,
+        grade4: thesisGrade.prof3_grade4
+      }
+    } : null,
+    presentation: thesisPresentation.length > 0 ? thesisPresentation[0] : null,
+    links: thesisLinks.map(link => link.url)
+  };
+
+  res.status(200).json(response);
+});
 
 module.exports = {
   getProfessorInfo, getTopics, createTopic, getThesisNotes,
   editTopic, deleteTopic, getStats, getThesesList,postCancelThesis,
   searchStudent, assignTopicToStudent, getCommitteeRequests, putThesisReview,
   postThesisNotes , putEnableGrading, postGrade, getInvitationsList, respondToInvitation,
-  getGradeList, postAnnouncement, getThesisInfo
+  getGradeList, postAnnouncement, getThesisInfo, getThesisDetails
 };
