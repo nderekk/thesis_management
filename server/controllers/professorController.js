@@ -542,49 +542,6 @@ const postAnnouncement = asyncHandler(async (req, res) => {
   res.status(200).json({ createAnnouncement });
 });
 
-//@desc Show a thesis' info
-//@route GET /api/professor/thesisInfo?thesisID=id
-//@access Private 
-const getThesisInfo = asyncHandler(async (req, res) => {
-  const { thesisID } = req.query;
-
-  const th = await thesis.findOne({where: {id: thesisID}});
-  const stud = await student.findOne({where: {am: th.student_am}});
-  const superv = await professor.findOne({where: {am: th.supervisor_am}});
-  const prof2 = await professor.findOne({where: {am: th.prof2_am}});
-  const prof3 = await professor.findOne({where: {am: th.prof3_am}});
-  const topic = await thesis_topics.findOne({where: {id: th.topic_id}});
-  const logs = await thesis_logs.findAll({where: {thesis_id: thesisID}});
-
-  if(th.thesis_status !== 'Completed'){
-    var info = {
-      id: thesisID,
-      student_name: `${stud.first_name} ${stud.last_name}`,
-      supervisor: `${superv.first_name} ${superv.last_name}`,
-      prof2: prof2 ? `${prof2.first_name} ${prof2.last_name}` : "-",
-      prof3: prof3 ? `${prof3.first_name} ${prof3.last_name}` : "-",
-      topic: topic.title,
-      thesis_logs: logs
-    };
-  }else{
-    const grades = await thesis_grade.findOne({where: {thesis_id: thesisID}});
-    var info = {
-      id: thesisID,
-      student_name: `${stud.first_name} ${stud.last_name}`,
-      supervisor: `${superv.first_name} ${superv.last_name}`,
-     prof2: prof2 ? `${prof2.first_name} ${prof2.last_name}` : "-",
-      prof3: prof3 ? `${prof3.first_name} ${prof3.last_name}` : "-",
-      topic: topic.title,
-      thesis_logs: logs,
-      finalGrade: grades.final_grade,
-      nemLink: th.nemertes_link,
-      fileLink: th.thesis_content_file
-    };
-  }
-
-  res.status(200).json(info);
-});
-
 //@desc Get comprehensive thesis details including logs, grades, and committee
 //@route GET /api/professor/thesis/:id
 //@access Private
@@ -771,5 +728,5 @@ module.exports = {
   editTopic, deleteTopic, getStats, getThesesList,postCancelThesis,
   searchStudent, assignTopicToStudent, getCommitteeRequests, putThesisReview,
   postThesisNotes , putEnableGrading, postGrade, getInvitationsList, respondToInvitation,
-  getGradeList, postAnnouncement, getThesisInfo, getThesisDetails
+  getGradeList, postAnnouncement, getThesisDetails
 };
