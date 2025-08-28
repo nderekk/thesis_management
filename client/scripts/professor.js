@@ -86,8 +86,13 @@ ${thesisTopics.data.map(topic => `
                 </div>
                 <div class="form-group">
                     <label>Αρχείο PDF (προαιρετικό):</label>
-                    <input type="file" id="editFile-${topic.id}" value="${topic.original_file_name}" accept=".pdf">
-                    <span id="fileLabel" class="file-label">Έχετε ήδη ανεβάσει: "${topic.original_file_name}"</span>
+                    <input type="file" id="editFile-${topic.id}" accept=".pdf">
+
+                    ${topic.original_file_name 
+                        ? `<a href="/server/uploads/${topic.attached_file_name}" download>
+                            Έχετε ήδη ανεβάσει: "${topic.original_file_name}"
+                        </a>`
+                        : '<span class="file-label">Δεν υπάρχει ανεβασμένο αρχείο</span>'}
                 </div>
                 <button type="submit" class="btn btn-primary">Αποθήκευση</button>
                 <button type="button" class="btn btn-secondary" onclick="cancelEdit()">Άκυρο</button>

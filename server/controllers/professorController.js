@@ -27,6 +27,7 @@ const getTopics = asyncHandler(async (req, res) => {
       description: topic.description,
       status: topic.topic_status,
       original_file_name: topic.original_file_name,
+      attached_file_name : topic.attached_discription_file,
       createdDate: topic.createdAt.toISOString().split("T")[0],
       student_am: topic.student_am
     })),
