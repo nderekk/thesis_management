@@ -9,7 +9,6 @@ async function deleteUploadedFile(filename) {
     console.log(`Deleted file: ${filePath}`);
   } catch (error) {
     console.error(`Failed to delete file "${filename}":`, error.message);
-    throw error;
   }
 }
 

@@ -1263,16 +1263,26 @@ function filterManageTheses() {
     console.log('Filtering manage theses...');
 }
 
-// Action functions for thesis management
-function cancelThesisAssignment(thesisId) {
+
+async function cancelThesisAssignment(id) {
     if (confirm('Είστε σίγουροι ότι θέλετε να ακυρώσετε την ανάθεση αυτής της διπλωματικής;')) {
-        const thesis = theses.find(t => t.id === thesisId);
-        if (thesis) {
-            thesis.status = 'cancelled';
-            thesis.cancellationReason = 'Ακυρώθηκε από τον επιβλέποντα';
-            closeModal();
-            loadContent('manageTheses');
+        const response = await fetch("http://localhost:5001/api/professor/topic", {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'  // important for JSON data
+        },
+        body: JSON.stringify({
+            id: id
+        })
+        });
+        const ans = await response.json();
+        if (!response.ok) {
+            alert(ans.message);
+            throw new Error(`Error: ${ans.message}`);
         }
+        closeModal();
+        loadContent('manageTheses');
     }
 }
 

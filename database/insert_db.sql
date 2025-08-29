@@ -45,7 +45,7 @@ INSERT INTO secretary (am, first_name, last_name, phone_number, address, email, 
 INSERT INTO thesis_topics (id, prof_am, title, description, attached_discription_file, topic_status, student_am, createdAt, updatedAt) VALUES
 (1, 1, 'RISC-V CPU', 'Designing a custom RISC-V CPU in Verilog', 'riscv_description.pdf', 'assigned', 1, "2025-01-15", "2025-01-15"),
 (2, 2, 'AI Tutor', 'Creating an adaptive learning system using ML', 'ai_tutor_description.pdf', 'assigned', 2, "2025-01-15", "2025-01-15"),
-(3, 3, 'Secure App', 'Developing a secure messaging app for Android', 'secure_app_description.pdf', 'assigned', 3, "2025-01-15", "2025-01-15"),
+(3, 3, 'Secure App', 'Developing a secure messaging app for Android', 'secure_app_description.pdf', 'temp_assigned', 3, "2025-01-15", "2025-01-15"),
 (4, 1, 'FPGA Vision', 'Using FPGAs for real-time image processing', 'fpga_vision.pdf', 'unassigned', NULL, "2025-01-15", "2025-01-15"),
 (5, 2, 'ML Compiler', 'AutoML for optimizing compiler pipelines', 'ml_compiler.pdf', 'unassigned', NULL, "2025-01-15", "2025-01-15"),
 (25, 1, 'The Divine Feats of Chunkus Maximus', 'he fat asf fasdfasdf', '1753440448217-668114698.pdf', 'unassigned', NULL, '2025-07-25', '2025-07-25');
