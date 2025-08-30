@@ -1160,13 +1160,37 @@ async function getReviewThesisActions(thesis) {
     }
     
     if (thesis.professor_role === "Supervisor" || thesis.professor_role === "Committee Member") {
+        const response = await fetch("http://localhost:5001/api/professor/getProfsGrade", {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'  // important for JSON data
+            },
+            body: JSON.stringify({ thesisID })
+        });
+        const profGrade = await response.json();
+        if (!response.ok) {
+            alert(profGrade.message);
+            throw new Error(`Error: ${profGrade.message}`);
+        }
         content += `
             <div class="card">
                 <div class="card-header">
                     <h5>Βαθμολόγηση</h5>
                 </div>
                 ${thesis.enableGrading ? `
-                    <form id="gradeForm" onsubmit="submitGrade(${thesis.thesis_id}, event)">
+                    ${profGrade.grade1 !== null ? 
+                    `<div class="grades-summary">
+                        <h6>Οι Βαθμοί σας:</h6>
+                            <div class="grade-item">
+                                <span>Καθηγητής: ${profGrade.prof_name}</span>
+                                <span>Grade 1: ${profGrade.grade1}</span>
+                                <span>Grade 2: ${profGrade.grade2}</span>
+                                <span>Grade 3: ${profGrade.grade3}</span>
+                                <span>Grade 4: ${profGrade.grade4}</span>
+                            </div>
+                    </div>` : 
+                    `<form id="gradeForm" onsubmit="submitGrade(${thesis.thesis_id}, event)">
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="contentGrade">Ποιότητα Δ.Ε.</label>
@@ -1188,7 +1212,7 @@ async function getReviewThesisActions(thesis) {
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary">Υποβολή Βαθμού</button>
-                    </form>
+                    </form>`}
                     
                     <div class="grades-summary">
                         <h6>Βαθμοί Τριμελούς:</h6>

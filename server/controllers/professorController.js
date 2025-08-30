@@ -527,6 +527,60 @@ const getGradeList = asyncHandler(async (req, res) => {
 
 });
 
+//@desc Get grades of a thesis ONLY for the professor who queried
+//@route POST /api/professor/getProfsGrade
+//@access Private
+const getProfsGrade = asyncHandler(async (req, res) => {
+  
+  const grades = await thesis_grade.findOne({ where: {thesis_id: req.body.thesisID} });
+
+  if(grades){
+    const prof1 = await professor.findOne({ where: {am: grades.prof1am} });
+    const prof2 = await professor.findOne({ where: {am: grades.prof2am} });
+    const prof3 = await professor.findOne({ where: {am: grades.prof3am} });
+
+    const prof = await professor.findOne({where: {prof_userid : req.user.id}});
+    const profID = prof.am; 
+
+    const prof1grades = 
+        {prof_name: `${prof1.first_name} ${prof1.last_name}`,
+        grade1: grades.prof1_grade1,
+        grade2: grades.prof1_grade2,
+        grade3: grades.prof1_grade3,
+        grade4: grades.prof1_grade4
+      };
+    
+    const prof2grades = 
+        {prof_name: `${prof2.first_name} ${prof2.last_name}`,
+        grade1: grades.prof2_grade1,
+        grade2: grades.prof2_grade2,
+        grade3: grades.prof2_grade3,
+        grade4: grades.prof2_grade4
+      };
+    
+    const prof3grades = 
+        {prof_name: `${prof3.first_name} ${prof3.last_name}`,
+        grade1: grades.prof3_grade1,
+        grade2: grades.prof3_grade2,
+        grade3: grades.prof3_grade3,
+        grade4: grades.prof3_grade4
+      };
+    
+    
+    if(profID === grades.prof1am){
+      res.status(200).json(prof1grades);
+    }else if(profID === grades.prof2am){
+      res.status(200).json(prof2grades);
+    }else if(profID === grades.prof3am){
+      res.status(200).json(prof3grades);
+    }else
+      res.status(200).json({});
+
+}else
+   res.status(200).json({});
+
+});
+
 //@desc accept or decline an invitation
 //@route POST /api/professor/newAnnouncement
 //@access Private 
@@ -729,5 +783,5 @@ module.exports = {
   editTopic, deleteTopic, getStats, getThesesList,postCancelThesis,
   searchStudent, assignTopicToStudent, getCommitteeRequests, putThesisReview,
   postThesisNotes , putEnableGrading, postGrade, getInvitationsList, respondToInvitation,
-  getGradeList, postAnnouncement, getThesisDetails
+  getGradeList, getProfsGrade, postAnnouncement, getThesisDetails
 };

@@ -23,6 +23,7 @@ const {
     getInvitationsList,
     respondToInvitation,
     getGradeList,
+    getProfsGrade,
     postAnnouncement,
     getThesisDetails,
 } = require("../controllers/professorController");
@@ -50,6 +51,7 @@ router.put("/postGrade", postGrade);
 router.get("/invitations", getInvitationsList);
 router.put("/invitations/respond", respondToInvitation);
 router.post("/getGradeList", getGradeList);
+router.post("/getProfsGrade", getProfsGrade);
 router.post("/newAnnouncement", postAnnouncement);
 router.get("/thesis/:id", getThesisDetails);
 
