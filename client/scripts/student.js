@@ -598,40 +598,57 @@ async function handleThesisSubmission() {
     const thesisFile = document.getElementById('thesisFile').files[0];
     const additionalLinks = document.getElementById('additionalLinks').value;
     
-    if (!thesisFile) {
+    if (!thesisFile && !additionalLinks) {
         alert('Παρακαλώ επιλέξτε ένα αρχείο PDF.');
         return;
     }
     
-    // Check file size (10MB limit)
-    if (thesisFile.size > 10 * 1024 * 1024) {
-        alert('Το αρχείο είναι πολύ μεγάλο. Το μέγιστο μέγεθος είναι 10MB.');
-        return;
-    }
-    
-    // Check file type
-    if (thesisFile.type !== 'application/pdf') {
-        alert('Παρακαλώ επιλέξτε ένα αρχείο PDF.');
-        return;
-    }
-    
-    const formData = new FormData();
-    formData.append('file', thesisFile);
+    if(thesisFile){
+        // Check file size (10MB limit)
+        if (thesisFile.size > 10 * 1024 * 1024) {
+            alert('Το αρχείο είναι πολύ μεγάλο. Το μέγιστο μέγεθος είναι 10MB.');
+            return;
+        }
+        
+        // Check file type
+        if (thesisFile.type !== 'application/pdf') {
+            alert('Παρακαλώ επιλέξτε ένα αρχείο PDF.');
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('file', thesisFile);
 
-    // Update thesis with submission data
-    const response = await fetch("http://localhost:5001/api/student/upload-pdf", {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-    });
-    const upload = await response.json();
-    if (!response.ok) {
-        alert(upload.message);
-        throw new Error(`Error: ${upload.message}`);
+        // Update thesis with submission data
+        const response = await fetch("http://localhost:5001/api/student/upload-pdf", {
+            method: 'POST',
+            credentials: 'include',
+            body: formData,
+        });
+        const upload = await response.json();
+        if (!response.ok) {
+            alert(upload.message);
+            throw new Error(`Error: ${upload.message}`);
+        }
     }
+
+    if (additionalLinks) {
+          var thesisLinks = additionalLinks.split("\n").map(line => line.trim()).filter(line => line !== "");
     
-    if (additionalLinks.trim()) {
-        currentThesis.additionalLinks = additionalLinks.split('\n').filter(link => link.trim());
+
+        const postLinks = await fetch("http://localhost:5001/api/student/uploadLinks", {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+            "Content-Type": "application/json"
+            },
+            body: JSON.stringify({thesisLinks}),
+        });
+        const posted = await postLinks.json();
+        if (!postLinks.ok) {
+            alert(posted.message);
+            throw new Error(`Error: ${posted.message}`);
+        }
     }
     
     alert('Το υλικό ανέβηκε επιτυχώς!');
