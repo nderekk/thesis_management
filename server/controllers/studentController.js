@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const {
   sequelize, student, thesis, thesis_topics, 
-  professor, trimelis_requests, thesis_presentation, thesis_grade, links
+  professor, trimelis_requests, thesis_presentation, thesis_grade, links, thesis_logs
 } = require("../config/dbConnection");
 const {fn, Op} = require('sequelize');
 const bcrypt = require("bcrypt");
@@ -37,6 +37,7 @@ const getThesisInfo = asyncHandler(async (req, res) => {
         };
     });
   var committeeMembers = null;
+  const thesisLogs =  await thesis_logs.findAll({where: {thesis_id : studentThesis.id}});
 
   if(!prof2 || !prof3){
      if(prof2){
@@ -70,7 +71,8 @@ const getThesisInfo = asyncHandler(async (req, res) => {
     committeeMembers : committeeMembers,
     invitedProfessors : finalCommitteProfessors,
     grade: thesisGrade ? thesisGrade.final_grade : null,
-    completionDate: studentThesis.completion_date
+    completionDate: studentThesis.completion_date,
+    thesisLogs: thesisLogs
   });
 
 });
