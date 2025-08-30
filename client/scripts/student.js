@@ -471,6 +471,22 @@ function getCompletedThesisContent(thesis) {
                     <p><a href="${thesis.libraryLink}" target="_blank">${thesis.libraryLink}</a></p>
                 </div>
             ` : ''}
+
+
+            <!-- Logs section -->
+            ${thesis.thesisLogs && thesis.thesisLogs.length > 0 ? `
+                <div class="form-group">
+                    <label>Καταγραφές Αλλαγών Διπλωματικής:</label>
+                    <ul>
+                        ${thesis.thesisLogs.map(log => `
+                            <li>
+                                <strong>${formatDate(log.timedate)}</strong>: 
+                                <em>${log.prev_status}</em> → <em>${log.new_status}</em>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            ` : ''}
             <button onclick="viewExaminationReport()" class="btn btn-primary">Προβολή Πρακτικού Εξέτασης</button>
         </div>
     `;
