@@ -313,7 +313,7 @@ async function manageSecretaryThesis(thesisId) {
                             <input type="number" id="cancelApNumber" required>
                         </div>
                         <div class="form-group">
-                            <label for="cancelApYear">Έτος Ακύρωσης Γενικής ΣυνέλευσηςΣ:</label>
+                            <label for="cancelApYear">Έτος Ακύρωσης Γενικής Συνέλευσης:</label>
                             <input type="number" id="cancelApYear" min="2020" max="2030" required>
                         </div>
                         <div class="form-group">
