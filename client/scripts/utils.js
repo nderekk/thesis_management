@@ -230,6 +230,17 @@ function showModal(content) {
     document.getElementById('modalOverlay').classList.add('active');
 }
 
+// gia to praktiko
+function showModalShadow(content){
+    const modalContent = document.getElementById('modalContent');
+    let shadow = modalContent.shadowRoot; // check if one exists
+    if (!shadow) {
+        shadow = modalContent.attachShadow({ mode: "open" });
+    }
+    shadow.innerHTML = content;
+    document.getElementById('modalOverlay').classList.add('active');
+}
+
 function closeModal() {
     document.getElementById('modalOverlay').classList.remove('active');
 }

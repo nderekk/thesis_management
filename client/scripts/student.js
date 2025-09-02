@@ -551,6 +551,47 @@ async function viewExaminationReport() {
     committeeAlphabetically.sort((a, b) => a.localeCompare(b));
     
     const reportContent = `
+        <style>
+            body {
+            font-family: "Times New Roman", serif;
+            margin: 40px;
+            line-height: 1.6;
+            }
+            h2 {
+            text-align: center;
+            font-weight: bold;
+            text-decoration: underline;
+            }
+            h3 {
+            text-align: center;
+            font-weight: bold;
+            }
+            .center {
+            text-align: center;
+            }
+            .underline {
+            border-bottom: 1px dotted black;
+            display: inline-block;
+            width: 300px;
+            }
+            table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            }
+            table, th, td {
+            border: 1px solid black;
+            }
+            th, td {
+            padding: 8px;
+            text-align: center;
+            }
+            .section {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            }
+        </style>
+        
         <div class="examination-report">
             <h3>ΠΡΟΓΡΑΜΜΑ ΣΠΟΥΔΩΝ<br>
             «ΤΜΗΜΑΤΟΣ ΜΗΧΑΝΙΚΩΝ, ΗΛΕΚΤΡΟΝΙΚΩΝ ΥΠΟΛΟΓΙΣΤΩΝ ΚΑΙ ΠΛΗΡΟΦΟΡΙΚΗΣ»</h3>
@@ -640,7 +681,7 @@ async function viewExaminationReport() {
         </div>
     `;
     
-    showModal(reportContent);
+    showModalShadow(reportContent);
 }
 
 async function handleInviteProfessor() {
