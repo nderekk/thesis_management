@@ -11,6 +11,16 @@ app.use(cors({
   origin: 'http://127.0.0.1:5501', // το origin του frontend σου
   credentials: true
 }));
+app.use('/static', express.static('public', {
+  maxAge: '7d',        // cache for 7 days
+  etag: true,          // enable ETag headers
+  lastModified: true   // enable Last-Modified headers
+}));
+
+// Cache monitoring routes
+app.use("/api/cache", require("./routes/cacheRoutes"));
+
+// API routes with caching
 app.use("/api/user", require("./routes/userRoutes"));
 app.use("/api/student", require("./routes/studentRoutes"));
 app.use("/api/professor", require("./routes/professorRoutes"));
