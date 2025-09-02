@@ -528,8 +528,27 @@ function saveLibraryLink() {
     }
 }
 
-function viewExaminationReport() {    
+async function viewExaminationReport() {    
     if (!currentThesis) return;
+
+    const response = await fetch("http://localhost:5001/api/student/exam-date", {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    });
+    const examInfo = await response.json();
+    if (!response.ok) {
+        alert(examInfo.message);
+        throw new Error(`Error: ${examInfo.message}`);
+    }
+
+    const weekday = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday", "undefined"];
+    dayIndex = examInfo.date !== "YYYY-MM-DD" ? examInfo.date.getDay() : 7
+    
+    committeeAlphabetically = currentThesis.committeeMembers;
+    committeeAlphabetically.sort((a, b) => a.localeCompare(b));
     
     const reportContent = `
         <div class="examination-report">
@@ -541,11 +560,11 @@ function viewExaminationReport() {
             ΓΙΑ ΤΗΝ ΠΑΡΟΥΣΙΑΣΗ ΚΑΙ ΚΡΙΣΗ ΤΗΣ ΔΙΠΛΩΜΑΤΙΚΗΣ ΕΡΓΑΣΙΑΣ</h3>
 
             <p class="center">του/της φοιτητή/φοιτήτρια</p>
-            <p class="center">Κ ${currentUser.first_name} ${currentUser.last_name}</p>
+            <p class="center">Κ ${currentUser.last_name} ${currentUser.first_name}</p>
 
             <p>
-                Η συνεδρίαση πραγματοποιήθηκε στην αίθουσα …………………………………………, 
-                στις ………………………… ημέρα ……………………… και ώρα …………………………
+                Η συνεδρίαση πραγματοποιήθηκε στην αίθουσα/σύνδεσμο ${examInfo.venue}, 
+                στις ${examInfo.date} ημέρα ${weekday[dayIndex]} και ώρα ${examInfo.time}
             </p>
 
             <p>Στην συνεδρίαση είναι παρόντα τα μέλη της Τριμελούς Επιτροπής κ.κ.:</p>
@@ -560,7 +579,7 @@ function viewExaminationReport() {
             </p>
 
             <p>
-                Ο/Η φοιτητής/φοιτήτρια Κ ${currentUser.first_name} ${currentUser.last_name} 
+                Ο/Η φοιτητής/φοιτήτρια Κ ${currentUser.last_name} ${currentUser.first_name} 
                 ανέπτυξε το θέμα της Διπλωματικής του/της Εργασίας, με τίτλο <br>
                 «${currentThesis.title}»
             </p>
@@ -581,19 +600,19 @@ function viewExaminationReport() {
 
             <p>Τα μέλη της Τριμελούς Επιτροπής ψηφίζουν κατ’ αλφαβητική σειρά:</p>
             <ol>
-                <li>…………………………………………………………………………………</li>
-                <li>…………………………………………………………………………………</li>
-                <li>…………………………………………………………………………………</li>
+                ${committeeAlphabetically.map(member => 
+                        `<li>${member}</li>`
+                    ).join('')}
             </ol>
 
             <p>
-                υπέρ της εγκρίσεως της Διπλωματικής Εργασίας του φοιτητή ${currentUser.first_name} ${currentUser.last_name},
+                υπέρ της εγκρίσεως της Διπλωματικής Εργασίας του φοιτητή ${currentUser.last_name} ${currentUser.first_name},
                 επειδή θεωρούν επιστημονικά επαρκή και το περιεχόμενο της ανταποκρίνεται στο θέμα που του δόθηκε.
             </p>
 
             <p>
                 Μετά της έγκριση, ο εισηγητής κ. ${currentThesis.supervisor} προτείνει στα μέλη της Τριμελούς Επιτροπής 
-                να απονεμηθεί στον/στη φοιτητή/φοιτήτρια Κ ${currentUser.first_name} ${currentUser.last_name} ο βαθμός ${currentThesis.grade}
+                να απονεμηθεί στον/στη φοιτητή/φοιτήτρια Κ ${currentUser.last_name} ${currentUser.first_name} ο βαθμός ${currentThesis.grade}
             </p>
 
             <h3>Τα μέλη της Τριμελούς Επιτροπής απονέμουν την παρακάτω βαθμολογία:</h3>
@@ -604,21 +623,19 @@ function viewExaminationReport() {
                 <th>ΙΔΙΟΤΗΤΑ</th>
                 </tr>
                 <tr>
-                <td>………………………………………………………………</td>
-                <td>………………………………………………………………</td>
+                <td>${currentThesis.committeeMembers[0]}</td>
+                <td>Επιβλέπων Καθηγητής</td>
                 </tr>
-                <tr>
-                <td>………………………………………………………………</td>
-                <td>………………………………………………………………</td>
-                </tr>
-                <tr>
-                <td>………………………………………………………………</td>
-                <td>………………………………………………………………</td>
-                </tr>
+                ${currentThesis.committeeMembers.slice(1).map(member => 
+                    `<tr>
+                    <td>${member}</td>
+                    <td>Μέλος Τριμελούς</td>
+                    </tr>`
+                ).join('')}
             </table>
 
             <p>
-                Μετά την έγκριση και την απονομή του βαθμού ${currentThesis.grade}, η Τριμελής Επιτροπή, προτείνει να προχωρήσει στην διαδικασία για να ανακηρύξει τον κ ${currentUser.first_name} ${currentUser.last_name} σε Διπλωματούχο του Προγράμματος Σπουδών του «ΤΜΗΜΑΤΟΣ ΜΗΧΑΝΙΚΩΝ, ΗΛΕΚΤΡΟΝΙΚΩΝ ΥΠΟΛΟΓΙΣΤΩΝ ΚΑΙ ΠΛΗΡΟΦΟΡΙΚΗΣ ΠΑΝΕΠΙΣΤΗΜΙΟΥ ΠΑΤΡΩΝ» και να του απονέμει το Δίπλωμα Μηχανικού Η/Υ το οποίο αναγράφεται ως Ενιαίος Τίτλος Σπουδών Μεταπτυχιακού Επιπέδου.
+                Μετά την έγκριση και την απονομή του βαθμού ${currentThesis.grade}, η Τριμελής Επιτροπή, προτείνει να προχωρήσει στην διαδικασία για να ανακηρύξει τον κ ${currentUser.last_name} ${currentUser.first_name} σε Διπλωματούχο του Προγράμματος Σπουδών του «ΤΜΗΜΑΤΟΣ ΜΗΧΑΝΙΚΩΝ, ΗΛΕΚΤΡΟΝΙΚΩΝ ΥΠΟΛΟΓΙΣΤΩΝ ΚΑΙ ΠΛΗΡΟΦΟΡΙΚΗΣ ΠΑΝΕΠΙΣΤΗΜΙΟΥ ΠΑΤΡΩΝ» και να του απονέμει το Δίπλωμα Μηχανικού Η/Υ το οποίο αναγράφεται ως Ενιαίος Τίτλος Σπουδών Μεταπτυχιακού Επιπέδου.
             </p>
         </div>
     `;
