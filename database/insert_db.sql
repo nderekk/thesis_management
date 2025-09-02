@@ -59,3 +59,7 @@ INSERT INTO thesis (id, topic_id, student_am, supervisor_am, prof2_am, prof3_am,
 -- Insert grade
 INSERT INTO thesis_grade (id, thesis_id, final_grade) VALUES 
 (1, 1, 8.5);
+
+INSERT INTO thesis_presentation (thesis_id, date_time, presentation_type, venue) VALUES
+('1', '2025-5-5', 'in-person', 'αίθουσα Γ');
+

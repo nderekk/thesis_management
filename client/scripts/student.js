@@ -544,8 +544,8 @@ async function viewExaminationReport() {
         throw new Error(`Error: ${examInfo.message}`);
     }
 
-    const weekday = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday", "undefined"];
-    dayIndex = examInfo.date !== "YYYY-MM-DD" ? examInfo.date.getDay() : 7
+    const weekday = ["Κυριακή","Δευτέρα","Τρίτη","Τετάρτη","Πέμπτη","Παρασκευή","Σάββατο", "undefined"];
+    dayIndex = examInfo.date !== "YYYY-MM-DD" ? new Date(examInfo.date).getDay() : 7
     
     committeeAlphabetically = currentThesis.committeeMembers;
     committeeAlphabetically.sort((a, b) => a.localeCompare(b));
@@ -591,7 +591,7 @@ async function viewExaminationReport() {
             margin-bottom: 20px;
             }
         </style>
-        
+
         <div class="examination-report">
             <h3>ΠΡΟΓΡΑΜΜΑ ΣΠΟΥΔΩΝ<br>
             «ΤΜΗΜΑΤΟΣ ΜΗΧΑΝΙΚΩΝ, ΗΛΕΚΤΡΟΝΙΚΩΝ ΥΠΟΛΟΓΙΣΤΩΝ ΚΑΙ ΠΛΗΡΟΦΟΡΙΚΗΣ»</h3>
