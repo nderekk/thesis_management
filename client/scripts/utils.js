@@ -21,6 +21,10 @@ function initializeApp() {
         if (e.target === this) 
             closeModal();
     });
+    document.getElementById('shadowModalOverlay').addEventListener('click', function (e) {
+        if (e.target === this) 
+            closeShadowModal();
+    });
 
     const savedUser = localStorage.getItem('currentUser');
     const savedRole = localStorage.getItem('currentUserType');
@@ -230,8 +234,27 @@ function showModal(content) {
     document.getElementById('modalOverlay').classList.add('active');
 }
 
+// gia to praktiko
+function showModalShadow(content){
+    const modalContent = document.getElementById('shadowModalContent');
+    let shadow = modalContent.shadowRoot; // check if one exists
+    if (!shadow) {
+        shadow = modalContent.attachShadow({ mode: "open" });
+    }
+    shadow.innerHTML = content;
+    document.getElementById('shadowModalOverlay').classList.add('active');
+}
+
 function closeModal() {
     document.getElementById('modalOverlay').classList.remove('active');
+}
+
+function closeShadowModal() {
+    document.getElementById('shadowModalOverlay').classList.remove('active');
+    const modal = document.getElementById("modal-content");
+    if (modal.shadowRoot) {
+        modal.shadowRoot.innerHTML = ""; // wipe Praktiko
+    }
 }
 
 function showLoading() {

@@ -528,55 +528,160 @@ function saveLibraryLink() {
     }
 }
 
-function viewExaminationReport() {    
+async function viewExaminationReport() {    
     if (!currentThesis) return;
+
+    const response = await fetch("http://localhost:5001/api/student/exam-date", {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    });
+    const examInfo = await response.json();
+    if (!response.ok) {
+        alert(examInfo.message);
+        throw new Error(`Error: ${examInfo.message}`);
+    }
+
+    const weekday = ["Κυριακή","Δευτέρα","Τρίτη","Τετάρτη","Πέμπτη","Παρασκευή","Σάββατο", "undefined"];
+    dayIndex = examInfo.date !== "YYYY-MM-DD" ? new Date(examInfo.date).getDay() : 7
+    
+    committeeAlphabetically = currentThesis.committeeMembers;
+    committeeAlphabetically.sort((a, b) => a.localeCompare(b));
     
     const reportContent = `
+        <style>
+            body {
+            font-family: "Times New Roman", serif;
+            margin: 40px;
+            line-height: 1.6;
+            }
+            h2 {
+            text-align: center;
+            font-weight: bold;
+            text-decoration: underline;
+            }
+            h3 {
+            text-align: center;
+            font-weight: bold;
+            }
+            .center {
+            text-align: center;
+            }
+            .underline {
+            border-bottom: 1px dotted black;
+            display: inline-block;
+            width: 300px;
+            }
+            table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            }
+            table, th, td {
+            border: 1px solid black;
+            }
+            th, td {
+            padding: 8px;
+            text-align: center;
+            }
+            .section {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            }
+        </style>
+
         <div class="examination-report">
-            <h2>Πρακτικό Εξέτασης Διπλωματικής Εργασίας</h2>
-            
-            <div class="report-section">
-                <h3>Στοιχεία Διπλωματικής</h3>
-                <p><strong>Τίτλος:</strong> ${currentThesis.title}</p>
-                <p><strong>Φοιτητής:</strong> ${currentUser.first_name} ${currentUser.last_name} </p>
-                <p><strong>Αριθμός Μητρώου:</strong> ${currentUser.am}</p>
-            </div>
-            
-            <div class="report-section">
-                <h3>Τριμελής Επιτροπή</h3>
-                <p><strong>Επιβλέπων:</strong> ${currentThesis.supervisor}</p>
-                <ul style="list-style-type: none;" >
-                    ${currentThesis.committeeMembers.slice(1).map(member => 
-                        `<li><strong>Μέλος:</strong> ${member}</li>`
+            <h3>ΠΡΟΓΡΑΜΜΑ ΣΠΟΥΔΩΝ<br>
+            «ΤΜΗΜΑΤΟΣ ΜΗΧΑΝΙΚΩΝ, ΗΛΕΚΤΡΟΝΙΚΩΝ ΥΠΟΛΟΓΙΣΤΩΝ ΚΑΙ ΠΛΗΡΟΦΟΡΙΚΗΣ»</h3>
+
+            <h3>ΠΡΑΚΤΙΚΟ ΣΥΝΕΔΡΙΑΣΗΣ<br>
+            ΤΗΣ ΤΡΙΜΕΛΟΥΣ ΕΠΙΤΡΟΠΗΣ<br>
+            ΓΙΑ ΤΗΝ ΠΑΡΟΥΣΙΑΣΗ ΚΑΙ ΚΡΙΣΗ ΤΗΣ ΔΙΠΛΩΜΑΤΙΚΗΣ ΕΡΓΑΣΙΑΣ</h3>
+
+            <p class="center">του/της φοιτητή/φοιτήτρια</p>
+            <p class="center">Κ ${currentUser.last_name} ${currentUser.first_name}</p>
+
+            <p>
+                Η συνεδρίαση πραγματοποιήθηκε στην αίθουσα/σύνδεσμο ${examInfo.venue}, 
+                στις ${examInfo.date} ημέρα ${weekday[dayIndex]} και ώρα ${examInfo.time}
+            </p>
+
+            <p>Στην συνεδρίαση είναι παρόντα τα μέλη της Τριμελούς Επιτροπής κ.κ.:</p>
+            <ol>
+                ${currentThesis.committeeMembers.map(member => 
+                        `<li>${member}</li>`
                     ).join('')}
-                </ul>
-            </div>
-            
-            <div class="report-section">
-                <h3>Αποτελέσματα Εξέτασης</h3>
-                <p><strong>Βαθμός:</strong> ${currentThesis.grade}/10</p>
-                <p><strong>Ημερομηνία Εξέτασης:</strong> ${formatDate(currentThesis.examDate)}</p>
-                <p><strong>Τύπος Εξέτασης:</strong> ${currentThesis.examType === 'in-person' ? 'Δια Ζώσης' : 'Διαδικτυακά'}</p>
-            </div>
-            
-            ${currentThesis.committeeComments ? `
-                <div class="report-section">
-                    <h3>Σχόλια Τριμελούς</h3>
-                    ${currentThesis.committeeComments.map(comment => `
-                        <div class="comment">
-                            <strong>${getUserName(comment.professorId)}:</strong> ${comment.comment}
-                        </div>
-                    `).join('')}
-                </div>
-            ` : ''}
-            
-            <div class="report-footer">
-                <p>Ημερομηνία δημιουργίας: ${new Date().toLocaleDateString('el-GR')}</p>
-            </div>
+            </ol>
+
+            <p>
+                οι οποίοι ορίσθηκαν από την Συνέλευση του ΤΜΗΥΠ, στην συνεδρίαση της με αριθμό ${currentThesis.ap_from_gs}
+            </p>
+
+            <p>
+                Ο/Η φοιτητής/φοιτήτρια Κ ${currentUser.last_name} ${currentUser.first_name} 
+                ανέπτυξε το θέμα της Διπλωματικής του/της Εργασίας, με τίτλο <br>
+                «${currentThesis.title}»
+            </p>
+
+            <p>
+                Στην συνέχεια υποβλήθηκαν ερωτήσεις στον υποψήφιο από τα μέλη της Τριμελούς Επιτροπής και τους άλλους
+                παρευρισκόμενους, προκειμένου να διαμορφωθεί σαφή άποψη για το περιεχόμενο της εργασίας, για την επιστημονική συγκρότηση του μεταπτυχιακού φοιτητή.
+            </p>
+
+            <p>
+                Μετά το τέλος της ανωτέρω εργασίας του και των ερωτήσεων, ο υποψήφιος αποχωρεί.
+            </p>
+
+            <p>
+                Ο Επιβλέπων καθηγητής κ. ${currentThesis.supervisor} προτείνει στα μέλη της Τριμελούς Επιτροπής 
+                να ψηφίσουν για το αν εγκρίνεται η διπλωματική εργασία του φοιτητή.
+            </p>
+
+            <p>Τα μέλη της Τριμελούς Επιτροπής ψηφίζουν κατ’ αλφαβητική σειρά:</p>
+            <ol>
+                ${committeeAlphabetically.map(member => 
+                        `<li>${member}</li>`
+                    ).join('')}
+            </ol>
+
+            <p>
+                υπέρ της εγκρίσεως της Διπλωματικής Εργασίας του φοιτητή ${currentUser.last_name} ${currentUser.first_name},
+                επειδή θεωρούν επιστημονικά επαρκή και το περιεχόμενο της ανταποκρίνεται στο θέμα που του δόθηκε.
+            </p>
+
+            <p>
+                Μετά της έγκριση, ο εισηγητής κ. ${currentThesis.supervisor} προτείνει στα μέλη της Τριμελούς Επιτροπής 
+                να απονεμηθεί στον/στη φοιτητή/φοιτήτρια Κ ${currentUser.last_name} ${currentUser.first_name} ο βαθμός ${currentThesis.grade}
+            </p>
+
+            <h3>Τα μέλη της Τριμελούς Επιτροπής απονέμουν την παρακάτω βαθμολογία:</h3>
+
+            <table>
+                <tr>
+                <th>ΟΝΟΜΑΤΕΠΩΝΥΜΟ</th>
+                <th>ΙΔΙΟΤΗΤΑ</th>
+                </tr>
+                <tr>
+                <td>${currentThesis.committeeMembers[0]}</td>
+                <td>Επιβλέπων Καθηγητής</td>
+                </tr>
+                ${currentThesis.committeeMembers.slice(1).map(member => 
+                    `<tr>
+                    <td>${member}</td>
+                    <td>Μέλος Τριμελούς</td>
+                    </tr>`
+                ).join('')}
+            </table>
+
+            <p>
+                Μετά την έγκριση και την απονομή του βαθμού ${currentThesis.grade}, η Τριμελής Επιτροπή, προτείνει να προχωρήσει στην διαδικασία για να ανακηρύξει τον κ ${currentUser.last_name} ${currentUser.first_name} σε Διπλωματούχο του Προγράμματος Σπουδών του «ΤΜΗΜΑΤΟΣ ΜΗΧΑΝΙΚΩΝ, ΗΛΕΚΤΡΟΝΙΚΩΝ ΥΠΟΛΟΓΙΣΤΩΝ ΚΑΙ ΠΛΗΡΟΦΟΡΙΚΗΣ ΠΑΝΕΠΙΣΤΗΜΙΟΥ ΠΑΤΡΩΝ» και να του απονέμει το Δίπλωμα Μηχανικού Η/Υ το οποίο αναγράφεται ως Ενιαίος Τίτλος Σπουδών Μεταπτυχιακού Επιπέδου.
+            </p>
         </div>
     `;
     
-    showModal(reportContent);
+    showModalShadow(reportContent);
 }
 
 async function handleInviteProfessor() {
