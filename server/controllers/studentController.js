@@ -73,7 +73,8 @@ const getThesisInfo = asyncHandler(async (req, res) => {
     grade: thesisGrade ? thesisGrade.final_grade : null,
     completionDate: studentThesis.completion_date,
     thesisLogs: thesisLogs,
-    ap_from_gs: studentThesis.ap_from_gs
+    ap_from_gs: studentThesis.ap_from_gs,
+    libraryLink: studentThesis.nemertes_link
   });
 
 });
