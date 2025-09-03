@@ -343,11 +343,24 @@ function getActiveThesisContent(thesis) {
 }
 
 async function getReviewThesisContent(thesis) {
+    const materialResponse = await fetch("http://localhost:5001/api/student/thesis-material", {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json' 
+        },
+    });
+    const material = await materialResponse.json();
+    if (!materialResponse.ok) {
+        alert(material.message);
+        throw new Error(`Error: ${examInfo.message}`);
+    }
+
     const response = await fetch("http://localhost:5001/api/student/exam-date", {
         method: 'GET',
         credentials: 'include',
         headers: {
-            'Content-Type': 'application/json'  // important for JSON data
+            'Content-Type': 'application/json'
         },
     });
     const examInfo = await response.json();
@@ -368,12 +381,14 @@ async function getReviewThesisContent(thesis) {
             <form id="thesisSubmissionForm">
                 <div class="form-group">
                     <label for="thesisFile">Πρόχειρο Κείμενο (PDF):</label>
-                    <input type="file" id="thesisFile" accept=".pdf" required>
-                    <small>Μέγιστο μέγεθος: 10MB</small>
+                    <input type="file" id="thesisFile" accept=".pdf">
+                    <small>'Εχετε ανεβάσει: <a href="/server/uploads/${material.fileName}">${material.fileName}</a> | Μέγιστο μέγεθος: 10MB</small>
                 </div>
                 <div class="form-group">
                     <label for="additionalLinks">Σύνδεσμοι Υλικού:</label>
-                    <textarea id="additionalLinks" rows="2" placeholder="Ένας σύνδεσμος ανά γραμμή"></textarea>
+                    <textarea id="additionalLinks" rows="2" placeholder="Ένας σύνδεσμος ανά γραμμή" >${
+                        material.links.length !== 0 ? material.links.join('\n') : ""}
+                    </textarea>
                 </div>
                 <button type="submit" class="btn btn-primary">Ανάρτηση Υλικού</button>
             </form>
@@ -716,8 +731,41 @@ async function handleInviteProfessor() {
 }
 
 async function handleThesisSubmission() {
+    const materialResponse = await fetch("http://localhost:5001/api/student/thesis-material", {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json' 
+        },
+    });
+    const material = await materialResponse.json();
+    if (!materialResponse.ok) {
+        alert(material.message);
+        throw new Error(`Error: ${examInfo.message}`);
+    }
+
     const thesisFile = document.getElementById('thesisFile').files[0];
     const additionalLinks = document.getElementById('additionalLinks').value;
+
+    // an den valei kainourio file kai apla allaksei ta links
+    if (material.fileExists && !thesisFile){
+        let links = additionalLinks.split("\n").map(line => line.trim()).filter(line => line !== "");
+        const materialResponse = await fetch("http://localhost:5001/api/student/append-link", {
+            method: 'PUT',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({
+                links: links
+            }),
+        });
+        alert('Το υλικό ανέβηκε επιτυχώς!');
+    
+        // Refresh the content
+        loadContent('manageThesis');
+        return;
+    }
     
     if (!thesisFile && !additionalLinks) {
         alert('Παρακαλώ επιλέξτε ένα αρχείο PDF.');
@@ -754,16 +802,18 @@ async function handleThesisSubmission() {
     }
 
     if (additionalLinks) {
-          var thesisLinks = additionalLinks.split("\n").map(line => line.trim()).filter(line => line !== "");
+        var thesisLinks = additionalLinks.split("\n").map(line => line.trim()).filter(line => line !== "");
     
 
-        const postLinks = await fetch("http://localhost:5001/api/student/uploadLinks", {
-            method: 'POST',
+        const postLinks = await fetch("http://localhost:5001/api/student/append-link", {
+            method: 'PUT',
             credentials: 'include',
             headers: {
             "Content-Type": "application/json"
             },
-            body: JSON.stringify({thesisLinks}),
+            body: JSON.stringify({
+                links: thesisLinks
+            }),
         });
         const posted = await postLinks.json();
         if (!postLinks.ok) {
