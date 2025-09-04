@@ -14,7 +14,6 @@ const {
     getExamDate,
     modifyExamDate,
     getThesisGrade,
-    postUploadLinks,
     getThesisMaterial,
     appendLinks,
 } = require("../controllers/studentController");
@@ -35,7 +34,5 @@ router.post("/exam-date", setExamDate);
 router.get("/exam-date", getExamDate);
 router.put("/exam-date", modifyExamDate);
 router.get("/thesis/grade", getThesisGrade);
-router.post("/uploadLinks", postUploadLinks);
-
 
 module.exports = router;

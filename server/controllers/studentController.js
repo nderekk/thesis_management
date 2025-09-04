@@ -337,42 +337,10 @@ const getThesisGrade = asyncHandler(async (req, res) => {
     res.status(200).json(thesisGrade.final_grade);
   else 
     res.status(200).json("ungraded");
-});
-
-
-//@desc post thesis grade
-//@route POST /api/student/uploadLinks
-//@access Private
-const postUploadLinks = asyncHandler(async (req, res) => {
-  const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
-  const studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
-
-  try {
-    let { thesisLinks } = req.body; 
-
-    if (!Array.isArray(thesisLinks)) {
-      await links.create({
-         thesis_id : studentThesis.id,
-         url :  thesisLinks
-        }); 
-    }else{
-      for (const singleLink of thesisLinks) {
-        await links.create({
-          thesis_id : studentThesis.id,
-          url :  singleLink
-          }); 
-      }
-    }
-
-    res.status(201).json({ message: "Links saved!" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to save links" });
-  }
-});
+})
 
 module.exports = {getThesisInfo, getStudentInfo, modifyStudentInfo, 
   professorList, inviteProfessor, uploadPdf, setExamDate, 
-  getExamDate, modifyExamDate, getThesisGrade, postUploadLinks, 
+  getExamDate, modifyExamDate, getThesisGrade,  
   getThesisMaterial, appendLinks};
   
