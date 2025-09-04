@@ -15,6 +15,8 @@ const {
     modifyExamDate,
     getThesisGrade,
     postUploadLinks,
+    getThesisMaterial,
+    appendLinks,
 } = require("../controllers/studentController");
 
 // public
@@ -26,7 +28,9 @@ router.get("/", getStudentInfo);
 router.put("/", modifyStudentInfo);
 router.get("/professorList", professorList);
 router.post("/inviteProfessor", inviteProfessor);
+router.get("/thesis-material", getThesisMaterial);
 router.post('/upload-pdf', upload.single('file'), uploadPdf);
+router.put("/append-link", appendLinks)
 router.post("/exam-date", setExamDate);
 router.get("/exam-date", getExamDate);
 router.put("/exam-date", modifyExamDate);

@@ -1,6 +1,29 @@
 const {constants} = require("../utils/constants");
 const errorHandler = (err, req, res, next) => {
-  const statusCode = res.statusCode ? res.statusCode : 500;
+  if (err.code === "LIMIT_FILE_SIZE") {
+    res.status(constants.VALIDATION_ERROR);
+    return res.json({
+      title: "Validation Failed",
+      message: "File too large. Max size is 10 MB",
+    });
+  }
+
+  if (err.message.includes("Only PDFs")) {
+    res.status(constants.VALIDATION_ERROR);
+    return res.json({
+      title: "Validation Failed",
+      message: "Only PDF files are allowed",
+    });
+  }
+
+  if (err.message.includes("Only JSONs")) {
+    res.status(constants.VALIDATION_ERROR);
+    return res.json({
+      title: "Validation Failed",
+      message: "Only JSON files are allowed",
+    });
+  }
+  
   switch (res.statusCode) {
     case constants.VALIDATION_ERROR:
       res.json({ 

@@ -7,6 +7,7 @@ const {fn, Op} = require('sequelize');
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { link } = require("fs");
+const deleteUploadedFile = require("../utils/fileDeleter");
 
 //@desc Get Thesis Info
 //@route Get /api/student/thesis
@@ -162,25 +163,85 @@ const inviteProfessor = asyncHandler(async (req, res) => {
   throw new Error( "Invite alr exists");
 });
 
+//@desc get ipovoli ilikou eksetashs info
+//@route GET /api/student/thesis-material
+//@access Private
+const getThesisMaterial = asyncHandler(async (req, res) => {  
+  const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
+  const studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
+
+  if (!studentThesis) {
+    return res.status(404).json({ message: 'Thesis not found for student' });
+  }
+
+  const fileName = studentThesis.thesis_content_filename;
+  const linkList = await links.findAll({ attributes: ["url"], where: {thesis_id: studentThesis.id} });
+  
+  res.status(200);
+  res.json({
+    fileExists: fileName ? true : false, // exists and uparxei file alliws empty
+    fileName: fileName,
+    links: linkList.map(link => link.url)
+  });
+});
+
 //@desc student uploads pdf
 //@route Post /api/student/upload-pdf
 //@access Private
 const uploadPdf = asyncHandler(async (req, res) => {  
   const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
   const studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
+  const prevFile = studentThesis.thesis_content_file;
+  const prevOriginalFile = studentThesis.thesis_content_filename;
   const filePath = `${req.file.filename}`;
+  const fileName = `${req.file.originalname}`;
 
   if (!studentThesis) {
     return res.status(404).json({ message: 'Thesis not found for student' });
   }
 
+  deleteUploadedFile(prevFile);
   studentThesis.thesis_content_file = filePath;
+  studentThesis.thesis_content_filename = fileName;
   await studentThesis.save();
   
   res.status(200);
   res.json({
     message: 'Upload successful',
-    filePath: `/uploads/${req.file.filename}`
+    filePath: `/uploads/${req.file.filename}`,
+    fileName: fileName
+  });
+});
+
+//@desc student add links only
+//@route PUT /api/student/append-link
+//@access Private
+const appendLinks = asyncHandler(async (req, res) => {  
+  const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
+  const studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
+  const ls = req.body.links;
+          
+  if (!studentThesis) {
+    return res.status(404).json({ message: 'Thesis not found for student' });
+  }
+
+  const linkList = await links.findAll({ where: {thesis_id: studentThesis.id} });
+
+  linkList.map(async link => (
+    !ls.includes(link.url) ? await link.destroy() : ls.splice(ls.indexOf(link.url), 1)
+  ));
+  
+  await Promise.all(ls.map(async link => {
+    await links.create({
+      thesis_id: studentThesis.id,
+      url: link
+    });
+  }));
+  
+  res.status(200);
+  res.json({
+    message: 'Links Added',
+    links: ls,
   });
 });
 
@@ -312,5 +373,6 @@ const postUploadLinks = asyncHandler(async (req, res) => {
 
 module.exports = {getThesisInfo, getStudentInfo, modifyStudentInfo, 
   professorList, inviteProfessor, uploadPdf, setExamDate, 
-  getExamDate, modifyExamDate, getThesisGrade, postUploadLinks};
+  getExamDate, modifyExamDate, getThesisGrade, postUploadLinks, 
+  getThesisMaterial, appendLinks};
   

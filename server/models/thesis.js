@@ -74,6 +74,10 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(255),
       allowNull: true
     },
+    thesis_content_filename: {
+      type: DataTypes.STRING(255),
+      allowNull: true
+    },
     nemertes_link: {
       type: DataTypes.STRING(255),
       allowNull: true
