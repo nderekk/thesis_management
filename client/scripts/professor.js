@@ -65,7 +65,7 @@ async function getTopicsManagement() {
 ${thesisTopics.data.map(topic => `
     <tr>
         <td>${topic.title}</td>
-        <td><span class="status-badge status-${topic.status}">${getStatusText(topic.status)}</span></td>
+        <td><span class="status-badge status-${topic.status}">${getTopicStatusText(topic.status)}</span></td>
         <td>${formatDate(topic.createdDate)}</td>
         <td>
             <button class="btn btn-secondary" onclick="editTopic(${topic.id})">Επεξεργασία</button>
@@ -105,6 +105,15 @@ ${thesisTopics.data.map(topic => `
             </div>
         </div>
     `;
+}
+
+function getTopicStatusText(status) {
+    const statusMap = {
+        assigned: 'Ανατεθημένο',
+        unassigned: 'Προς Ανάθεση',
+        temp_assigned: 'Προσωρινά Ανατεθημένο'
+    };
+    return statusMap[status.toLowerCase()] || status;
 }
 
 async function handleCreateTopic() {
@@ -358,19 +367,19 @@ async function getThesesList() {
                     <label for="statusFilter">Κατάσταση:</label>
                     <select id="statusFilter" onchange="filterTheses()">
                         <option value="">Όλες</option>
-                        <option value="pending">Υπό Ανάθεση</option>
-                        <option value="active">Ενεργή</option>
-                        <option value="review">Υπό Εξέταση</option>
-                        <option value="completed">Περατωμένη</option>
-                        <option value="cancelled">Ακυρωμένη</option>
+                        <option value="Υπό Ανάθεση">Υπό Ανάθεση</option>
+                        <option value="Ενεργή">Ενεργή</option>
+                        <option value="Υπό Εξέταση">Υπό Εξέταση</option>
+                        <option value="Περατωμένη">Περατωμένη</option>
+                        <option value="Ακυρωμένη">Ακυρωμένη</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="roleFilter">Ρόλος:</label>
                     <select id="roleFilter" onchange="filterTheses()">
                         <option value="">Όλοι</option>
-                        <option value="supervisor">Επιβλέπων</option>
-                        <option value="committee">Μέλος Τριμελούς</option>
+                        <option value="Επιβλέπων">Επιβλέπων</option>
+                        <option value="Μέλος Τριμελούς">Μέλος Τριμελούς</option>
                     </select>
                 </div>
             </div>
@@ -402,8 +411,8 @@ async function getThesesList() {
                             <tr>
                                 <td>${thesis.thesis_title}</td>
                                 <td>${thesis.student_name}</td>
-                                <td>${thesis.thesis_status}</span></td>
-                                <td>${thesis.professor_role}</td>
+                                <td><span class="status-badge status-${thesis.thesis_status}">${getStatusText(thesis.thesis_status)}</span></td>
+                                <td>${getProfessorRoleText(thesis.professor_role)}</td>
                                 <td>${thesis.thesis_ass_date}</td>
                                 <td>
                                     <button class="btn btn-secondary" onclick='viewThesisDetails(${JSON.stringify(thesis)})'>Προβολή</button>
@@ -430,8 +439,8 @@ function filterTheses() {
 
     const matchesStatus = !statusFilter || statusCell === statusFilter;
     const matchesRole = !roleFilter || (
-      roleFilter === 'committee'
-        ? roleCell.includes('committee')
+      roleFilter === 'Μέλος Τριμελούς'
+        ? roleCell.includes('Μέλος')
         : roleCell === roleFilter
     );
 
@@ -881,7 +890,7 @@ async function getThesesManagement() {
                                 <td>${thesis.thesis_title}</td>
                                 <td>${thesis.student_name}</td>
                                 <td><span class="status-badge status-${thesis.thesis_status}">${getStatusText(thesis.thesis_status)}</span></td>
-                                <td>${thesis.professor_role}</td>
+                                <td>${getProfessorRoleText(thesis.professor_role)}</td>
                                 <td>${formatDate(thesis.thesis_ass_date)}</td>
                                 <td>
                                     <button class="btn btn-secondary" onclick='viewThesisDetails(${JSON.stringify(thesis)})'>Προβολή</button>
@@ -908,7 +917,7 @@ async function manageThesis(thesis) {
             <h3>${thesis.thesis_title}</h3>
             <p><strong>Φοιτητής:</strong> ${thesis.student_name}</p>
             <p><strong>Κατάσταση:</strong> <span class="status-badge status-${thesis.thesis_status}">${getStatusText(thesis.thesis_status)}</span></p>
-            <p><strong>Ρόλος:</strong>${thesis.professor_role}</p>
+            <p><strong>Ρόλος:</strong> ${getProfessorRoleText(thesis.professor_role)}</p>
             <hr>
     `;
 
@@ -1014,7 +1023,7 @@ async function manageThesis(thesis) {
 
 async function getActiveThesisActions(thesis) {
 
-    const response = await fetch("http://localhost:5001/api/professor/thesisNotes", {
+    const response = await fetch(`http://localhost:5001/api/professor/thesisNotes?thesisID=${thesis.thesis_id}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -1039,7 +1048,7 @@ async function getActiveThesisActions(thesis) {
             <form id="noteForm" onsubmit="addNote(${thesis.thesis_id}, event)">
                 <div class="form-group">
                     <label for="noteText">Νέα Σημείωση (μέχρι 300 χαρακτήρες):</label>
-                    <textarea id="noteText" maxlength="300" rows="3" required></textarea>
+                    <textarea id="noteText" maxlength="300" rows="3" required oninput="updateCharCount('noteText','charCount')"></textarea>
                     <small>Χαρακτήρες: <span id="charCount">0</span>/300</small>
                 </div>
                 <button type="submit" class="btn btn-primary">Προσθήκη Σημείωσης</button>
@@ -1331,6 +1340,8 @@ async function addNote(thesisID, event) {
     }
         
     document.getElementById('noteText').value = '';
+    const cnt = document.getElementById('charCount');
+    if (cnt) cnt.textContent = '0';
     alert('Η προσθήκη νέας σημείωσης ήταν επιτυχής!');
     closeModal();
     loadContent('manageTheses');
@@ -1488,6 +1499,24 @@ async function submitGrade(thesisID, event) {
 function copyAnnouncement() {
     // This would copy the announcement text to clipboard
     alert('Η ανακοίνωση αντιγράφηκε στο clipboard!');
+}
+
+// Live character counter helper
+function updateCharCount(textareaId, counterSpanId) {
+  const textarea = document.getElementById(textareaId);
+  const counter = document.getElementById(counterSpanId);
+  if (!textarea || !counter) return;
+  const length = textarea.value.length;
+  counter.textContent = String(length);
+}
+
+// Helper function to get professor role text in Greek
+function getProfessorRoleText(role) {
+    const roleMap = {
+        'Supervisor': 'Επιβλέπων',
+        'Committee Member': 'Μέλος Τριμελούς'
+    };
+    return roleMap[role] || role;
 }
 
 async function getInvitationsList() {

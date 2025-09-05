@@ -339,6 +339,23 @@ body {
     color: #721c24;
 }
 
+/* Topic Status in Professor*/
+.status-temp_assigned {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-assigned {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-unassigned {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+
 /* Tables */
 .table-container {
     overflow-x: auto;
@@ -809,6 +826,9 @@ tr:hover {
 .note p {
     margin: 0 0 8px 0;
     color: #333;
+    white-space: pre-wrap;          /* preserve newlines and wrap */
+    overflow-wrap: anywhere;        /* break long unspaced strings */
+    word-break: break-word;         /* fallback for older browsers */
 }
 
 .note small {

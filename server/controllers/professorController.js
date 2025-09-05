@@ -344,16 +344,22 @@ const postCancelThesis = asyncHandler(async (req, res) => {
 
 });
 
-//@desc Get notes from a thesis
+//@desc Get notes from a thesis (only creator can see). If thesisID provided, filter by it.
 //@route GET /api/professor/thesisNotes
 //@access Private
 const getThesisNotes = asyncHandler(async (req, res) => {
-  
-  const prof = await professor.findOne({ where : { prof_userid : req.user.id}})
-  const thesisNotes = await thesis_comments.findAll({ where: {prof_am: prof.am} });
+  const prof = await professor.findOne({ where : { prof_userid : req.user.id}});
+  const { thesisID } = req.query;
+
+  const whereClause = { prof_am: prof.am };
+  if (thesisID) whereClause.thesis_id = thesisID;
+
+  const thesisNotes = await thesis_comments.findAll({ 
+    where: whereClause,
+    order: [["comment_date", "DESC"], ["id", "DESC"]]
+  });
 
   res.status(200).json(thesisNotes);
-
 });
 
 //@desc Cancel a thesis

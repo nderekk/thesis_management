@@ -35,7 +35,7 @@ async function getSecretaryThesesView() {
                                 <td>${t.title}</td>
                                 <td>${t.student_name}</td>
                                 <td>${t.supervisor_name}</td>
-                                <td>${t.status}</td>
+                                <td><span class="status-badge status-${t.status}">${getStatusText(t.status)}</span></td>
                                 <td>${t.assignment_date}</td>
                             </tr>
                             <tr class="thesis-details-row" id="details-${t.id}" style="display: none;">
