@@ -68,9 +68,9 @@ function initModels(sequelize) {
   student.belongsTo(users, {as: "user", foreignKey: "student_userid"});
   secretary.belongsTo(users, {as: "user", foreignKey: "secretary_userid"});
   thesis_comments.belongsTo(professor, {as: "professor", foreignKey: "prof_am"});
-  thesis_grade.hasMany(professor, {as: "professor1", foreignKey: "prof1am"})
-  thesis_grade.hasMany(professor, {as: "professor2", foreignKey: "prof2am"})
-  thesis_grade.hasMany(professor, {as: "professor3", foreignKey: "prof3am"})
+  thesis_grade.belongsTo(professor, {as: "professor1", foreignKey: "prof1am"})
+  thesis_grade.belongsTo(professor, {as: "professor2", foreignKey: "prof2am"})
+  thesis_grade.belongsTo(professor, {as: "professor3", foreignKey: "prof3am"})
 
   return {
     announcements,

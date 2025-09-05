@@ -54,8 +54,8 @@ const getActiveTheses = asyncHandler(async (req, res) => {
   res.status(200).json(data);
 });
 
-//@desc Get current secretary user
-//@route Get /api/secretary/import-data
+//@desc mass import data from json
+//@route POST /api/secretary/import-data
 //@access Private
 const importData = asyncHandler(async (req, res) => {
   let stuCount = 0;
