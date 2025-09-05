@@ -1060,6 +1060,16 @@ tr:hover {
     color: #856404;
 }
 
+.status-badge.status-accepted {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-badge.status-declined {
+    background: #f8d7da;
+    color: #721c24;
+}
+
 /* Thesis Management Modal Layout */
 .thesis-info-header {
     display: flex;
@@ -1346,12 +1356,6 @@ tr:hover {
 .grade-item span:first-child {
     color: #555;
     font-size: 0.9rem;
-}
-
-.grade-item span:last-child {
-    color: #2c3e50;
-    font-weight: 500;
-    font-size: 1rem;
 }
 
 /* Files and Links */

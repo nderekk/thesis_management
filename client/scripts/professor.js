@@ -307,7 +307,7 @@ async function loadTempAssignments() {
         return;
     }
     div.innerHTML = `<ul>${temp.map(t => `<li>
-        <span>${t.title} - ${t.original_file_name ? `Αρχείο: ${t.original_file_name}` : ''} (Φοιτητής ΑΜ: ${t.student_am})</span>
+        <span>${t.title} (Φοιτητής ΑΜ: ${t.student_am})</span>
         <button class="btn btn-danger" onclick="cancelTempAssignment(${t.id})">Ακύρωση</button>
     </li>`).join('')}</ul>`;
 }
@@ -758,9 +758,9 @@ async function renderGraphs(){
   
   //render graphs with fetched data
   renderTimeGraph({
-    Supervisor: stats.supervisorAvg/30,
-    Committee: stats.committeeAvg/30,
-    Total: stats.totalAvg/30
+    Supervisor: stats.supervisorAvg,
+    Committee: stats.committeeAvg,
+    Total: stats.totalAvg
   });
 
   renderGradeChart({
@@ -1143,7 +1143,7 @@ async function getReviewThesisActions(thesis) {
                     <h5>Ενέργειες Επιβλέποντος</h5>
                 </div>
                 ${thesis.enableAnnouncement ? `
-                    <div class="announcement-section">
+                    <div class="form-group">
                         <label for="announcementText" class="form-control w-100 mb-2">
                         </label>
                         <textarea id="announcementText" rows="3" required></textarea>
@@ -1285,7 +1285,7 @@ function getInvitationStatusText(status) {
     const statuses = {
         pending: 'Εκκρεμεί',
         accepted: 'Αποδεκτή',
-        rejected: 'Απορριφθείσα'
+        declined: 'Απορριφθείσα'
     };
     return statuses[status] || status;
 }
@@ -1300,7 +1300,7 @@ function filterManageTheses() {
 async function cancelThesisAssignment(id) {
     if (confirm('Είστε σίγουροι ότι θέλετε να ακυρώσετε την ανάθεση αυτής της διπλωματικής;')) {
         const response = await fetch("http://localhost:5001/api/professor/topic", {
-        method: 'DELETE',
+        method: 'PUT',
         credentials: 'include',
         headers: {
             'Content-Type': 'application/json'  // important for JSON data

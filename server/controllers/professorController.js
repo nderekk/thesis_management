@@ -228,9 +228,9 @@ const getStats = asyncHandler(async (req, res) => {
 
   
   res.status(200).json({
-    supervisorAvg: Number(supervisorResults.avg_days), 
-    committeeAvg: Number(committeeResults.avg_days), 
-    totalAvg: totalAvg ? Number(totalAvg) : 0,
+    supervisorAvg: Number(supervisorResults.avg_days)/30, 
+    committeeAvg: Number(committeeResults.avg_days)/30, 
+    totalAvg: totalAvg ? Number(totalAvg)/30 : 0,
 
     supervisorGrade: Number(supervisorGrade.grade),
     committeeGrade: Number(committeeGrade.grade),
@@ -321,9 +321,12 @@ const putThesisReview = asyncHandler(async (req, res) => {
 
   const currentThesis = await thesis.findOne({ where : { id : thesisID } });
 
-  await currentThesis.update({ thesis_status: 'Review'});
-  res.status(200).json({ message: 'Status changed from Active to Review.' });
-
+  if (currentThesis.ap_from_gs){
+    await currentThesis.update({ thesis_status: 'Review'});
+    res.status(200).json({ message: 'Status changed from Active to Review.' });
+  } else {
+    res.status(400).json({ message: 'Απαιτείται αριθμός πρωτοκολλου απο την Γραμματεία' });
+  }
 });
 
 

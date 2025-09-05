@@ -382,13 +382,11 @@ async function getReviewThesisContent(thesis) {
                 <div class="form-group">
                     <label for="thesisFile">Πρόχειρο Κείμενο (PDF):</label>
                     <input type="file" id="thesisFile" accept=".pdf">
-                    <small>'Εχετε ανεβάσει: <a href="/server/uploads/${material.fileName}">${material.fileName}</a> | Μέγιστο μέγεθος: 10MB</small>
+                    <small>${material.fileName ? `Εχετε ανεβάσει: <a href="/server/uploads/${material.fileName}">${material.fileName}</a> |` : ``} Μέγιστο μέγεθος: 10MB</small>
                 </div>
                 <div class="form-group">
                     <label for="additionalLinks">Σύνδεσμοι Υλικού:</label>
-                    <textarea id="additionalLinks" rows="2" placeholder="Ένας σύνδεσμος ανά γραμμή" >${
-                        material.links.length !== 0 ? material.links.join('\n') : ""}
-                    </textarea>
+                    <textarea id="additionalLinks" rows="2" placeholder="Ένας σύνδεσμος ανά γραμμή" >${material.links.length !== 0 ? material.links.join('\n') : ""}</textarea>
                 </div>
                 <button type="submit" class="btn btn-primary">Ανάρτηση Υλικού</button>
             </form>
@@ -444,16 +442,6 @@ async function getReviewThesisContent(thesis) {
                 <div class="form-group">
                     <label>Βαθμός:</label>
                     <p><strong>${thesis.grade}/10</strong></p>
-                </div>
-                <div class="form-group">
-                    <label>Σχόλια Τριμελούς:</label>
-                    <div class="committee-comments">
-                        ${thesis.committeeComments ? thesis.committeeComments.map(comment => `
-                            <div class="comment">
-                                <strong>${getUserName(comment.professorId)}:</strong> ${comment.comment}
-                            </div>
-                        `).join('') : '<p>Δεν υπάρχουν σχόλια.</p>'}
-                    </div>
                 </div>
                 <div class="form-group">
                     <label for="libraryLink">Σύνδεσμος Νημερτής:</label>
