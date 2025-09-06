@@ -116,16 +116,26 @@ const deleteTopic = asyncHandler(async (req, res) => {
 //@route Get /api/professor/thesesList
 //@access Private
 const getThesesList = asyncHandler(async (req, res) => {
+  const manage = req.query.manage === "true";
   const loggedProfessor = await professor.findOne({ where: {prof_userid: req.user.id} });
-  const professorThesesSupervisor = await thesis.findAll({
-    where: {
+
+  const baseConditions = [
+    {
       [Op.or]: [
         { supervisor_am: loggedProfessor.am },
         { prof2_am: loggedProfessor.am },
         { prof3_am: loggedProfessor.am }
       ]
     }
-  });
+  ];
+
+  if (manage) {
+    baseConditions.push({ thesis_status: { [Op.ne]: "Completed" } });
+  }
+
+  const whereClause = baseConditions.length === 1 ? baseConditions[0] : { [Op.and]: baseConditions };
+
+  const professorThesesSupervisor = await thesis.findAll({ where: whereClause });
   const topicIDs = professorThesesSupervisor.map(thesis => thesis.topic_id);
   const professorThesesTopics = await thesis_topics.findAll({where: { id: topicIDs }});
 

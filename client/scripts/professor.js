@@ -847,7 +847,7 @@ function generateGradeChart(theses) {
 }
 
 async function getThesesManagement() {
-    const response = await fetch("http://localhost:5001/api/professor/thesesList", {
+    const response = await fetch("http://localhost:5001/api/professor/thesesList?manage=true", {
       method: 'GET',
       credentials: 'include',
       headers: {
