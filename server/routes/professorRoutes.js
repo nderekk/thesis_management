@@ -26,6 +26,7 @@ const {
     getProfsGrade,
     postAnnouncement,
     getThesisDetails,
+    announced,
 } = require("../controllers/professorController");
 
 // public
@@ -54,5 +55,6 @@ router.post("/getGradeList", getGradeList);
 router.post("/getProfsGrade", getProfsGrade);
 router.post("/newAnnouncement", postAnnouncement);
 router.get("/thesis/:id", getThesisDetails);
+router.get("/announced", announced);
 
 module.exports = router;

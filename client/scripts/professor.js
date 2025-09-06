@@ -1118,7 +1118,20 @@ async function getReviewThesisActions(thesis) {
         throw new Error(`Error: ${grades.message}`);
     }
 
-    console.log(grades);
+     const announcedResponse = await fetch(`http://localhost:5001/api/professor/announced?id=${thesisID}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'  // important for JSON data
+      }
+    });
+    const announced = await announcedResponse.json();
+    if (!response.ok) {
+        alert(announced.message);
+        throw new Error(`Error: ${announced.message}`);
+    }
+
+    console.log(announced);
 
     let content = `
         <h4>Ενέργειες για Διπλωματική Υπό Εξέταση</h4>
@@ -1142,7 +1155,7 @@ async function getReviewThesisActions(thesis) {
                 <div class="card-header">
                     <h5>Ενέργειες Επιβλέποντος</h5>
                 </div>
-                ${thesis.enableAnnouncement ? `
+                ${thesis.enableAnnouncement && !announced ? `
                     <div class="form-group">
                         <label for="announcementText" class="form-control w-100 mb-2">
                         </label>
@@ -1153,6 +1166,10 @@ async function getReviewThesisActions(thesis) {
                             Δημιουργία Ανακοίνωσης Παρουσίασης
                         </button>
                     </div>
+                ` : announced ? `
+                    <p class="alert alert-warning">
+                        Έχετε ήδη αναρτήσει ανακοίνωση για αυτήν την παρουσίαση
+                    </p>
                 ` : `
                     <p class="alert alert-warning">
                         Η ανακοίνωση είναι διαθέσιμη μόνο μετά τη συμπλήρωση των λεπτομερειών παρουσίασης

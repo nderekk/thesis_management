@@ -616,6 +616,22 @@ const postAnnouncement = asyncHandler(async (req, res) => {
   res.status(200).json({ createAnnouncement });
 });
 
+//@desc check wether announcement exists
+//@route GET /api/professor/announced
+//@access Private
+const announced = asyncHandler(async (req, res) => {
+  const loggedProfessor = await professor.findOne({ where: {prof_userid: req.user.id} });
+  const thesis_id = req.query.id;
+  if (!thesis_id){
+    res.status(400);
+    throw new Error("thesis_id missing from request");
+  }
+
+  const exists = (await announcements.findOne({ where: {thesis_id: thesis_id} })) ? true : false;
+  console.log(exists);
+  res.status(200).json(exists);
+});
+
 //@desc Get comprehensive thesis details including logs, grades, and committee
 //@route GET /api/professor/thesis/:id
 //@access Private
@@ -801,6 +817,6 @@ module.exports = {
   getProfessorInfo, getTopics, createTopic, getThesisNotes,
   editTopic, deleteTopic, getStats, getThesesList,postCancelThesis,
   searchStudent, assignTopicToStudent, getCommitteeRequests, putThesisReview,
-  postThesisNotes , putEnableGrading, postGrade, getInvitationsList, respondToInvitation,
-  getGradeList, getProfsGrade, postAnnouncement, getThesisDetails
+  postThesisNotes, putEnableGrading, postGrade, getInvitationsList, respondToInvitation,
+  getGradeList, getProfsGrade, postAnnouncement, getThesisDetails, announced
 };
