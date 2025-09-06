@@ -75,3 +75,39 @@ INSERT INTO thesis_grade VALUES
 INSERT INTO thesis_presentation (thesis_id, date_time, presentation_type, venue) VALUES
 ('1', '2025-5-5', 'in-person', 'αίθουσα Γ');
 
+-- ==========================================
+USE diplomatiki_sys;
+
+-- Insert thesis topics for students 4,5,7,8,9
+INSERT INTO thesis_topics (prof_am, title, description, attached_discription_file, topic_status, student_am, createdAt, updatedAt) VALUES
+(1, 'Distributed Systems Optimization', 'Optimizing distributed consensus protocols', 'dist_sys.pdf', 'assigned', 4, "2025-02-01", "2025-02-01"),
+(2, 'Deep Reinforcement Learning', 'Exploring reinforcement learning for robotics', 'drl.pdf', 'assigned', 5, "2025-02-01", "2025-02-01"),
+(3, 'Blockchain Security', 'Analyzing vulnerabilities in blockchain protocols', 'blockchain_sec.pdf', 'assigned', 7, "2025-02-01", "2025-02-01"),
+(4, 'Graph Algorithms in Big Data', 'Scalable graph processing techniques', 'graph_bigdata.pdf', 'assigned', 8, "2025-02-01", "2025-02-01"),
+(5, 'Neural Machine Translation', 'Developing an NMT model for Greek-English translation', 'nmt.pdf', 'assigned', 9, "2025-02-01", "2025-02-01");
+
+-- Insert theses for students 4,5,7,8,9
+INSERT INTO thesis (topic_id, student_am, supervisor_am, prof2_am, prof3_am, thesis_status, assignment_date, thesis_content_file, nemertes_link, ap_from_gs, completion_date) VALUES 
+-- Completed theses (~60%)
+(11, 4, 1, 2, 3, 'Completed', '2025-02-10', 'thesis4.pdf', 'https://nemertes.upatras.gr/thesis4', 1004, '2025-07-10'),
+(12, 5, 2, 1, 3, 'Completed', '2025-02-12', 'thesis5.pdf', 'https://nemertes.upatras.gr/thesis5', 1005, '2025-07-15'),
+(13, 7, 3, 1, 2, 'Completed', '2025-02-15', 'thesis7.pdf', 'https://nemertes.upatras.gr/thesis7', 1007, '2025-07-20'),
+
+-- Active thesis
+(14, 8, 4, 2, 5, 'Active', '2025-02-20', 'thesis8.pdf', 'https://nemertes.upatras.gr/thesis8', 1008, NULL),
+
+-- Canceled thesis
+(15, 9, 5, 3, 4, 'Cancelled', '2025-02-25', 'thesis9.pdf', 'https://nemertes.upatras.gr/thesis9', 1009, NULL);
+
+-- Insert grades only for Completed theses (4,5,7)
+INSERT INTO thesis_grade VALUES
+(NULL, 25, 8, 1, 9, 9, 9, 9, 2, 8, 8, 8, 8, 3, 9, 9, 9, 9),
+(NULL, 26, 9, 1, 10, 10, 10, 9, 2, 9, 9, 9, 9, 3, 8, 8, 8, 8),
+(NULL, 27, 7, 1, 7, 7, 7, 7, 2, 8, 8, 8, 8, 3, 7, 7, 7, 7);
+
+-- Insert presentations (only for completed ones)
+INSERT INTO thesis_presentation (thesis_id, date_time, presentation_type, venue) VALUES
+(25, '2025-07-20 10:00:00', 'in-person', 'Αίθουσα 201'),
+(26, '2025-07-22 11:00:00', 'online', 'https://zoom.us/j/123456789'),
+(27, '2025-07-25 09:30:00', 'in-person', 'Αίθουσα 305');
+
