@@ -445,7 +445,7 @@ async function getReviewThesisContent(thesis) {
                 </div>
                 <div class="form-group">
                     <label for="libraryLink">Σύνδεσμος Νημερτής:</label>
-                    <input type="url" id="libraryLink" placeholder="https://nemertes.lis.upatras.gr/..." value="${thesis.libraryLink || ''}">
+                    <input type="url" id="libraryLink" placeholder="https://nemertes.lis.upatras.gr/..." value="${currentThesis.libraryLink || ''}">
                     <button onclick="saveLibraryLink()" class="btn btn-secondary">Αποθήκευση</button>
                 </div>
                 <button onclick="viewExaminationReport()" class="btn btn-primary">Προβολή Πρακτικού</button>
@@ -521,14 +521,25 @@ function toggleExamLocation() {
     }
 }
 
-function saveLibraryLink() {
+async function saveLibraryLink() {
     const libraryLink = document.getElementById('libraryLink').value;
-    const currentThesis = theses.find(t => t.studentId === currentUser.id);
-    
-    if (currentThesis) {
-        currentThesis.libraryLink = libraryLink;
-        alert('Ο σύνδεσμος αποθηκεύτηκε επιτυχώς!');
+    const response = await fetch("http://localhost:5001/api/student/saveLibraryLink", {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            libraryLink
+        })
+    });
+    const saved = await response.json();
+    if (!response.ok) {
+        alert(saved.message);
+        throw new Error(`Error: ${saved.message}`);
     }
+    alert('Ο σύνδεσμος αποθηκεύτηκε επιτυχώς!');
+
 }
 
 async function viewExaminationReport() {    

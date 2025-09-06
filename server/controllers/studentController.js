@@ -337,10 +337,21 @@ const getThesisGrade = asyncHandler(async (req, res) => {
     res.status(200).json(thesisGrade.final_grade);
   else 
     res.status(200).json("ungraded");
+});
+
+//@desc student saves library link
+//@route PUT /api/student/saveLibraryLink
+//@access Private
+const saveLibraryLink = asyncHandler(async (req, res) => {
+  const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
+  const studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
+  const libraryLink = req.body.libraryLink;
+  await studentThesis.update({ nemertes_link: libraryLink });
+  res.status(200).json({ message: 'Ο σύνδεσμος αποθηκεύτηκε επιτυχώς' });
 })
 
 module.exports = {getThesisInfo, getStudentInfo, modifyStudentInfo, 
   professorList, inviteProfessor, uploadPdf, setExamDate, 
   getExamDate, modifyExamDate, getThesisGrade,  
-  getThesisMaterial, appendLinks};
+  getThesisMaterial, appendLinks, saveLibraryLink};
   

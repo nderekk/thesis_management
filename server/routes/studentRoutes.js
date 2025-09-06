@@ -16,6 +16,7 @@ const {
     getThesisGrade,
     getThesisMaterial,
     appendLinks,
+    saveLibraryLink,
 } = require("../controllers/studentController");
 
 // public
@@ -34,5 +35,6 @@ router.post("/exam-date", setExamDate);
 router.get("/exam-date", getExamDate);
 router.put("/exam-date", modifyExamDate);
 router.get("/thesis/grade", getThesisGrade);
+router.put("/saveLibraryLink", saveLibraryLink);
 
 module.exports = router;
