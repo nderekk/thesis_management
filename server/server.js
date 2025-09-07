@@ -9,7 +9,7 @@ const app = express();
 // middleware
 app.use(express.json());
 app.use(cors({
-  origin: 'http://127.0.0.1:5502', // το origin του frontend σου
+  origin: 'http://127.0.0.1:5501', // το origin του frontend σου
   credentials: true
 }));
 
