@@ -3,24 +3,39 @@ const errorHandler = require("./middleware/errorHandler");
 const dotenv = require("dotenv").config();
 const {sequelize} = require("./config/dbConnection");
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 // middleware
 app.use(express.json());
 app.use(cors({
-  origin: 'http://127.0.0.1:5501', // το origin του frontend σου
+  origin: 'http://127.0.0.1:5502', // το origin του frontend σου
   credentials: true
 }));
-app.use('/static', express.static('public', {
-  maxAge: '7d',        // cache for 7 days
-  etag: true,          // enable ETag headers
-  lastModified: true   // enable Last-Modified headers
+
+// HTML - 5 minutes
+app.use('/', express.static(path.join(__dirname, '../client'), {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'private, max-age=60, must-revalidate');
+    }
+  }
 }));
 
-// Cache monitoring routes
-app.use("/api/cache", require("./routes/cacheRoutes"));
+// CSS - 7 days
+app.use('/styles', express.static(path.join(__dirname, '../client/styles'), {
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'private, max-age=604800');
+  }
+}));
 
-// API routes with caching
+// JS - 7 days
+app.use('/scripts', express.static(path.join(__dirname, '../client/scripts'), {
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'private, max-age=604800');
+  }
+}));
+
 app.use("/api/user", require("./routes/userRoutes"));
 app.use("/api/student", require("./routes/studentRoutes"));
 app.use("/api/professor", require("./routes/professorRoutes"));
