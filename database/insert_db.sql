@@ -89,25 +89,24 @@ INSERT INTO thesis_topics (prof_am, title, description, attached_discription_fil
 -- Insert theses for students 4,5,7,8,9
 INSERT INTO thesis (topic_id, student_am, supervisor_am, prof2_am, prof3_am, thesis_status, assignment_date, thesis_content_file, nemertes_link, ap_from_gs, completion_date) VALUES 
 -- Completed theses (~60%)
-(11, 4, 1, 2, 3, 'Completed', '2025-02-10', 'thesis4.pdf', 'https://nemertes.upatras.gr/thesis4', 1004, '2025-07-10'),
-(12, 5, 2, 1, 3, 'Completed', '2025-02-12', 'thesis5.pdf', 'https://nemertes.upatras.gr/thesis5', 1005, '2025-07-15'),
-(13, 7, 3, 1, 2, 'Completed', '2025-02-15', 'thesis7.pdf', 'https://nemertes.upatras.gr/thesis7', 1007, '2025-07-20'),
+(4, 4, 1, 2, 3, 'Completed', '2025-02-10', 'thesis4.pdf', 'https://nemertes.upatras.gr/thesis4', 1004, '2025-07-10'),
+(5, 5, 2, 1, 3, 'Completed', '2025-02-12', 'thesis5.pdf', 'https://nemertes.upatras.gr/thesis5', 1005, '2025-07-15'),
+(6, 7, 4, 1, 2, 'Completed', '2025-02-15', 'thesis7.pdf', 'https://nemertes.upatras.gr/thesis7', 1007, '2025-07-20'),
 
 -- Active thesis
-(14, 8, 4, 2, 5, 'Active', '2025-02-20', 'thesis8.pdf', 'https://nemertes.upatras.gr/thesis8', 1008, NULL),
+(7, 8, 5, 2, 5, 'Active', '2025-02-20', 'thesis8.pdf', 'https://nemertes.upatras.gr/thesis8', 1008, NULL),
 
 -- Canceled thesis
-(15, 9, 5, 3, 4, 'Cancelled', '2025-02-25', 'thesis9.pdf', 'https://nemertes.upatras.gr/thesis9', 1009, NULL);
+(8, 9, 5, 3, 4, 'Cancelled', '2025-02-25', 'thesis9.pdf', 'https://nemertes.upatras.gr/thesis9', 1009, NULL);
 
 -- Insert grades only for Completed theses (4,5,7)
 INSERT INTO thesis_grade VALUES
-(NULL, 25, 8, 1, 9, 9, 9, 9, 2, 8, 8, 8, 8, 3, 9, 9, 9, 9),
-(NULL, 26, 9, 1, 10, 10, 10, 9, 2, 9, 9, 9, 9, 3, 8, 8, 8, 8),
-(NULL, 27, 7, 1, 7, 7, 7, 7, 2, 8, 8, 8, 8, 3, 7, 7, 7, 7);
+(NULL, 4, 9, 1, 10, 10, 10, 9, 2, 9, 9, 9, 9, 3, 8, 8, 8, 8),
+(NULL, 5, 7, 2, 7, 7, 7, 7, 1, 8, 8, 8, 8, 3, 7, 7, 7, 7),
+(NULL, 6, 7, 4, 7, 7, 7, 7, 1, 8, 8, 8, 8, 2, 7, 7, 7, 7);
 
 -- Insert presentations (only for completed ones)
 INSERT INTO thesis_presentation (thesis_id, date_time, presentation_type, venue) VALUES
-(25, '2025-07-20 10:00:00', 'in-person', 'Αίθουσα 201'),
-(26, '2025-07-22 11:00:00', 'online', 'https://zoom.us/j/123456789'),
-(27, '2025-07-25 09:30:00', 'in-person', 'Αίθουσα 305');
-
+(4, '2025-07-22 11:00:00', 'online', 'https://zoom.us/j/123456789'),
+(5, '2025-07-25 09:30:00', 'in-person', 'Αίθουσα 305'),
+(6, '2025-10-28 09:30:00', 'online', 'https://zoom.us/j/1234321');
