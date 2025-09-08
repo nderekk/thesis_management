@@ -6,18 +6,21 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
+
 // middleware
 app.use(express.json());
 app.use(cors({
-  origin: 'http://127.0.0.1:5501', // το origin του frontend σου
+  corsOptions : {origin: 'http://127.0.0.1:5501', // το origin του frontend σου
   credentials: true
+  }
 }));
+
 
 // HTML - 5 minutes
 app.use('/', express.static(path.join(__dirname, '../client'), {
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.html')) {
-      res.setHeader('Cache-Control', 'private, max-age=60, must-revalidate');
+      res.setHeader('Cache-Control', 'no-cahce no-store');
     }
   }
 }));
@@ -25,14 +28,14 @@ app.use('/', express.static(path.join(__dirname, '../client'), {
 // CSS - 7 days
 app.use('/styles', express.static(path.join(__dirname, '../client/styles'), {
   setHeaders: (res) => {
-    res.setHeader('Cache-Control', 'private, max-age=604800');
+    res.setHeader('Cache-Control', 'no-cahce no-store');
   }
 }));
 
 // JS - 7 days
-app.use('/scripts', express.static(path.join(__dirname, '../client/scripts'), {
-  setHeaders: (res) => {
-    res.setHeader('Cache-Control', 'private, max-age=604800');
+app.use('../client/scripts',express.static(path.join(__dirname, '../client/scripts'), {
+  setHeaders: (res, filePath) => {
+    res.setHeader("Cache-Control", "no-cahce no-store");
   }
 }));
 
@@ -63,4 +66,6 @@ async function startServer() {
 }
 
 startServer();
+
+
 
