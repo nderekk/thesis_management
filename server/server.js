@@ -3,14 +3,36 @@ const errorHandler = require("./middleware/errorHandler");
 const dotenv = require("dotenv").config();
 const {sequelize} = require("./config/dbConnection");
 const cors = require('cors');
+const path = require("path");
 
 const app = express();
-// middleware
-app.use(express.json());
-app.use(cors({
-  origin: 'http://127.0.0.1:5501', // το origin του frontend σου
-  credentials: true
+
+// middleware //
+
+// 5 lepta
+app.use('/', express.static(path.join(__dirname, '../client'), {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'private, max-age=60, must-revalidate');
+    }
+  }
 }));
+
+// 7 meres
+app.use('/styles_new', express.static(path.join(__dirname, '../client/styles'), {
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'private, max-age=604800');
+  }
+}));
+
+// 7 meres
+app.use('/scriptz',express.static(path.join(__dirname, '../client/scripts'), {
+  setHeaders: (res, filePath) => {
+    res.setHeader("Cache-Control", "public, max-age=50");
+  }
+}));
+
+app.use(express.json());
 app.use("/api/user", require("./routes/userRoutes"));
 app.use("/api/student", require("./routes/studentRoutes"));
 app.use("/api/professor", require("./routes/professorRoutes"));
