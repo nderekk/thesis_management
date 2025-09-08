@@ -1316,16 +1316,11 @@ function filterManageTheses() {
 
 async function cancelThesisAssignment(id) {
     if (confirm('Είστε σίγουροι ότι θέλετε να ακυρώσετε την ανάθεση αυτής της διπλωματικής;')) {
-        const response = await fetch("http://localhost:5001/api/professor/topic", {
+        const response = await fetch('http://localhost:5001/api/professor/topic', {
         method: 'PUT',
         credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json'  // important for JSON data
-        },
-        body: JSON.stringify({
-            id: id
-        })
-        });
+        body: (() => { const fd = new FormData(); fd.append('mode', "thesisID"), fd.append('id', id); fd.append('topic_status', 'unassigned'); fd.append('student_am', ''); return fd; })()
+    });
         const ans = await response.json();
         if (!response.ok) {
             alert(ans.message);

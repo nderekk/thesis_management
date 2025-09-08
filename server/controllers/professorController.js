@@ -56,7 +56,13 @@ const createTopic = asyncHandler(async (req, res) => {
 //@access Private
 const editTopic = asyncHandler(async (req, res) => {
   const loggedProfessor = await professor.findOne({ where: {prof_userid: req.user.id} });
-  const targetTopic = await thesis_topics.findOne({where: {prof_am: loggedProfessor.am, id:req.body.id} });
+  const mode = req.body.mode;
+  let targetId = req.body.id;
+  if (mode === "thesisID"){
+    const studentThesis = await thesis.findOne({ attributes: ["topic_id"], where: {supervisor_am: loggedProfessor.am, id:targetId} });
+    targetId = studentThesis.topic_id;
+  }
+  const targetTopic = await thesis_topics.findOne({where: {prof_am: loggedProfessor.am, id:targetId} });
   const prevFile = targetTopic.attached_discription_file;
   const prevOriginalFile = targetTopic.original_file_name;
 
@@ -71,7 +77,6 @@ const editTopic = asyncHandler(async (req, res) => {
       topic_status,
       student_am,
     } = req.body;
-    console.log(student_am);
 
     const updateData = {};
     if (title !== undefined) updateData.title = title;
