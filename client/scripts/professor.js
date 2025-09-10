@@ -13,7 +13,6 @@ async function getTopicsManagement() {
         alert(thesisTopics.message);
         throw new Error(`Error: ${thesisTopics.message}`);
     }
-    console.log(thesisTopics);
     
     return `
         <div class="content-header">
@@ -62,7 +61,9 @@ async function getTopicsManagement() {
                         </tr>
                     </thead>
                     <tbody>
-${thesisTopics.data.map(topic => `
+${thesisTopics.data
+    .filter(topic => topic.status === "unassigned" || topic.status === "temp_assigned")
+    .map(topic => `
     <tr>
         <td>${topic.title}</td>
         <td><span class="status-badge status-${topic.status}">${getTopicStatusText(topic.status)}</span></td>
