@@ -15,7 +15,7 @@ async function getSecretaryThesesView() {
     return `
         <div class="content-header">
             <h1>Προβολή Διπλωματικών</h1>
-            <p>Προβάλετε όλες τις ενεργές διπλωματικές</p>
+            <p>Προβάλονται όλες οι διπλωματικές σε κατάσταση 'Ενεργή' ή 'Υπό Εξέταση'</p>
         </div>
         <div class="card">
             <div class="table-container">
