@@ -9,26 +9,26 @@ const app = express();
 
 // middleware //
 
-// 5 lepta
+// HTML Files - SPA => More frequent refresh rates
 app.use('/', express.static(path.join(__dirname, '../client'), {
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.html')) {
-      res.setHeader('Cache-Control', 'private, max-age=60, must-revalidate');
+      res.setHeader('Cache-Control', 'private, max-age=0, must-revalidate');
     }
   }
 }));
 
-// 7 meres
+// CSS Files - 7 Day Caching
 app.use('/styles_new', express.static(path.join(__dirname, '../client/styles'), {
   setHeaders: (res) => {
-    res.setHeader('Cache-Control', 'private, max-age=604800');
+    res.setHeader('Cache-Control', 'public, max-age=604800');
   }
 }));
 
-// 7 meres
+// JS Files - 7 Day Caching
 app.use('/scriptz',express.static(path.join(__dirname, '../client/scripts'), {
   setHeaders: (res, filePath) => {
-    res.setHeader("Cache-Control", "public, max-age=50");
+    res.setHeader('Cache-Control', 'public, max-age=604800');
   }
 }));
 
