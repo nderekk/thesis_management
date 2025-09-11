@@ -116,10 +116,10 @@ const getAnnouncements = asyncHandler(async (req, res) => {
     ];
     return {
       id: ann.id,
-      announcementDate: ann.announcement_datetime,
+      announcementDate: new Date(ann.announcement_datetime).toISOString().replace("T", " ").replace("Z", ""),
       announcementContent: ann.announcement_content,
       presentation: {
-        date: presentation_details.date_time.toISOString().split("T")[0],
+        date: new Date(presentation_details.date_time).toISOString().replace("T", " ").replace("Z", ""),
         type: presentation_details.presentation_type,
         venue: presentation_details.venue,
       },
