@@ -136,6 +136,7 @@ const getThesesList = asyncHandler(async (req, res) => {
 
   if (manage) {
     baseConditions.push({ thesis_status: { [Op.ne]: "Completed" } });
+    baseConditions.push({ thesis_status: { [Op.ne]: "Cancelled" } });
   }
 
   const whereClause = baseConditions.length === 1 ? baseConditions[0] : { [Op.and]: baseConditions };
