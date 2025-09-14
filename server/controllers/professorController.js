@@ -3,6 +3,19 @@ const {sequelize, professor, thesis_topics, thesis, student , trimelis_requests,
 const deleteUploadedFile = require("../utils/fileDeleter");
 const { Op, fn } = require('sequelize');
 
+// Helper function to format datetime as local time without timezone conversion
+function formatLocalDateTime(dateTime) {
+  if (!dateTime) return "";
+  const year = dateTime.getFullYear();
+  const month = String(dateTime.getMonth() + 1).padStart(2, '0');
+  const day = String(dateTime.getDate()).padStart(2, '0');
+  const hours = String(dateTime.getHours()).padStart(2, '0');
+  const minutes = String(dateTime.getMinutes()).padStart(2, '0');
+  const seconds = String(dateTime.getSeconds()).padStart(2, '0');
+  
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
 //@desc Get current professor
 //@route Get /api/professor
 //@access Private
@@ -28,7 +41,7 @@ const getTopics = asyncHandler(async (req, res) => {
       status: topic.topic_status,
       original_file_name: topic.original_file_name,
       attached_file_name : topic.attached_discription_file,
-      createdDate: topic.createdAt.toISOString().split("T")[0],
+      createdDate: topic.createdAt ? topic.createdAt.toISOString().split("T")[0] : "",
       student_am: topic.student_am
     })),
   });
@@ -812,7 +825,11 @@ const getThesisDetails = asyncHandler(async (req, res) => {
         grade4: thesisGrade.prof3_grade4
       }
     } : null,
-    presentation: thesisPresentation.length > 0 ? thesisPresentation[0] : null,
+    presentation: thesisPresentation.length > 0 ? {
+      date_time: thesisPresentation[0].date_time ? formatLocalDateTime(thesisPresentation[0].date_time) : null,
+      presentation_type: thesisPresentation[0].presentation_type,
+      venue: thesisPresentation[0].venue
+    } : null,
     links: thesisLinks.map(link => link.url)
   };
 

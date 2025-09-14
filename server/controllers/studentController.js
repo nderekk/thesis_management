@@ -252,9 +252,18 @@ const setExamDate = asyncHandler(async (req, res) => {
   const loggedStudent = await student.findOne({ where: {student_userid: req.user.id} });
   const studentThesis = await thesis.findOne({ where: {student_am: loggedStudent.am}});
 
+  // Parse the date_time as local time without timezone conversion
+  const dateTimeString = req.body.date_time;
+  const [datePart, timePart] = dateTimeString.split('T');
+  const [year, month, day] = datePart.split('-');
+  const [hours, minutes] = timePart.split(':');
+  
+  // Create date in local timezone (no UTC conversion)
+  const localDateTime = new Date(year, month - 1, day, hours, minutes, 0, 0);
+
   const pres = await thesis_presentation.create({
         thesis_id: studentThesis.id,
-        date_time: new Date(req.body.date_time),
+        date_time: localDateTime,
         presentation_type: req.body.presentation_type,
         venue: req.body.venue
   });
@@ -275,8 +284,16 @@ const getExamDate = asyncHandler(async (req, res) => {
     res.status(200).json({ date: "YYYY-MM-DD", time: "--:--" , venue: "", presentation_type: ""});
   }
   else {
-    const [date, timeWithMs] = pres.date_time.toISOString().split("T");
-    const time = timeWithMs.slice(0, 5);
+    // Format date and time as stored (local time, no timezone conversion)
+    const year = pres.date_time.getFullYear();
+    const month = String(pres.date_time.getMonth() + 1).padStart(2, '0');
+    const day = String(pres.date_time.getDate()).padStart(2, '0');
+    const hours = String(pres.date_time.getHours()).padStart(2, '0');
+    const minutes = String(pres.date_time.getMinutes()).padStart(2, '0');
+    
+    const date = `${year}-${month}-${day}`;
+    const time = `${hours}:${minutes}`;
+    
     res.status(200).json({
       date: date, 
       time: time, 
@@ -309,9 +326,17 @@ const modifyExamDate = asyncHandler(async (req, res) => {
 
     const updateData = {};
     if (presentation_type !== undefined) updateData.presentation_type = presentation_type;
-    if (date !== undefined) updateData.date = date;
-    if (time !== undefined) updateData.time = time;
     if (venue !== undefined) updateData.venue = venue;
+
+    // Handle date and time update with proper local time handling
+    if (date !== undefined && time !== undefined) {
+      const [year, month, day] = date.split('-');
+      const [hours, minutes] = time.split(':');
+      
+      // Create date in local timezone (no UTC conversion)
+      const localDateTime = new Date(year, month - 1, day, hours, minutes, 0, 0);
+      updateData.date_time = localDateTime;
+    }
 
     if (Object.keys(updateData).length === 0) {
         res.status(400);
@@ -354,4 +379,3 @@ module.exports = {getThesisInfo, getStudentInfo, modifyStudentInfo,
   professorList, inviteProfessor, uploadPdf, setExamDate, 
   getExamDate, modifyExamDate, getThesisGrade,  
   getThesisMaterial, appendLinks, saveLibraryLink};
-  
