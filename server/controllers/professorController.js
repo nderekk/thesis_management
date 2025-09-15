@@ -449,7 +449,6 @@ const getInvitationsList = asyncHandler(async (req, res) => {
       prof_am: loggedProfessor.am
     }
   });
-  console.log(requests);
   const invitations = await Promise.all(requests.map(async r => {
     const th = await thesis.findOne({where: {
       id: r.thesis_id
@@ -634,7 +633,6 @@ const announced = asyncHandler(async (req, res) => {
   }
 
   const exists = (await announcements.findOne({ where: {thesis_id: thesis_id} })) ? true : false;
-  console.log(exists);
   res.status(200).json(exists);
 });
 

@@ -70,19 +70,19 @@ const getUser = asyncHandler(async (req, res) => {
 //@access Public
 const getAnnouncements = asyncHandler(async (req, res) => {
   const { from, to, format } = req.query;
+  const start = new Date(from);
+  const end = new Date(to);
+  end.setDate(end.getDate() + 1);
 
   const anns = await announcements.findAll();
 
   const announcementsInfo = await Promise.all(anns.map(async ann => {
     const presentation_details = await thesis_presentation.findOne({
       attributes: ['date_time', 'presentation_type', 'venue'],
-      where: { thesis_id: ann.thesis_id,
-        [Op.and]: [
-        where(fn('DATE', col('date_time')), {
-          [Op.between]: [from, to]
-      })
-    ]
-       }
+      where: {
+        thesis_id: ann.thesis_id,
+        date_time: { [Op.gte]: start, [Op.lt]: end }
+      }
     });
 
     if (!presentation_details) return null;
