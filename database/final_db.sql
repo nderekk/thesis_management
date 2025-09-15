@@ -711,6 +711,22 @@ INSERT INTO `users` VALUES (1,'dkollias@ceid.upatras.gr','hashed_password_1','pr
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
+-- Thesis | για queries του τυπου διπλωματικες του ταδε φοιτητή/καθηγητή στην ταδε κατάσταση
+CREATE INDEX idx_thesis_supervisor_status ON thesis (supervisor_am, thesis_status);
+CREATE INDEX idx_thesis_student_status    ON thesis (student_am, thesis_status);
+
+-- Thesis topics | Γρήγορη λίστα θεμάτων ενός καθηγητή φιλτραρισμένη (π.χ., μόνο unassigned ή temp_assigned).
+CREATE INDEX idx_topics_prof_status ON thesis_topics (prof_am, topic_status);
+
+-- Presentation | λίστες/τελευταίο στοιχείο ανά εργασία, ταξινομημένα χρονολογικά, χωρίς έξτρα sort
+CREATE INDEX idx_tp_date ON thesis_presentation (date_time)
+
+-- 1:1 με users(id)
+ALTER TABLE professor  ADD UNIQUE KEY uq_prof_userid      (prof_userid);
+ALTER TABLE student    ADD UNIQUE KEY uq_student_userid   (student_userid);
+ALTER TABLE secretary  ADD UNIQUE KEY uq_secretary_userid (secretary_userid);
+
+
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
