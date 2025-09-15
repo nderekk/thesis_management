@@ -7,6 +7,19 @@ const jwt = require("jsonwebtoken");
 const { Op, fn, col, where } = require('sequelize');
 const xmlparser = require("js2xmlparser");
 
+// Helper function to format datetime as local time without timezone conversion
+function formatLocalDateTime(dateTime) {
+  if (!dateTime) return "";
+  const year = dateTime.getFullYear();
+  const month = String(dateTime.getMonth() + 1).padStart(2, '0');
+  const day = String(dateTime.getDate()).padStart(2, '0');
+  const hours = String(dateTime.getHours()).padStart(2, '0');
+  const minutes = String(dateTime.getMinutes()).padStart(2, '0');
+  const seconds = String(dateTime.getSeconds()).padStart(2, '0');
+  
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
 //@desc Login User
 //@route Post /api/user/login
 //@access Public
@@ -116,10 +129,10 @@ const getAnnouncements = asyncHandler(async (req, res) => {
     ];
     return {
       id: ann.id,
-      announcementDate: new Date(ann.announcement_datetime).toISOString().replace("T", " ").replace("Z", ""),
+      announcementDate: formatLocalDateTime(ann.announcement_datetime),
       announcementContent: ann.announcement_content,
       presentation: {
-        date: new Date(presentation_details.date_time).toISOString().replace("T", " ").replace("Z", ""),
+        date: formatLocalDateTime(presentation_details.date_time),
         type: presentation_details.presentation_type,
         venue: presentation_details.venue,
       },
