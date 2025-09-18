@@ -417,7 +417,9 @@ async function getThesesList() {
                                 <td>${thesis.thesis_ass_date}</td>
                                 <td>
                                     <button class="btn btn-secondary" onclick='viewThesisDetails(${JSON.stringify(thesis)})'>Προβολή</button>
-                                    <button class="btn btn-primary" onclick='manageThesis(${JSON.stringify(thesis)})'>Διαχείριση</button>
+                                    ${thesis.thesis_status !== 'Completed' ? `
+                                        <button class="btn btn-primary" onclick='manageThesis(${JSON.stringify(thesis)})'>Διαχείριση</button>
+                                    ` : ''}
                                 </td>
                             </tr>
                         `).join('')}
