@@ -90,7 +90,7 @@ ${thesisTopics.data
                     <input type="file" id="editFile-${topic.id}" accept=".pdf">
 
                     ${topic.original_file_name 
-                        ? `<a href="/server/uploads/${topic.attached_file_name}" download>
+                        ? `<a href="/uploads/${topic.attached_file_name}" download>
                             Έχετε ήδη ανεβάσει: "${topic.original_file_name}"
                         </a>`
                         : '<span class="file-label">Δεν υπάρχει ανεβασμένο αρχείο</span>'}

@@ -175,12 +175,14 @@ const getThesisMaterial = asyncHandler(async (req, res) => {
   }
 
   const fileName = studentThesis.thesis_content_filename;
+  const file = studentThesis.thesis_content_file;
   const linkList = await links.findAll({ attributes: ["url"], where: {thesis_id: studentThesis.id} });
   
   res.status(200);
   res.json({
     fileExists: fileName ? true : false, // exists and uparxei file alliws empty
     fileName: fileName,
+    file: file,
     links: linkList.map(link => link.url)
   });
 });

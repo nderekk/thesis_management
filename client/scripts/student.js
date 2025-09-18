@@ -382,7 +382,7 @@ async function getReviewThesisContent(thesis) {
                 <div class="form-group">
                     <label for="thesisFile">Πρόχειρο Κείμενο (PDF):</label>
                     <input type="file" id="thesisFile" accept=".pdf">
-                    <small>${material.fileName ? `Εχετε ανεβάσει: <a href="/server/uploads/${material.fileName}">${material.fileName}</a> |` : ``} Μέγιστο μέγεθος: 10MB</small>
+                    <small>${material.fileName ? `Εχετε ανεβάσει: <a href="/uploads/${material.file}">${material.fileName}</a> |` : ``} Μέγιστο μέγεθος: 10MB</small>
                 </div>
                 <div class="form-group">
                     <label for="additionalLinks">Σύνδεσμοι Υλικού:</label>

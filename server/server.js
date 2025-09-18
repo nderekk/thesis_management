@@ -37,6 +37,7 @@ app.use("/api/user", require("./routes/userRoutes"));
 app.use("/api/student", require("./routes/studentRoutes"));
 app.use("/api/professor", require("./routes/professorRoutes"));
 app.use("/api/secretary", require("./routes/secretaryRoutes"));
+app.use("/uploads", express.static(path.join(__dirname, "../server/uploads")));
 // app.use("/api/<thing>", require("./routes/<analogo_route>"));
 app.use(errorHandler);
 
