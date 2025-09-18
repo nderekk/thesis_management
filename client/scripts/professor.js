@@ -1144,7 +1144,7 @@ async function getReviewThesisActions(thesis) {
             ${thesis.draft_text ? `
                 <div class="thesis-draft">
                     <p><strong>Πρόχειρο από τον φοιτητή:</strong></p>
-                     <a href="/server/uploads/${thesis.draft_text}" download>📄 Λήψη Πρόχειρου</a>
+                     <a href="/uploads/${thesis.draft_text}" download>📄 Λήψη Πρόχειρου</a>
                 </div>
             ` : '<p>Δεν έχει αναρτηθεί πρόχειρο ακόμα</p>'}
         </div>
@@ -1533,6 +1533,12 @@ function getProfessorRoleText(role) {
 }
 
 async function getInvitationsList() {
+    const deletion = await fetch("http://localhost:5001/api/professor/deleteCommitteeRequests", {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+    });
+
     const response = await fetch("http://localhost:5001/api/professor/invitations", {
         method: 'GET',
         credentials: 'include',

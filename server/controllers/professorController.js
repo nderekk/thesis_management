@@ -834,10 +834,25 @@ const getThesisDetails = asyncHandler(async (req, res) => {
   res.status(200).json(response);
 });
 
+//@desc check wether announcement exists
+//@route DELETE /api/professor/deleteCommitteeRequests
+//@access Private
+const deleteCommitteeRequests = asyncHandler(async (req, res) => {
+  const invalidRequests = await trimelis_requests.findAll({where : {answer: "pending"}});
+
+  for(let i of invalidRequests){
+    const currThesis = await thesis.findOne({where : {id: i.thesis_id }});
+
+    if(currThesis.thesis_status !== "Pending")
+      await i.destroy();
+  }
+  res.status(200).json({ success: true });
+});
+
 module.exports = {
   getProfessorInfo, getTopics, createTopic, getThesisNotes,
   editTopic, deleteTopic, getStats, getThesesList,postCancelThesis,
   searchStudent, assignTopicToStudent, getCommitteeRequests, putThesisReview,
   postThesisNotes, putEnableGrading, postGrade, getInvitationsList, respondToInvitation,
-  getGradeList, getProfsGrade, postAnnouncement, getThesisDetails, announced
+  getGradeList, getProfsGrade, postAnnouncement, getThesisDetails, announced, deleteCommitteeRequests
 };

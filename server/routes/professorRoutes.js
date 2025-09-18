@@ -27,6 +27,7 @@ const {
     postAnnouncement,
     getThesisDetails,
     announced,
+    deleteCommitteeRequests,
 } = require("../controllers/professorController");
 
 // public
@@ -56,5 +57,6 @@ router.post("/getProfsGrade", getProfsGrade);
 router.post("/newAnnouncement", postAnnouncement);
 router.get("/thesis/:id", getThesisDetails);
 router.get("/announced", announced);
+router.delete("/deleteCommitteeRequests", deleteCommitteeRequests);
 
 module.exports = router;
