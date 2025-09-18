@@ -189,7 +189,7 @@ CREATE TABLE `student` (
 
 LOCK TABLES `student` WRITE;
 /*!40000 ALTER TABLE `student` DISABLE KEYS */;
-INSERT INTO `student` VALUES (1,'Andreas','Petrou','Giorgos',8,'andpet@upatras.gr','2610991101','6944111111','Οδός Παπαδιαμάντη 12','Patras',26223,6),(2,'Eleni','Makri','Nikos',7,'elmakri@upatras.gr','2610991234','6944222222','Οδός Καποδιστρίου 25','Patras',26224,7),(3,'Mpampis','Kuriakos','Nikos',7,'mpampis@upatras.gr','2610994312','6944222444','Οδός Βραχνονησίδας 21','Patras',26224,8),(4,'Nikos','Charalampous','Dimitris',9,'nikchar@upatras.gr','2610995678','6944333333','Οδός Ερμού 88','Patras',26225,9),(5,'Kostis','Lamprou','Iosif',9,'klamprou@upatras.gr','2610990968','6944222555','Οδός Ηρακλείτου 18','Patras',26223,10),(6,'Giorgos','Kay','Giorgos',8,'giokay@upatras.gr','2610996425','6944111666','Κανακαρη 12','Patras',26223,11),(7,'Sotiris','Snikopoulos','Nikos',7,'snik@upatras.gr','2610991562','6944222777','Βονίτσης 112','Αθηνα',26224,12),(8,'Giannis','Damianidis','Orsalios',7,'light@upatras.gr','2610995666','6944222888','Οδός Αμπελοκηπως 12','Patras',26224,13),(9,'Iraklis','Ivanidis','Dimitris',9,'ivan@upatras.gr','2610991333','69443333999','Οδός Ερμού 2','Patras',26225,14),(10,'Damianos','Arabopoulos','Spiros',9,'arab@upatras.gr','2610992888','6944233333','Οδός Μενιδιου 18','Athens',26223,15);
+INSERT INTO `student` VALUES (1,'Andreas','Petrou','Giorgos',8,'andpet@upatras.gr','2610991101','6944111111','Οδός Παπαδιαμάντη 12','Patras',26223,6),(2,'Eleni','Makri','Nikos',7,'elmakri@upatras.gr','2610991234','6944222222','Οδός Καποδιστρίου 25','Patras',26224,7),(3,'Mpampis','Kuriakos','Nikos',7,'mpampis@upatras.gr','2610994312','6944222444','Οδός Βραχνονησίδας 21','Patras',26224,9),(4,'Nikos','Charalampous','Dimitris',9,'nikchar@upatras.gr','2610995678','6944333333','Οδός Ερμού 88','Patras',26225,8),(5,'Kostis','Lamprou','Iosif',9,'klamprou@upatras.gr','2610990968','6944222555','Οδός Ηρακλείτου 18','Patras',26223,10),(6,'Giorgos','Kay','Giorgos',8,'giokay@upatras.gr','2610996425','6944111666','Κανακαρη 12','Patras',26223,11),(7,'Sotiris','Snikopoulos','Nikos',7,'snik@upatras.gr','2610991562','6944222777','Βονίτσης 112','Αθηνα',26224,12),(8,'Giannis','Damianidis','Orsalios',7,'light@upatras.gr','2610995666','6944222888','Οδός Αμπελοκηπως 12','Patras',26224,13),(9,'Iraklis','Ivanidis','Dimitris',9,'ivan@upatras.gr','2610991333','69443333999','Οδός Ερμού 2','Patras',26225,14),(10,'Damianos','Arabopoulos','Spiros',9,'arab@upatras.gr','2610992888','6944233333','Οδός Μενιδιου 18','Athens',26223,15);
 /*!40000 ALTER TABLE `student` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -719,12 +719,12 @@ CREATE INDEX idx_thesis_student_status    ON thesis (student_am, thesis_status);
 CREATE INDEX idx_topics_prof_status ON thesis_topics (prof_am, topic_status);
 
 -- Presentation | λίστες/τελευταίο στοιχείο ανά εργασία, ταξινομημένα χρονολογικά, χωρίς έξτρα sort
-CREATE INDEX idx_tp_date ON thesis_presentation (date_time)
+CREATE INDEX idx_tp_date ON thesis_presentation (date_time);
 
 -- 1:1 με users(id)
-ALTER TABLE professor  ADD UNIQUE KEY uq_prof_userid      (prof_userid);
-ALTER TABLE student    ADD UNIQUE KEY uq_student_userid   (student_userid);
-ALTER TABLE secretary  ADD UNIQUE KEY uq_secretary_userid (secretary_userid);
+ALTER TABLE professor ADD UNIQUE KEY uq_prof_userid      (prof_userid);
+ALTER TABLE student   ADD UNIQUE KEY uq_student_userid   (student_userid);
+ALTER TABLE secretary ADD UNIQUE KEY uq_secretary_userid (secretary_userid);
 
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
