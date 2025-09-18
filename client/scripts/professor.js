@@ -62,7 +62,7 @@ async function getTopicsManagement() {
                     </thead>
                     <tbody>
 ${thesisTopics.data
-    .filter(topic => topic.status === "unassigned" || topic.status === "temp_assigned")
+    .filter(topic => topic.status === "unassigned")
     .map(topic => `
     <tr>
         <td>${topic.title}</td>
