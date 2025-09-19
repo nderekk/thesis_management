@@ -78,6 +78,17 @@ async function getStudentThesisView() {
                 </div>
             ` : ''}
         </div>
+
+        <div class="card" style="${currentThesis.thesisFile ? '' : 'display:none;'}">
+            <div class="form-group">
+                <label>Ανεβασμένο Αρχείο:</label>
+                <p>
+                    <a href="/uploads/${currentThesis.thesisFile}" download>
+                        📄 Κατεβάστε την περιγραφή του θέματος!
+                    </a>
+                </p>
+            </div>
+        </div>
     `;
 }
 

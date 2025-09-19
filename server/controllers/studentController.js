@@ -75,7 +75,9 @@ const getThesisInfo = asyncHandler(async (req, res) => {
     completionDate: studentThesis.completion_date,
     thesisLogs: thesisLogs,
     ap_from_gs: studentThesis.ap_from_gs,
-    libraryLink: studentThesis.nemertes_link
+    libraryLink: studentThesis.nemertes_link,
+    thesisFilename: thesisTopic.original_file_name,
+    thesisFile: thesisTopic.attached_discription_file
   });
 
 });
