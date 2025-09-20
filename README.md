@@ -7,7 +7,6 @@ folder, σε ένα terminal μέσα σε εκείνο, τρέξτε npm instal
 των κατάλληλων dependencies.
 3. DB Export: Πηγαίντε στον φάκελο server και τρέξτε την παρακάτω εντολή για
 την εφαρμογή του φακέλου final db.sql στο project:
-43
 mysql -u root -p diplomatiki_sys < ../database/final_db.sql
 4. Ξεκινήστε τον server: Μπορείτε να ξεκινήσετε τον server με την εντολή npm
 run dev.
